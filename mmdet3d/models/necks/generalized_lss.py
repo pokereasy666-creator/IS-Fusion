@@ -1,0 +1,129 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from mmcv.cnn import ConvModule
+# ----------------- 物理修复：针对 BaseModule 等组件迁移 -----------------
+try:
+    from mmcv.runner import BaseModule, auto_fp16
+except ImportError:
+    # 适配 MMEngine / MMCV 2.x
+    try:
+        from mmengine.model import BaseModule
+    except ImportError:
+        import torch.nn as nn
+        BaseModule = nn.Module
+    
+    # 定义空装饰器保底
+    def auto_fp16(apply_to=None, out_fp16=False):
+        def decorator(func): return func
+        return decorator
+# ----------------- 物理修复结束 -----------------
+
+# ----------------- 物理修复：针对 mmdet.models.builder 缺失 -----------------
+try:
+    from mmdet.models.builder import NECKS
+except ImportError:
+    # 适配 MMDet 3.x / MMEngine 注册表
+    try:
+        from mmdet.registry import MODELS as NECKS
+    except ImportError:
+        # 最后的保底，如果是在非常特殊的环境下
+        from mmengine.registry import Registry
+        NECKS = Registry('neck')
+# ----------------- 物理修复结束 -----------------
+
+__all__ = ["GeneralizedLSSFPN"]
+
+
+@NECKS.register_module()
+class GeneralizedLSSFPN(BaseModule):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        num_outs,
+        start_level=0,
+        end_level=-1,
+        no_norm_on_lateral=False,
+        conv_cfg=None,
+        norm_cfg=dict(type="BN2d"),
+        act_cfg=dict(type="ReLU"),
+        upsample_cfg=dict(mode="bilinear", align_corners=True),
+    ) -> None:
+        super().__init__()
+        assert isinstance(in_channels, list)
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.num_ins = len(in_channels)
+        self.num_outs = num_outs
+        self.no_norm_on_lateral = no_norm_on_lateral
+        self.fp16_enabled = False
+        self.upsample_cfg = upsample_cfg.copy()
+
+        if end_level == -1:
+            self.backbone_end_level = self.num_ins - 1
+            # assert num_outs >= self.num_ins - start_level
+        else:
+            # if end_level < inputs, no extra level is allowed
+            self.backbone_end_level = end_level
+            assert end_level <= len(in_channels)
+            assert num_outs == end_level - start_level
+        self.start_level = start_level
+        self.end_level = end_level
+
+        self.lateral_convs = nn.ModuleList()
+        self.fpn_convs = nn.ModuleList()
+
+        for i in range(self.start_level, self.backbone_end_level):
+            l_conv = ConvModule(
+                in_channels[i]
+                + (
+                    in_channels[i + 1]
+                    if i == self.backbone_end_level - 1
+                    else out_channels
+                ),
+                out_channels,
+                1,
+                conv_cfg=conv_cfg,
+                norm_cfg=norm_cfg if not self.no_norm_on_lateral else None,
+                act_cfg=act_cfg,
+                inplace=False,
+            )
+            fpn_conv = ConvModule(
+                out_channels,
+                out_channels,
+                3,
+                padding=1,
+                conv_cfg=conv_cfg,
+                norm_cfg=norm_cfg,
+                act_cfg=act_cfg,
+                inplace=False,
+            )
+
+            self.lateral_convs.append(l_conv)
+            self.fpn_convs.append(fpn_conv)
+
+    @auto_fp16()
+    def forward(self, inputs):
+        """Forward function."""
+        # upsample -> cat -> conv1x1 -> conv3x3
+        assert len(inputs) == len(self.in_channels)
+
+        # build laterals
+        laterals = [inputs[i + self.start_level] for i in range(len(inputs))]
+
+        # build top-down path
+        used_backbone_levels = len(laterals) - 1
+        for i in range(used_backbone_levels - 1, -1, -1):
+            x = F.interpolate(
+                laterals[i + 1],
+                size=laterals[i].shape[2:],
+                **self.upsample_cfg,
+            )
+            laterals[i] = torch.cat([laterals[i], x], dim=1)
+            laterals[i] = self.lateral_convs[i](laterals[i])
+            laterals[i] = self.fpn_convs[i](laterals[i])
+
+        # build outputs
+        outs = [laterals[i] for i in range(used_backbone_levels)]
+        return tuple(outs)

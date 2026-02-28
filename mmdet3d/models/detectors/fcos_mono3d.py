@@ -1,0 +1,31 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+# ----------------- 物理修复开始：检测器注册表兼容 -----------------
+try:
+    from mmdet.models.builder import DETECTORS
+except ImportError:
+    try:
+        from mmdet.models import DETECTORS
+    except ImportError:
+        # 适配 MMDet 3.x / MMEngine 注册表
+        from mmdet.registry import MODELS as DETECTORS
+# ----------------- 物理修复结束 -----------------
+from .single_stage_mono3d import SingleStageMono3DDetector
+
+
+@DETECTORS.register_module()
+class FCOSMono3D(SingleStageMono3DDetector):
+    r"""`FCOS3D <https://arxiv.org/abs/2104.10956>`_ for monocular 3D object detection.
+
+    Currently please refer to our entry on the
+    `leaderboard <https://www.nuscenes.org/object-detection?externalData=all&mapData=all&modalities=Camera>`_.
+    """  # noqa: E501
+
+    def __init__(self,
+                 backbone,
+                 neck,
+                 bbox_head,
+                 train_cfg=None,
+                 test_cfg=None,
+                 pretrained=None):
+        super(FCOSMono3D, self).__init__(backbone, neck, bbox_head, train_cfg,
+                                         test_cfg, pretrained)
