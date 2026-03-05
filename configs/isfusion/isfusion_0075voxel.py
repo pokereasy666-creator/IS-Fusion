@@ -430,11 +430,11 @@ log_config = dict(
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = None
-load_from = '/home/poker/IS-Fusion-master/checkpoints/IS-Fusion_epoch_10.pth'
+load_from = None  # Update to your checkpoint path, e.g. 'checkpoints/IS-Fusion_epoch_10.pth'
 resume_from = None
 workflow = [('train', 1)]
 gpu_ids = [0]
-find_unused_parameters=True
+find_unused_parameters = False
 
 
 fp16 = dict(loss_scale=512.0)

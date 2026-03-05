@@ -217,32 +217,16 @@ def main():
 
     cfg = Config.fromfile(args.config)
 
-    # --- 运行时强行修改字典，筑起绝对的显存防波堤 ---
-    def limit_voxels(d):
-        if isinstance(d, dict):
-            for k, v in d.items():
-                if k == 'max_voxels':
-                    if isinstance(v, tuple) and len(v) == 2:
-                        d[k] = (16000, 32000)
-                    elif isinstance(v, list) and len(v) == 2:
-                        d[k] = [16000, 32000]
-                else:
-                    limit_voxels(v)
-        elif isinstance(d, list):
-            for item in d:
-                limit_voxels(item)
-    limit_voxels(cfg._cfg_dict)
-    print("🚀 [HOTFIX] 运行时强行将所有 max_voxels 压低到 16000/32000，绝对防御极限拥挤帧的 OOM！")
-    # ---------------------------------------------------
-
+    # --- A30 (24GB): Use original max_voxels from config, no reduction needed ---
+    # Enable TF32 for Ampere GPUs (A30/A100) - free speedup with negligible precision loss
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+    print("[Info] TF32 enabled for Ampere GPU acceleration")
 
     if hasattr(cfg, "model") and "img_backbone" in cfg.model:
-
         cfg.model.img_backbone.with_cp = True
-
-        cfg.find_unused_parameters = False
     cfg.find_unused_parameters = False
-    print("🚀 [HOTFIX] 终极护盾启动: with_cp=True (省显存), find_unused=False (解冲突)!")
+    print("[Info] Gradient checkpointing enabled, find_unused_parameters=False")
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
     # import modules from string list.
