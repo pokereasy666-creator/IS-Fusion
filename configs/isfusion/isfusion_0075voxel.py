@@ -45,7 +45,8 @@ model = dict(
         patch_norm=True,
         out_indices=[1, 2, 3],
         with_cp=True,
-        convert_weights=False,
+        convert_weights=True,
+        init_cfg=dict(type='Pretrained', checkpoint='checkpoints/swin_tiny_patch4_window7_224.pth'),
     ),
     img_neck=dict(
         type='GeneralizedLSSFPN',
@@ -395,10 +396,10 @@ data = dict(
         box_type_3d='LiDAR'))
 
 
-optimizer = dict(type='AdamW', lr=0.0001, weight_decay=0.01, paramwise_cfg=dict(
+optimizer = dict(type='AdamW', lr=0.00000625, weight_decay=0.01, paramwise_cfg=dict(
     custom_keys={
         'img_backbone': dict(lr_mult=0.1),
-    }),)  # for 8gpu * 2sample_per_gpu
+    }),)  # scaled for 1gpu * 1sample_per_gpu (original: 0.0001 for 8gpu * 2sample_per_gpu)
 
 optimizer_config = dict(grad_clip=dict(max_norm=0.01, norm_type=2))
 lr_config = dict(
@@ -438,4 +439,3 @@ find_unused_parameters = False
 
 
 fp16 = dict(loss_scale=512.0)
-runner = dict(type="EpochBasedRunner", max_epochs=10)

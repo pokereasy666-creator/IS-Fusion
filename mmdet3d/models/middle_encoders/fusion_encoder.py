@@ -1099,9 +1099,9 @@ class ISFusionEncoder(BaseModule):
                 
                 res = val[batch_idx] if (isinstance(val, list) or isinstance(val, torch.Tensor)) else val
                 
-                # 自动将取出来的 Tensor 送到 GPU
+                # 自动将取出来的 Tensor 送到正确的设备
                 if isinstance(res, torch.Tensor):
-                    res = res.cuda().float()
+                    res = res.to(cur_coords.device).float()
                 return res
 
             cur_img_aug_matrix = _get_item(img_aug_matrix, b)

@@ -37,12 +37,19 @@ def get_extensions():
         extension = CUDAExtension
         sources += source_cuda
         define_macros += [("WITH_CUDA", None)]
-        extra_compile_args["nvcc"] = [
+        nvcc_args = [
             "-DCUDA_HAS_FP16=1",
             "-D__CUDA_NO_HALF_OPERATORS__",
             "-D__CUDA_NO_HALF_CONVERSIONS__",
             "-D__CUDA_NO_HALF2_OPERATORS__",
         ]
+        # Add A30 (SM 8.0) architecture support if not set via environment
+        cuda_arch = os.environ.get("TORCH_CUDA_ARCH_LIST", None)
+        if cuda_arch:
+            for arch in cuda_arch.replace(" ", "").split(";"):
+                arch = arch.replace(".", "")
+                nvcc_args.append(f"-gencode=arch=compute_{arch[:2]},code=sm_{arch[:2]}")
+        extra_compile_args["nvcc"] = nvcc_args
     else:
         raise NotImplementedError('Cuda is not availabel')
 
