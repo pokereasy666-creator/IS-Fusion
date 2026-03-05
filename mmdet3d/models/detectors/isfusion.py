@@ -257,14 +257,8 @@ class ISFusionDetector(MVXTwoStageDetector):
                 proposals=proposals)
             losses.update(losses_img)
 
-        # --- 终极保底：Dummy Loss 确保 100% 参数进入计算图 ---
-        dummy_loss = 0.0
-        for p in self.parameters():
-            if p.requires_grad:
-                dummy_loss = dummy_loss + p.sum() * 0.0
-        if isinstance(losses, dict):
-            losses['loss_dummy_safeguard'] = dummy_loss
         return losses
+
     def forward_pts_train(self,
                           pts_feats,
                           img_feats,
@@ -287,26 +281,20 @@ class ISFusionDetector(MVXTwoStageDetector):
         Returns:
             dict: Losses of each branch.
         """
+        if hasattr(gt_bboxes_3d[0], 'data'):
+            gt_bboxes_3d = [b.data for b in gt_bboxes_3d]
+        if hasattr(gt_labels_3d[0], 'data'):
+            gt_labels_3d = [l.data for l in gt_labels_3d]
+
         if len(pts_feats) == 2:  # instance heatmap loss
             outs = self.pts_bbox_head(pts_feats[0], img_feats, img_metas)
             loss_inputs = [gt_bboxes_3d, gt_labels_3d, outs, pts_feats[1]]
         else:
             outs = self.pts_bbox_head(pts_feats, img_feats, img_metas)
-            
-        if hasattr(gt_bboxes_3d[0], 'data'):
-            gt_bboxes_3d = [b.data for b in gt_bboxes_3d]
-        if hasattr(gt_labels_3d[0], 'data'):
-            gt_labels_3d = [l.data for l in gt_labels_3d]
-        loss_inputs = [gt_bboxes_3d, gt_labels_3d, outs]
+            loss_inputs = [gt_bboxes_3d, gt_labels_3d, outs]
         losses = self.pts_bbox_head.loss(*loss_inputs)
-        # --- 终极保底：Dummy Loss 确保 100% 参数进入计算图 ---
-        dummy_loss = 0.0
-        for p in self.parameters():
-            if p.requires_grad:
-                dummy_loss = dummy_loss + p.sum() * 0.0
-        if isinstance(losses, dict):
-            losses['loss_dummy_safeguard'] = dummy_loss
         return losses
+
     def simple_test_pts(self, x, x_img, img_metas, rescale=False):
         """Test function of point cloud branch."""
         outs = self.pts_bbox_head(x, x_img, img_metas)

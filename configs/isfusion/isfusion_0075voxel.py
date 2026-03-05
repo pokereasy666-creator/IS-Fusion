@@ -438,4 +438,4 @@ gpu_ids = [0]
 find_unused_parameters = False
 
 
-fp16 = dict(loss_scale=512.0)
+fp16 = dict(loss_scale='dynamic')
