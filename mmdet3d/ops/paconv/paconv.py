@@ -9,7 +9,7 @@ try:
     from mmcv.cnn import constant_init, kaiming_init
 except ImportError:
     # 如果失败，从新位置导入 (MMCV 2.x / MMEngine)
-    from mmengine.model import constant_init, kaiming_init
+    from mmcv.cnn import constant_init, kaiming_init
 # ----------------- 物理修复结束 -----------------
 
 from torch import nn as nn

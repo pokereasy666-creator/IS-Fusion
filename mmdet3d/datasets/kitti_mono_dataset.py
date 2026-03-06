@@ -8,7 +8,7 @@ import torch
 try:
     from mmcv.utils import print_log
 except ImportError:
-    from mmengine.logging import print_log
+    from mmcv.utils import print_log
 # ----------------- 物理修复结束 -----------------
 from os import path as osp
 
@@ -22,7 +22,7 @@ except ImportError:
         from mmdet.registry import DATASETS
     except ImportError:
         # 万能保底：手动定义一个 Registry 防止程序崩溃
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         DATASETS = Registry('dataset')
 # ----------------- 物理修复结束 -----------------
 from ..core.bbox import Box3DMode, CameraInstance3DBoxes, points_cam2img

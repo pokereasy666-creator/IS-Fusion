@@ -8,7 +8,7 @@ try:
     from mmcv.runner import BaseModule, force_fp32
 except ImportError:
     # 适配 MMEngine
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     # 定义空装饰器以兼容旧代码
     def force_fp32(apply_to=None, out_fp16=False):
         def decorator(func):

@@ -7,7 +7,7 @@ try:
     from mmcv.runner import BaseModule
 except ImportError:
     # 适配 MMEngine：BaseModule 移到了 mmengine.model
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
 # ----------------- 物理修复结束 -----------------
 
 

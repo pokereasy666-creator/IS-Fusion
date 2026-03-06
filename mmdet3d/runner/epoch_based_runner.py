@@ -5,7 +5,7 @@ except ImportError:
     # 适配 MMEngine Runner。
     # 注意：新版 Runner 逻辑与旧版差异较大，此处仅为保证 Import 通过
     try:
-        from mmengine.runner import Runner as EpochBasedRunner
+        from mmcv.runner import EpochBasedRunner
     except ImportError:
         class EpochBasedRunner:
             def __init__(self, *args, **kwargs): pass
@@ -15,10 +15,10 @@ try:
     from mmcv.runner.builder import RUNNERS
 except ImportError:
     try:
-        from mmengine.registry import RUNNERS
+        from mmcv.utils import Registry; RUNNERS = Registry("runner")
     except ImportError:
         # 极端物理保底：手动创建一个临时的 Registry 对象
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         RUNNERS = Registry('runner')
 # ----------------- 物理修复结束 -----------------
 

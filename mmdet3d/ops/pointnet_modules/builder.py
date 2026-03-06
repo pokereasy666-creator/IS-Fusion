@@ -5,7 +5,7 @@ try:
     from mmcv.utils import Registry, build_from_cfg
 except ImportError:
     # 如果失败，从新位置导入 (MMCV 2.x / MMEngine)
-    from mmengine.registry import Registry, build_from_cfg
+    from mmcv.utils import Registry, build_from_cfg
 # ----------------- 物理修复结束 -----------------
 
 SA_MODULES = Registry('point_sa_module')

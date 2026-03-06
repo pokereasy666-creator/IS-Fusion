@@ -24,7 +24,7 @@ try:
     from mmcv.utils import Registry, build_from_cfg
 except ImportError:
     # 新路径 (MMCV 2.x / MMEngine)
-    from mmengine.registry import Registry, build_from_cfg
+    from mmcv.utils import Registry, build_from_cfg
 # ----------------- 物理修复结束 -----------------
 
 # ----------------- 物理修复开始 -----------------
@@ -39,7 +39,7 @@ except ImportError:
         # 如果都找不到，创建一个独立的注册表来保命
         # 注意：这里假设你之前的步骤已经正确导入了 Registry
         if 'Registry' not in locals():
-            from mmengine.registry import Registry
+            from mmcv.utils import Registry
         DATASETS = Registry('dataset')
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始 -----------------
@@ -73,7 +73,8 @@ def build_dataset(cfg, default_args=None):
         try:
             from mmdet.datasets import ConcatDataset, RepeatDataset
         except ImportError:
-            from mmengine.dataset import ConcatDataset, RepeatDataset
+            from torch.utils.data import ConcatDataset
+            from mmdet.datasets.dataset_wrappers import RepeatDataset
         
         # 定义一个假的 ClassBalancedDataset
         class ClassBalancedDataset:

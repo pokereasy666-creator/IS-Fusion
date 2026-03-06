@@ -5,7 +5,7 @@ import torch
 torch.backends.cudnn.enabled = False 
 torch.backends.cudnn.benchmark = False
 import warnings
-import mmengine
+import mmcv
 import mmcv
 # ----------------- 物理修复：瞒天过海 -----------------
 # 1. 欺骗 mmdet 的版本审查保安，让它以为我们用的是 2.1.0
@@ -17,22 +17,24 @@ torch.backends.cudnn.benchmark = False
 # ------------------------------------------------------
 
 # [关键修复] 引入 MMEngine 的核心组件替代旧版 MMCV
-from mmengine.config import Config, DictAction, ConfigDict
-from mmengine.dist import get_dist_info, init_dist
-from mmengine.runner import load_checkpoint
-from mmengine.utils import import_modules_from_strings
+from mmcv import Config, DictAction
+from mmcv.utils import ConfigDict
+from mmcv.runner import get_dist_info
+from mmcv.dist import init_dist
+from mmcv.runner import load_checkpoint
+from mmcv.utils import import_modules_from_strings
 
 # [关键修复] 模型并行化包装器迁移
 try:
-    from mmengine.model import MMDistributedDataParallel
-    from mmengine.model import MMEngineDataParallel as MMDataParallel
+    from mmcv.parallel import MMDistributedDataParallel
+    from mmcv.parallel import MMDataParallel
 except ImportError:
     from torch.nn.parallel import DistributedDataParallel as MMDistributedDataParallel
     from torch.nn.parallel import DataParallel as MMDataParallel
 
 # [关键修复] BN融合工具迁移
 try:
-    from mmengine.model.utils import fuse_conv_bn
+    from mmcv.cnn import fuse_conv_bn
 except ImportError:
     try:
         from mmcv.cnn import fuse_conv_bn
@@ -51,7 +53,7 @@ try:
     from mmdet.apis import set_random_seed
 except ImportError:
     try:
-        from mmengine.runner import set_random_seed
+        from mmdet.apis import set_random_seed
     except ImportError:
         # 最后的物理保底
         import numpy as np
@@ -222,7 +224,7 @@ def main():
 # build the dataloader
     # ----------------- 物理修复：核弹级全量抓捕所有隐身算子 -----------------
     try:
-        from mmengine.registry import TRANSFORMS
+        from mmcv.utils import Registry; TRANSFORMS = Registry("pipeline")
         import os
         import importlib
 
@@ -459,7 +461,7 @@ def main():
     import mmcv
     if not hasattr(mmcv, 'ProgressBar'):
         try:
-            from mmengine.utils import ProgressBar
+            from mmcv.utils import ProgressBar
             mmcv.ProgressBar = ProgressBar
         except ImportError:
             # 终极保底：如果连 MMEngine 的进度条都找不到，直接给个哑巴进度条
@@ -470,7 +472,7 @@ def main():
 
         if not hasattr(mmcv, "track_iter_progress"):
             try:
-                from mmengine.utils import track_iter_progress
+                from mmcv.utils import track_iter_progress
                 mmcv.track_iter_progress = track_iter_progress
             except ImportError:
                 mmcv.track_iter_progress = lambda x, **kwargs: x
@@ -578,7 +580,7 @@ def main():
         if args.out:
             print(f'\nwriting results to {args.out}')
             # 使用 mmengine.dump 替代 mmcv.dump
-            mmengine.dump(outputs, args.out)
+            mmcv.dump(outputs, args.out)
         
         # --- [PHYSICAL FIX: CATCH NULL DETECTIONS] ---
         #import torch

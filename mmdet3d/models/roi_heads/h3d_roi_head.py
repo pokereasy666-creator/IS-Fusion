@@ -13,7 +13,7 @@ try:
     from mmcv.runner import BaseModule, auto_fp16
 except ImportError:
     try:
-        from mmengine.model import BaseModule
+        from mmcv.runner import BaseModule
     except ImportError:
         import torch.nn as nn
         BaseModule = nn.Module

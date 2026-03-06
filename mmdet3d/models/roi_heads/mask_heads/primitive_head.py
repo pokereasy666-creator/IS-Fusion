@@ -7,7 +7,7 @@ try:
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
     try:
-        from mmengine.model import BaseModule
+        from mmcv.runner import BaseModule
     except ImportError:
         import torch.nn as nn
         BaseModule = nn.Module # 终极保底
@@ -27,7 +27,7 @@ except ImportError:
         from mmdet.models.utils import multi_apply
     except ImportError:
         try:
-            from mmengine.utils import multi_apply
+            from mmdet.core import multi_apply
         except ImportError:
             # 最后的物理保底实现
             from functools import partial

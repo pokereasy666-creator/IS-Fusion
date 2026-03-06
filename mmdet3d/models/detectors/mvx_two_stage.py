@@ -84,7 +84,7 @@ except ImportError:
         from mmdet.models.utils import multi_apply
     except ImportError:
         # 万一在极新的版本连 utils 里的也被去掉了，直接从 MMCV 或本地手写保底
-        from mmengine.utils.misc import multi_apply
+        from mmdet.core import multi_apply
 
 # 如果这行还导入了 bbox2result，请加上：
 try:

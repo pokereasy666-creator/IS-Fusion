@@ -9,7 +9,8 @@ try:
     from mmseg.core import add_prefix
 except ImportError:
     try:
-        from mmengine.utils import add_prefix
+        def add_prefix(inputs, prefix):
+            return {f"{prefix}.{k}": v for k, v in inputs.items()}
     except ImportError:
         # 物理保底实现：add_prefix 的本质就是给字典的 key 加前缀
         def add_prefix(inputs, prefix):

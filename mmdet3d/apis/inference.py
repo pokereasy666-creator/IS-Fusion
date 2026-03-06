@@ -17,7 +17,7 @@ except ImportError:
 try:
     from mmcv.runner import load_checkpoint
 except ImportError:
-    from mmengine.runner import load_checkpoint
+    from mmcv.runner import load_checkpoint
 
 # 如果还有 wrap_fp16_model，也一并修了
 try:

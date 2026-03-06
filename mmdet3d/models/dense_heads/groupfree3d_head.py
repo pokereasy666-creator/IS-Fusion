@@ -6,14 +6,14 @@ import torch
 try:
     from mmcv import ConfigDict
 except ImportError:
-    from mmengine.config import ConfigDict
+    from mmcv.utils import ConfigDict
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始：xavier_init -----------------
 from mmcv.cnn import ConvModule
 try:
     from mmcv.cnn import xavier_init
 except ImportError:
-    from mmengine.model import xavier_init
+    from mmcv.cnn import xavier_init
 # ----------------- 物理修复结束 -----------------
 from mmcv.cnn.bricks.transformer import (build_positional_encoding,
                                          build_transformer_layer)
@@ -24,7 +24,7 @@ from torch.nn import functional as F
 try:
     from mmcv.runner import BaseModule, force_fp32
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     def force_fp32(apply_to=None, out_fp16=False):
         def decorator(func): return func
         return decorator

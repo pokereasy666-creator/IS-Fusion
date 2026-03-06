@@ -14,7 +14,7 @@ try:
     from mmcv.runner import get_dist_info
 except ImportError:
     # 适配 MMEngine 环境
-    from mmengine.dist import get_dist_info
+    from mmcv.runner import get_dist_info
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复：针对 encode_mask_results 路径迁移 -----------------
 try:

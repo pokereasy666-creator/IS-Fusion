@@ -6,7 +6,7 @@ try:
     from mmcv.runner import BaseModule, force_fp32, auto_fp16
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     def force_fp32(apply_to=None, out_fp16=False):
         def decorator(func): return func
         return decorator

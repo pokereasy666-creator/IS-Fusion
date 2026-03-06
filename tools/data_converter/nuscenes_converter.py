@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import mmengine
+import mmcv
 import mmcv
 import numpy as np
 import os
@@ -8,7 +8,7 @@ try:
     from mmcv import track_iter_progress
 except ImportError:
     try:
-        from mmengine.utils import track_iter_progress
+        from mmcv.utils import track_iter_progress
     except ImportError:
         from mmcv.utils import track_iter_progress
 # ----------------- 物理修复结束 -----------------
@@ -140,18 +140,18 @@ def create_nuscenes_infos(root_path,
         data = dict(infos=train_nusc_infos, metadata=metadata)
         info_path = osp.join(root_path,
                              '{}_infos_test.pkl'.format(info_prefix))
-        mmengine.dump(data, info_path)
+        mmcv.dump(data, info_path)
     else:
         print('train sample: {}, val sample: {}'.format(
             len(train_nusc_infos), len(val_nusc_infos)))
         data = dict(infos=train_nusc_infos, metadata=metadata)
         info_path = osp.join(root_path,
                              '{}_infos_train.pkl'.format(info_prefix))
-        mmengine.dump(data, info_path)
+        mmcv.dump(data, info_path)
         data['infos'] = val_nusc_infos
         info_val_path = osp.join(root_path,
                                  '{}_infos_val.pkl'.format(info_prefix))
-        mmengine.dump(data, info_val_path)
+        mmcv.dump(data, info_val_path)
 
 
 def get_available_scenes(nusc):
@@ -448,7 +448,7 @@ def export_2d_annotation(root_path, info_path, version, mono3d=True):
         'CAM_BACK_LEFT',
         'CAM_BACK_RIGHT',
     ]
-    nusc_infos = mmengine.load(info_path)['infos']
+    nusc_infos = mmcv.load(info_path)['infos']
     nusc = NuScenes(version=version, dataroot=root_path, verbose=True)
     # info_2d_list = []
     cat2Ids = [
@@ -491,7 +491,7 @@ def export_2d_annotation(root_path, info_path, version, mono3d=True):
         json_prefix = f'{info_path[:-4]}_mono3d'
     else:
         json_prefix = f'{info_path[:-4]}'
-    mmengine.dump(coco_2d_dict, f'{json_prefix}.coco.json')
+    mmcv.dump(coco_2d_dict, f'{json_prefix}.coco.json')
 
 
 def get_2d_boxes(nusc,

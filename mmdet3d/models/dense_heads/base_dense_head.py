@@ -5,9 +5,9 @@ try:
     try:
     from mmcv.runner import BaseModule
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
 
 
 class BaseDenseHead(BaseModule, metaclass=ABCMeta):

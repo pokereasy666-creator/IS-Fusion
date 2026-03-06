@@ -18,7 +18,7 @@ except ImportError:
         from mmdet.registry import PIPELINES
     except ImportError:
         # 如果都找不到，创建一个独立的注册表来保命
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         PIPELINES = Registry('pipeline')
 # ----------------- 物理修复结束 -----------------
 from ..builder import OBJECTSAMPLERS

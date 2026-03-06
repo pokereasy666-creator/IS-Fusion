@@ -16,7 +16,7 @@ except ImportError:
         from mmdet.registry import DATASETS
     except ImportError:
         # 万能保底
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         DATASETS = Registry('dataset')
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始 -----------------
@@ -29,7 +29,7 @@ except ImportError:
         from mmseg.registry import DATASETS as SEG_DATASETS
     except ImportError:
         # 万能保底：如果还是找不到，造一个空的注册表防止崩溃
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         SEG_DATASETS = Registry('seg_dataset')
 # ----------------- 物理修复结束 -----------------
 from .pipelines import Compose

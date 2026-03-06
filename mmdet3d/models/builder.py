@@ -8,8 +8,8 @@ try:
     from mmcv.cnn import MODELS as MMCV_MODELS
 except ImportError:
     # 新版路径 (MMEngine / MMCV 2.x)
-    from mmengine.registry import Registry
-    from mmengine.registry import MODELS as MMCV_MODELS
+    from mmcv.utils import Registry
+    from mmcv.cnn import MODELS as MMCV_MODELS
 # ----------------- 物理修复结束 -----------------
 
 # ----------------- 物理修复开始：适配 MMDetection 3.x -----------------

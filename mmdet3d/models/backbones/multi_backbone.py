@@ -7,7 +7,7 @@ from mmcv.cnn import ConvModule
 try:
     from mmcv.runner import BaseModule, auto_fp16
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     # 定义一个假的 auto_fp16 装饰器，防止报错
     def auto_fp16(apply_to=None, out_fp32=False):
         def decorator(func):

@@ -5,7 +5,7 @@ try:
     from mmcv import is_tuple_of
 except ImportError:
     # 适配 MMEngine
-    from mmengine.utils import is_tuple_of
+    from mmcv.utils import is_tuple_of
 # ----------------- 物理修复结束 -----------------
 from mmcv.cnn import ConvModule
 from torch import nn as nn

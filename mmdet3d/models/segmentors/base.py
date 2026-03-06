@@ -8,7 +8,7 @@ try:
 except ImportError:
     try:
         # 适配 MMEngine 2.x 路径
-        from mmengine.structures import DataContainer as DC
+        from mmcv.parallel import DataContainer as DC
     except ImportError:
         try:
             from mmcv.parallel import DataContainer as DC
@@ -31,7 +31,7 @@ except ImportError:
 # 如果后面有 BaseModule 报错，可以提前加上这个探测
 if 'BaseModule' not in globals():
     try:
-        from mmengine.model import BaseModule
+        from mmcv.runner import BaseModule
     except ImportError:
         import torch.nn as nn
         BaseModule = nn.Module

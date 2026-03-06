@@ -6,7 +6,7 @@ try:
     from mmcv.runner import BaseModule
 except ImportError:
     # MMEngine 中 BaseModule 移到了 mmengine.model
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
 # ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 

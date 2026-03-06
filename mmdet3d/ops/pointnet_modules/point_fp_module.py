@@ -6,7 +6,7 @@ try:
     from mmcv.runner import BaseModule, force_fp32
 except ImportError:
     # 兼容 MMCV 2.x / MMEngine
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     
     # 定义假装饰器
     def force_fp32(apply_to=None, out_fp16=False):

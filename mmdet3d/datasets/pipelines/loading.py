@@ -7,9 +7,9 @@ from PIL import Image
 from typing import Any, Dict, Tuple
 
 # [兼容性修复] 引入 MMEngine 组件
-import mmengine
-import mmengine.fileio as fileio
-from mmengine.registry import TRANSFORMS
+import mmcv
+import mmcv
+from mmcv.utils import Registry; TRANSFORMS = Registry("pipeline")
 
 # [兼容性修复] 桥接注册表
 PIPELINES = TRANSFORMS
@@ -271,7 +271,7 @@ class LoadMultiViewImageFromFiles(object):
     def __call__(self, results):
         filename = results['img_filename']
         # 使用 mmengine.fileio 读取
-        img_bytes = [fileio.get(name, backend_args=self.file_client_args) for name in filename]
+        img_bytes = [mmcv.load(name, backend_args=self.file_client_args) for name in filename]
         img = np.stack([mmcv.imfrombytes(content, flag=self.color_type) for content in img_bytes], axis=-1)
         if self.to_float32:
             img = img.astype(np.float32)
@@ -346,7 +346,7 @@ class LoadPointsFromMultiSweeps(object):
 
     def _load_points(self, pts_filename):
         try:
-            pts_bytes = fileio.get(pts_filename, backend_args=self.file_client_args)
+            pts_bytes = mmcv.load(pts_filename, backend_args=self.file_client_args)
             points = np.frombuffer(pts_bytes, dtype=np.float32)
         except Exception: 
             if pts_filename.endswith('.npy'):
@@ -357,7 +357,7 @@ class LoadPointsFromMultiSweeps(object):
 
     def _load_painting(self, points, painting_path):
         try:
-            painting_bytes = fileio.get(painting_path, backend_args=self.file_client_args)
+            painting_bytes = mmcv.load(painting_path, backend_args=self.file_client_args)
             predict_idx = np.frombuffer(painting_bytes, dtype='uint8')
         except Exception:
              predict_idx = np.fromfile(painting_path, dtype='uint8')
@@ -627,7 +627,7 @@ class LoadPointsFromFile(object):
 
     def _load_points(self, pts_filename):
         try:
-            pts_bytes = fileio.get(pts_filename, backend_args=self.file_client_args)
+            pts_bytes = mmcv.load(pts_filename, backend_args=self.file_client_args)
             points = np.frombuffer(pts_bytes, dtype=np.float32)
         except Exception:
             if pts_filename.endswith('.npy'): points = np.load(pts_filename)
@@ -648,7 +648,7 @@ class LoadPointsFromFile(object):
             painting_path[-2] = 'LIDAR_TOP_MASK'
             painting_path = '/'.join(i for i in painting_path)
             try:
-                painting_bytes = fileio.get(painting_path, backend_args=self.file_client_args)
+                painting_bytes = mmcv.load(painting_path, backend_args=self.file_client_args)
                 predict_idx = np.frombuffer(painting_bytes, dtype='uint8')
             except Exception:
                 predict_idx = np.fromfile(painting_path, dtype='uint8')
@@ -750,7 +750,7 @@ class LoadAnnotations3D(LoadAnnotations):
         pts_instance_mask_path = results['ann_info']['pts_instance_mask_path']
 
         try:
-            mask_bytes = fileio.get(pts_instance_mask_path, backend_args=self.backend_args)
+            mask_bytes = mmcv.load(pts_instance_mask_path, backend_args=self.backend_args)
             pts_instance_mask = np.frombuffer(mask_bytes, dtype=np.int)
         except Exception:
             pts_instance_mask = np.fromfile(
@@ -764,7 +764,7 @@ class LoadAnnotations3D(LoadAnnotations):
         pts_semantic_mask_path = results['ann_info']['pts_semantic_mask_path']
 
         try:
-            mask_bytes = fileio.get(pts_semantic_mask_path, backend_args=self.backend_args)
+            mask_bytes = mmcv.load(pts_semantic_mask_path, backend_args=self.backend_args)
             pts_semantic_mask = np.frombuffer(
                 mask_bytes, dtype=self.seg_3d_dtype).copy()
         except Exception:

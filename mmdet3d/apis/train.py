@@ -78,7 +78,7 @@ def _mock_build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1
         collate_fn = partial(collate, samples_per_gpu=samples_per_gpu)
     except ImportError:
         try:
-            from mmengine.dataset import pseudo_collate
+            from mmcv.parallel import collate as pseudo_collate
             collate_fn = pseudo_collate
         except ImportError:
             pass
@@ -113,8 +113,8 @@ try:
 except ImportError:
     try:
         # 适配 MMEngine 环境
-        from mmengine.model import MMDistributedDataParallel
-        from mmengine.model import MMDistributedDataParallel as MMDataParallel # 别名兼容
+        from mmcv.parallel import MMDistributedDataParallel
+        from mmcv.parallel import MMDataParallel
     except ImportError:
         # 极端物理保底：定义空类
         class MMDataParallel: pass
@@ -128,14 +128,14 @@ try:
 except ImportError:
     # 适配 MMEngine 2.x 路径
     try:
-        from mmengine.registry import HOOKS
-        from mmengine.runner import Runner as EpochBasedRunner # 统一映射
+        from mmcv.utils import Registry; HOOKS = Registry("hook")
+        from mmcv.runner import EpochBasedRunner
         # 这里的 build 函数在新版中通常由核心 Registry 完成
         def build_runner(cfg, default_args=None):
-            from mmengine.runner import Runner
+            from mmcv.runner import EpochBasedRunner as Runner
             return Runner.from_cfg(cfg)
         def build_optimizer(model, cfg):
-            from mmengine.optim import build_optim_wrapper
+            pass  # build_optim_wrapper not needed in mmcv 2.x
             return build_optim_wrapper(model, cfg)
         # 占位符防止缺失报错
         DistSamplerSeedHook = None
@@ -150,7 +150,7 @@ try:
     from mmcv.utils import build_from_cfg
 except ImportError:
     try:
-        from mmengine.registry import build_from_cfg
+        from mmcv.utils import build_from_cfg
     except ImportError:
         # 最后的物理保底实现：手动模拟 build_from_cfg 逻辑
         def build_from_cfg(cfg, registry, default_args=None):
@@ -183,7 +183,7 @@ except ImportError:
         # 这里为了兼容旧接口，提供一个逻辑映射
         def _mock_build_dataloader(dataset, samples_per_gpu, workers_per_gpu, **kwargs):
             from torch.utils.data import DataLoader
-            from mmengine.dataset import DefaultSampler
+            from torch.utils.data.distributed import DistributedSampler as DefaultSampler
             return DataLoader(
                 dataset,
                 batch_size=samples_per_gpu,
@@ -203,7 +203,7 @@ try:
     from mmdet.utils import get_root_logger
 except ImportError:
     try:
-        from mmengine.logging import MMLogger
+        import logging; MMLogger = logging.getLogger
         def get_root_logger(log_file=None, log_level='INFO', **kwargs):
             # 获取名为 'mmdet' 的实例，如果不存在则初始化
             return MMLogger.get_instance('mmdet', log_file=log_file, log_level=log_level)

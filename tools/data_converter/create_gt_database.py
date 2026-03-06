@@ -1,4 +1,4 @@
-import mmengine
+import mmcv
 import mmcv
 import numpy as np
 import pickle
@@ -8,7 +8,7 @@ try:
 except ImportError:
     # 适配 MMCV 2.x / MMEngine 路径
     try:
-        from mmengine.utils import track_iter_progress
+        from mmcv.utils import track_iter_progress
     except ImportError:
         from mmcv.utils import track_iter_progress
 # ----------------- 物理修复结束 -----------------
@@ -301,7 +301,7 @@ def create_groundtruth_database(dataset_class_name,
     if db_info_save_path is None:
         db_info_save_path = osp.join(data_path,
                                      f'{info_prefix}_dbinfos_train.pkl')
-    mmengine.mkdir_or_exist(database_save_path)
+    mmcv.mkdir_or_exist(database_save_path)
     all_db_infos = dict()
     if with_mask:
         coco = COCO(osp.join(data_path, mask_anno_path))

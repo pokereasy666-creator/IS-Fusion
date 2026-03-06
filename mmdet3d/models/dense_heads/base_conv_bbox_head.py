@@ -6,7 +6,7 @@ from mmcv.cnn.bricks import build_conv_layer
 try:
     from mmcv.runner import BaseModule
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
 # ----------------- 物理修复结束 -----------------
 
 from torch import nn as nn

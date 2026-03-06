@@ -6,7 +6,8 @@ try:
 except (ImportError, ModuleNotFoundError):
     try:
         # 尝试 MMEngine 路径 (OpenMMLab 2.0 规范)
-        from mmengine.dataset import Compose
+        from mmcv.utils import build_from_cfg
+        # Compose will be imported from local pipelines
     except (ImportError, ModuleNotFoundError):
         # 最后的保底路径 (MMDet 3.x 变换)
         from mmdet.datasets.transforms import Compose

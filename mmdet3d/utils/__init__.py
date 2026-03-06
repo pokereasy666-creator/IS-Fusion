@@ -3,8 +3,8 @@
 try:
     from mmcv.utils import Registry, build_from_cfg, print_log
 except ImportError:
-    from mmengine.registry import Registry, build_from_cfg
-    from mmengine.logging import print_log
+    from mmcv.utils import Registry, build_from_cfg
+    from mmcv.utils import print_log
 # ----------------- 物理修复结束 -----------------
 
 from .collect_env import collect_env

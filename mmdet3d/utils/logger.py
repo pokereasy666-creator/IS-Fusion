@@ -5,7 +5,7 @@ try:
     from mmcv.utils import get_logger
 except ImportError:
     # MMEngine 2.x 日志系统迁移
-    from mmengine.logging import MMLogger
+    import logging; MMLogger = logging.getLogger
     
     def get_logger(name, log_file=None, log_level='INFO', file_mode='w'):
         # 使用 MMEngine 的单例模式获取 logger

@@ -7,7 +7,7 @@ try:
 except ImportError:
     from mmcv.cnn import ConvModule
     try:
-        from mmengine.model.weight_init import normal_init
+        from mmcv.cnn import normal_init
     except ImportError:
         try:
             from mmdet.models.utils import normal_init
@@ -25,7 +25,7 @@ try:
     from mmcv.runner import BaseModule
 except ImportError:
     try:
-        from mmengine.model import BaseModule
+        from mmcv.runner import BaseModule
     except ImportError:
         import torch.nn as nn
         if 'BaseModule' not in globals():
@@ -60,7 +60,7 @@ except ImportError:
         from mmdet.models.utils import multi_apply
     except ImportError:
         try:
-            from mmengine.utils import multi_apply
+            from mmdet.core import multi_apply
         except ImportError:
             from functools import partial
             def multi_apply(func, *args, **kwargs):

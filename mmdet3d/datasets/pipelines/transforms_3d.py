@@ -6,7 +6,7 @@ try:
     from mmcv.utils import is_tuple_of
 except ImportError:
     try:
-        from mmengine.utils import is_tuple_of
+        from mmcv.utils import is_tuple_of
     except ImportError:
         # 如果实在找不到，手动定义这个简单的工具函数
         def is_tuple_of(obj, cls):
@@ -17,7 +17,7 @@ try:
     from mmcv.utils import build_from_cfg
 except ImportError:
     # MMCV 2.x / MMEngine 环境下的新路径
-    from mmengine.registry import build_from_cfg
+    from mmcv.utils import build_from_cfg
 # ----------------- 物理修复结束 -----------------
 
 from mmdet3d.core import VoxelGenerator
@@ -27,7 +27,7 @@ from mmdet3d.core.bbox import (CameraInstance3DBoxes, DepthInstance3DBoxes,
 try:
     from mmdet.registry import PIPELINES
 except ImportError:
-    from mmengine.registry import Registry
+    from mmcv.utils import Registry
     PIPELINES = Registry('pipeline')
     
 # ----------------- 物理修复开始 -----------------

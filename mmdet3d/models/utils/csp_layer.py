@@ -5,7 +5,7 @@ from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 try:
     from mmcv.runner import BaseModule
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
 
 
 class DarknetBottleneck(BaseModule):

@@ -17,8 +17,9 @@ try:
     from mmcv.runner import BaseModule
 except ImportError:
     # 新版路径 (MMEngine / MMCV 2.x)
-    from mmengine.model import xavier_init, BaseModule
-    from mmengine.utils import to_2tuple
+    from mmcv.cnn import xavier_init
+    from mmcv.runner import BaseModule
+    from mmcv.utils import to_2tuple
 
 # ----------------- 物理修复结束 -----------------
 
@@ -28,8 +29,8 @@ try:
                                           TRANSFORMER_LAYER_SEQUENCE)
 except ImportError:
     # MMEngine 2.x 中，这些注册表已统一并入 MODELS
-    from mmengine.registry import MODELS as TRANSFORMER_LAYER
-    from mmengine.registry import MODELS as TRANSFORMER_LAYER_SEQUENCE
+    from mmcv.utils import Registry; TRANSFORMER_LAYER = Registry("transformer_layer")
+    from mmcv.utils import Registry; TRANSFORMER_LAYER_SEQUENCE = Registry("transformer_layer_sequence")
 # ----------------- 物理修复结束 -----------------
 from mmcv.cnn.bricks.transformer import (BaseTransformerLayer,
                                          TransformerLayerSequence,
@@ -39,7 +40,7 @@ from torch.nn.init import normal_
 try:
     from mmdet.models.utils.builder import TRANSFORMER
 except ImportError:
-    from mmengine.registry import MODELS as TRANSFORMER
+    from mmcv.utils import Registry; TRANSFORMER = Registry("transformer")
 
 try:
     from mmcv.ops.multi_scale_deform_attn import MultiScaleDeformableAttention

@@ -3,7 +3,7 @@ from mmcv.cnn import ConvModule
 try:
     from mmcv.runner import BaseModule
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
 from torch import nn as nn
 
 

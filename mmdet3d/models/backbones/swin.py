@@ -11,22 +11,22 @@ from mmcv.cnn import build_norm_layer
 try:
     from mmcv.cnn import constant_init, trunc_normal_init
 except ImportError:
-    from mmengine.model import constant_init, trunc_normal_init
+    from mmcv.cnn import constant_init, trunc_normal_init
 # ----------------- 物理修复结束 -----------------
 from mmcv.cnn.bricks.transformer import FFN, build_dropout
 # ----------------- 物理修复开始 -----------------
 try:
     from mmcv.runner import BaseModule, ModuleList, _load_checkpoint
 except ImportError:
-    from mmengine.model import BaseModule, ModuleList
-    from mmengine.runner import load_checkpoint as _load_checkpoint
+    from mmcv.runner import BaseModule, ModuleList
+    from mmcv.runner import load_checkpoint as _load_checkpoint
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始 -----------------
 try:
     from mmcv.utils import to_2tuple
 except ImportError:
     # MMEngine 中该工具移到了 mmengine.utils
-    from mmengine.utils import to_2tuple
+    from mmcv.utils import to_2tuple
 # ----------------- 物理修复结束 -----------------
 
 from ...utils import get_root_logger

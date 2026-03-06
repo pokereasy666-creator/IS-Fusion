@@ -8,7 +8,7 @@ try:
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
     try:
-        from mmengine.model import BaseModule
+        from mmcv.runner import BaseModule
     except ImportError:
         import torch.nn as nn
         BaseModule = nn.Module
@@ -28,7 +28,7 @@ except ImportError:
         from mmdet.registry import MODELS as NECKS
     except ImportError:
         # 最后的保底，如果是在非常特殊的环境下
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         NECKS = Registry('neck')
 # ----------------- 物理修复结束 -----------------
 

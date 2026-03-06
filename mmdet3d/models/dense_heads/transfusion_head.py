@@ -7,14 +7,14 @@ try:
     from mmcv.cnn import kaiming_init
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
-    from mmengine.model import kaiming_init
+    from mmcv.cnn import kaiming_init
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
 try:
     from mmcv.runner import BaseModule, force_fp32
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     def force_fp32(apply_to=None, out_fp16=False):
         def decorator(func): return func
         return decorator

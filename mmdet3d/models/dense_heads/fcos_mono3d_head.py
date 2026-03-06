@@ -6,7 +6,7 @@ from mmcv.cnn import Scale
 try:
     from mmcv.runner import force_fp32, BaseModule
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     def force_fp32(apply_to=None, out_fp16=False):
         def decorator(func): return func
         return decorator

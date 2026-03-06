@@ -6,7 +6,7 @@ try:
 except ImportError:
     # 适配 MMEngine / MMCV 2.0+
     try:
-        from mmengine.model import BaseModule
+        from mmcv.runner import BaseModule
     except ImportError:
         import torch.nn as nn
         BaseModule = nn.Module # 终极保底
@@ -22,7 +22,7 @@ except ImportError:
         from mmdet.registry import MODELS as ROI_EXTRACTORS
     except ImportError:
         # 最后的保底手动创建
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         ROI_EXTRACTORS = Registry('roi_extractor')
 # ----------------- 物理修复结束 -----------------
 

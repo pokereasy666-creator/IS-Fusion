@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import mmengine
+import mmcv
 import mmcv
 import numpy as np
 import pyquaternion
@@ -192,7 +192,7 @@ class NuScenesDataset(Custom3DDataset):
         Returns:
             list[dict]: List of annotations sorted by timestamps.
         """
-        data = mmengine.load(ann_file)
+        data = mmcv.load(ann_file)
         data_infos = list(sorted(data['infos'], key=lambda e: e['timestamp']))
         data_infos = data_infos[::self.load_interval]
         self.metadata = data['metadata']
@@ -423,7 +423,7 @@ class NuScenesDataset(Custom3DDataset):
         mmcv.mkdir_or_exist(jsonfile_prefix)
         res_path = osp.join(jsonfile_prefix, 'results_nusc.json')
         print('Results writes to', res_path)
-        mmengine.dump(nusc_submissions, res_path)
+        mmcv.dump(nusc_submissions, res_path)
         return res_path
 
     def _evaluate_single(self,
@@ -464,7 +464,7 @@ class NuScenesDataset(Custom3DDataset):
         nusc_eval.main(render_curves=False)
 
         # record metrics
-        metrics = mmengine.load(osp.join(output_dir, 'metrics_summary.json'))
+        metrics = mmcv.load(osp.join(output_dir, 'metrics_summary.json'))
         detail = dict()
         metric_prefix = f'{result_name}_NuScenes'
         for name in self.CLASSES:

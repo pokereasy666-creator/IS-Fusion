@@ -6,7 +6,7 @@ try:
     from mmcv.utils import print_log
 except ImportError:
     # 兼容 MMCV 2.x / MMEngine
-    from mmengine.logging import print_log
+    from mmcv.utils import print_log
 # ----------------- 物理修复结束 -----------------
 from terminaltables import AsciiTable
 

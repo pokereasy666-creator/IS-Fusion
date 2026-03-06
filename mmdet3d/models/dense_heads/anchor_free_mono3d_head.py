@@ -9,14 +9,14 @@ try:
     from mmcv.cnn import bias_init_with_prob, normal_init
 except ImportError:
     # 适配 MMEngine：初始化函数移到了 mmengine.model
-    from mmengine.model import bias_init_with_prob, normal_init
+    from mmcv.cnn import bias_init_with_prob, normal_init
 
 # ----------------- 物理修复开始：mmcv BaseModule 和 force_fp32 -----------------
 try:
     from mmcv.runner import force_fp32, BaseModule
 except ImportError:
     # 适配 MMEngine：BaseModule 移到了 mmengine.model
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     # force_fp32 在新版中机制改变，定义空装饰器以保持兼容
     def force_fp32(apply_to=None, out_fp16=False):
         def decorator(func):

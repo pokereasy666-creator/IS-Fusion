@@ -3,7 +3,7 @@ import mmcv
 # ----------------- 物理修复：猴子补丁补全 mmcv.is_list_of -----------------
 if not hasattr(mmcv, 'is_list_of'):
     try:
-        from mmengine.utils import is_list_of
+        from mmcv.utils import is_list_of
         mmcv.is_list_of = is_list_of
     except ImportError:
         def is_list_of(seq, expected_type):
@@ -23,7 +23,7 @@ except ImportError:
         from mmdet.registry import PIPELINES
     except ImportError:
         # 保底方案：从 mmengine 导入通用注册表
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         PIPELINES = Registry('pipeline')
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始 -----------------
@@ -31,7 +31,8 @@ try:
     from mmdet.datasets.pipelines import Compose
 except (ImportError, ModuleNotFoundError):
     # 针对 MMEngine / MMCV 2.x 的新路径
-    from mmengine.dataset import Compose
+    from mmcv.utils import build_from_cfg
+    # Compose will be imported from local pipelines
 # ----------------- 物理修复结束 -----------------
 
 
@@ -68,7 +69,7 @@ class MultiScaleFlipAug3D(object):
                  pcd_vertical_flip=False):
                  # ----------------- 物理修复：终极注册表同步术 -----------------
         try:
-            from mmengine.registry import TRANSFORMS
+            from mmcv.utils import Registry; TRANSFORMS = Registry("pipeline")
             # 1. 尝试同步 mmdet 的旧注册表
             try:
                 from mmdet.datasets.builder import PIPELINES as DET_PIPELINES

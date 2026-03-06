@@ -47,7 +47,7 @@ from mmcv.cnn import ConvModule, build_conv_layer
 import torch
 # --- 强制补回 force_fp32 ---
 try:
-    from mmengine.model import force_fp32
+    from mmcv.runner import force_fp32
 except ImportError:
     try:
         from mmcv.runner import force_fp32
@@ -107,7 +107,7 @@ except ImportError:
     try:
         from mmdet.models.utils.misc import multi_apply
     except ImportError:
-        from mmengine.utils import multi_apply
+        from mmdet.core import multi_apply
     from mmdet.models.task_modules.assigners import AssignResult
 
 # 强制注册 TransFusionBBoxCoder 防止 KeyError

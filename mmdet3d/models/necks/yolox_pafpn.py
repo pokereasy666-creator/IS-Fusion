@@ -10,7 +10,7 @@ try:
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
     try:
-        from mmengine.model import BaseModule
+        from mmcv.runner import BaseModule
     except ImportError:
         import torch.nn as nn
         BaseModule = nn.Module # 终极保底

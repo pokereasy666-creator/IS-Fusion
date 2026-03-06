@@ -8,7 +8,7 @@ from mmcv.cnn import ConvModule, build_conv_layer
 try:
     from mmcv.runner import BaseModule, force_fp32
 except ImportError:
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     def force_fp32(apply_to=None, out_fp16=False):
         def decorator(func): return func
         return decorator

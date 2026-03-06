@@ -16,7 +16,7 @@ except ImportError:
         from mmdet.registry import DATASETS
     except ImportError:
         # 如果都找不到，创建一个独立的注册表来保命
-        from mmengine.registry import Registry
+        from mmcv.utils import Registry
         DATASETS = Registry('dataset')
 # ----------------- 物理修复结束 -----------------
 from ..core.bbox import get_box_type
@@ -78,7 +78,7 @@ class Custom3DDataset(Dataset):
         if pipeline is not None:
             # ----------------- 物理修复：强制同步旧版 Pipeline 到 TRANSFORMS -----------------
             try:
-                from mmengine.registry import TRANSFORMS
+                from mmcv.utils import Registry; TRANSFORMS = Registry("pipeline")
                 import mmdet3d.datasets.pipelines as custom_pipelines
                 # 遍历旧版的所有 pipeline 类，批量注册到新版的 TRANSFORMS 中
                 for name in dir(custom_pipelines):

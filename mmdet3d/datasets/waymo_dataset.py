@@ -8,7 +8,7 @@ import torch
 try:
     from mmcv.utils import print_log
 except ImportError:
-    from mmengine.logging import print_log
+    from mmcv.utils import print_log
 # ----------------- 物理修复结束 -----------------
 from os import path as osp
 

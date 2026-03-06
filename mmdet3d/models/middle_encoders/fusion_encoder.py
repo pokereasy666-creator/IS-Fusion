@@ -10,7 +10,7 @@ except ImportError:
     # 在新版中，这些通常都统一注册在 MODELS 或各个特定的子注册表中
     # 为了保证代码能跑通，我们直接从 mmengine 导入对应的 Registry
     try:
-        from mmengine.registry import MODELS as MODELS_REG
+        from mmcv.utils import Registry; MODELS_REG = Registry("models")
         ATTENTION = MODELS_REG
         FEEDFORWARD_NETWORK = MODELS_REG
         TRANSFORMER_LAYER = MODELS_REG
@@ -71,7 +71,7 @@ try:
     from mmcv.cnn.bricks.registry import ATTENTION
 except ImportError:
     try:
-        from mmengine.registry import MODELS as ATTENTION
+        from mmcv.utils import Registry; ATTENTION = Registry("attention")
     except ImportError:
         ATTENTION = None
 # ----------------- 物理修复结束 -----------------
@@ -81,7 +81,7 @@ try:
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
     try:
-        from mmengine.model import BaseModule, ModuleList, Sequential
+        from mmcv.runner import BaseModule, ModuleList, Sequential
     except ImportError:
         import torch.nn as nn
         BaseModule = nn.Module # 最后的保底
@@ -94,10 +94,10 @@ try:
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
     try:
-        from mmengine.config import ConfigDict
-        from mmengine.registry import build_from_cfg
+        from mmcv.utils import ConfigDict
+        from mmcv.utils import build_from_cfg
         # deprecated_api_warning 通常在 mmengine.utils 或 mmdet.utils
-        from mmengine.utils import deprecated_api_warning
+        from mmcv.utils import deprecated_api_warning
         # to_2tuple 通常在 mmcv.utils.helpers 或 timm，简单定义保底
         def to_2tuple(x): return (x, x) if isinstance(x, int) else x
     except ImportError:

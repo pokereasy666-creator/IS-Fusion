@@ -5,14 +5,14 @@ try:
     from mmcv.cnn import normal_init
 except ImportError:
     # MMEngine 中初始化函数移到了 mmengine.model
-    from mmengine.model import normal_init
+    from mmcv.cnn import normal_init
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始 -----------------
 try:
     from mmcv.runner import BaseModule, auto_fp16, force_fp32
 except ImportError:
     # MMEngine 中 BaseModule 移到了 mmengine.model
-    from mmengine.model import BaseModule
+    from mmcv.runner import BaseModule
     
     # auto_fp16 和 force_fp32 在新版中机制改变，定义空装饰器以保持代码兼容
     def auto_fp16(apply_to=None, out_fp32=False):

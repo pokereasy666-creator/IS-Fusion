@@ -3,7 +3,7 @@
 import mmcv
 if not hasattr(mmcv, "load"):
     try:
-        from mmengine.fileio import load as _load
+        from mmcv import load as _load
         mmcv.load = _load
     except ImportError:
         import pickle
@@ -43,7 +43,7 @@ if not hasattr(mmcv, "build_from_cfg"):
                     except:
                         continue
                 raise e
-        from mmengine.registry import build_from_cfg
+        from mmcv.utils import build_from_cfg
         return build_from_cfg(cfg, registry, default_args)
     mmcv.build_from_cfg = _mock_build_from_cfg
 # ---------------------------------------
@@ -124,7 +124,7 @@ try:
     from mmdet.apis import set_random_seed
 except ImportError:
     try:
-        from mmengine.runner import set_random_seed
+        from mmdet.apis import set_random_seed
     except ImportError:
         import torch
         import numpy as np
@@ -315,7 +315,7 @@ def main():
 
 # ----------------- 物理修复：核弹级全量抓捕所有隐身算子 -----------------
     try:
-        from mmengine.registry import TRANSFORMS
+        from mmcv.utils import Registry; TRANSFORMS = Registry("pipeline")
         import os
         import importlib
 
