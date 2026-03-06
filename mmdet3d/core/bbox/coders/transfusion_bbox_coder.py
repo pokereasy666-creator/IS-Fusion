@@ -1,41 +1,8 @@
 import torch
 import numpy as np
 
-# --- MMEngine / MMDet 3.x Compatibility ---
-try:
-    from mmdet.registry import TASK_UTILS as BBOX_CODERS
-except ImportError:
-    pass
-
-try:
-    from mmdet.models.task_modules.coders.base_bbox_coder import BaseBBoxCoder
-except ImportError:
-    # 终极保底：如果实在找不到基类，直接继承 object，绝不报错
-    class BaseBBoxCoder(object): pass
-# ------------------------------------------
-
-import torch
-
-# ----------------- 物理修复：跨时代导包兼容 -----------------
-try:
-    # 新纪元 (MMDet 3.x / MMEngine)：将 TASK_UTILS 伪装成旧版的 BBOX_CODERS
-    from mmdet.registry import TASK_UTILS as BBOX_CODERS
-    try:
-        from mmdet.models.task_modules.coders import BaseBBoxCoder
-    except ImportError:
-        # 终极保底：如果连新版的基类也找不到，直接捏一个空基类
-        class BaseBBoxCoder: pass
-except ImportError:
-    # 旧石器时代 (MMDet 2.x) 的后路保留
-    try:
-    pass
-except ImportError:
-    from mmdet.registry import TASK_UTILS as BBOX_CODERS
-    try:
-    pass
-except ImportError:
-    from mmdet.models.task_modules.coders.base_bbox_coder import BaseBBoxCoder
-# ----------------- 物理修复结束 -----------------
+from mmdet.core.bbox import BaseBBoxCoder
+from mmdet.core.bbox.builder import BBOX_CODERS
 
 @BBOX_CODERS.register_module()
 class TransFusionBBoxCoder(BaseBBoxCoder):
