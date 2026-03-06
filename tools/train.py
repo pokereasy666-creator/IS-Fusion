@@ -104,13 +104,13 @@ import os
 import time
 import torch
 import warnings
-from mmengine.config import Config, DictAction
+from mmcv import Config, DictAction
 import mmcv
 if not hasattr(mmcv, "mkdir_or_exist"):
     import os
     mmcv.mkdir_or_exist = lambda d, **kwargs: os.makedirs(d, exist_ok=True)
 
-from mmengine.dist import get_dist_info, init_dist
+from mmcv.runner import get_dist_info, init_dist
 from os import path as osp
 
 from mmdet import __version__ as mmdet_version
