@@ -193,10 +193,17 @@ class NuScenesDataset(Custom3DDataset):
             list[dict]: List of annotations sorted by timestamps.
         """
         data = mmcv.load(ann_file)
-        data_infos = list(sorted(data['infos'], key=lambda e: e['timestamp']))
+        # Support both old format (infos/metadata) and new format (data_list/metainfo)
+        if 'infos' in data:
+            data_infos = list(sorted(data['infos'], key=lambda e: e['timestamp']))
+            self.metadata = data['metadata']
+        elif 'data_list' in data:
+            data_infos = list(sorted(data['data_list'], key=lambda e: e.get('timestamp', 0)))
+            self.metadata = data.get('metainfo', {})
+        else:
+            raise KeyError(f'Expected "infos" or "data_list" in {ann_file}, got {list(data.keys())}')
         data_infos = data_infos[::self.load_interval]
-        self.metadata = data['metadata']
-        self.version = self.metadata['version']
+        self.version = self.metadata.get('version', 'v1.0-trainval')
         return data_infos
 
     def get_data_info(self, index):
