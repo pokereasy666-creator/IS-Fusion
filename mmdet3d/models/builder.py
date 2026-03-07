@@ -37,7 +37,7 @@ except ImportError:
     SHARED_HEADS = MODELS
     
     try:
-        from mmseg.registry import MODELS as SEG_MODELS
+        from mmseg.models import MODELS as SEG_MODELS
         SEGMENTORS = SEG_MODELS
     except ImportError:
         # 如果没装 mmseg，用通用模型库代替

@@ -5,7 +5,7 @@ from os import path as osp
 from mmdet3d.core import show_seg_result
 from mmdet3d.core.bbox import DepthInstance3DBoxes
 from mmdet.datasets import DATASETS
-from mmseg.registry import DATASETS as SEG_DATASETS
+from mmseg.datasets import DATASETS as SEG_DATASETS
 from .custom_3d import Custom3DDataset
 from .custom_3d_seg import Custom3DSegDataset
 from .pipelines import Compose

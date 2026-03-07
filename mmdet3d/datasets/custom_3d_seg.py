@@ -22,11 +22,11 @@ except ImportError:
 # ----------------- 物理修复开始 -----------------
 try:
     # 尝试旧路径 (MMSeg 0.x)
-    from mmseg.registry import DATASETS as SEG_DATASETS
+    from mmseg.datasets import DATASETS as SEG_DATASETS
 except ImportError:
     # 针对 MMSeg 1.x 的新路径
     try:
-        from mmseg.registry import DATASETS as SEG_DATASETS
+        from mmseg.datasets import DATASETS as SEG_DATASETS
     except ImportError:
         # 万能保底：如果还是找不到，造一个空的注册表防止崩溃
         from mmcv.utils import Registry
