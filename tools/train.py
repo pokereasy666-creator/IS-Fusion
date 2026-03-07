@@ -1,4 +1,16 @@
 
+# --- FIX: yapf FormatCode compatibility (remove unsupported 'verify' kwarg) ---
+try:
+    import yapf.yapflib.yapf_api as _yapf_api
+    _orig_FormatCode = _yapf_api.FormatCode
+    def _patched_FormatCode(text, **kwargs):
+        kwargs.pop('verify', None)
+        return _orig_FormatCode(text, **kwargs)
+    _yapf_api.FormatCode = _patched_FormatCode
+except Exception:
+    pass
+# ------------------------------------------------------------------------------
+
 # --- GLOBAL MMCV LOAD MOCK ---
 import mmcv
 if not hasattr(mmcv, "load"):
