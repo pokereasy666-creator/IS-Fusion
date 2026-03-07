@@ -71,7 +71,7 @@ except ImportError:
         from mmdet3d.models.utils import limit_period, xywhr2xyxyr
 
 try:
-    from mmdet.models.task_modules.samplers import PseudoSampler
+    from mmdet.core.bbox.samplers import PseudoSampler
 except ImportError:
     try:
         from mmdet.core.bbox.samplers import PseudoSampler
@@ -100,7 +100,8 @@ from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
 try:
     from mmdet.core import build_bbox_coder, multi_apply, build_assigner, build_sampler, AssignResult
 except ImportError:
-    from mmdet.registry import MODELS, TASK_UTILS
+    from mmdet.models import MODELS
+    from mmdet.core.bbox.builder import BBOX_ASSIGNERS as TASK_UTILS
     build_bbox_coder = MODELS.build
     build_assigner = TASK_UTILS.build
     build_sampler = TASK_UTILS.build
@@ -108,7 +109,7 @@ except ImportError:
         from mmdet.models.utils.misc import multi_apply
     except ImportError:
         from mmdet.core import multi_apply
-    from mmdet.models.task_modules.assigners import AssignResult
+    from mmdet.core.bbox.assigners import AssignResult
 
 # 强制注册 TransFusionBBoxCoder 防止 KeyError
 try:
@@ -831,7 +832,7 @@ def custom_build_bbox_coder(cfg, **kwargs):
         return TransFusionBBoxCoder(**cfg_copy)
     else:
         # 其他的 coder 交给默认注册器
-        from mmdet.registry import MODELS
+        from mmdet.models import MODELS
         return MODELS.build(cfg)
 
 build_bbox_coder = custom_build_bbox_coder

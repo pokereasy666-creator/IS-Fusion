@@ -48,8 +48,8 @@ except ImportError:
 try:
     from mmdet.models.builder import HEADS, build_loss
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
-    from mmdet.registry import MODELS
+    from mmdet.models import HEADS
+    from mmdet.models import MODELS
     
     # 手动封装 build_loss 以适配 MMDet 3.x
     def build_loss(cfg):

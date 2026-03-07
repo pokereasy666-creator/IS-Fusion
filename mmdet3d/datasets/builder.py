@@ -30,11 +30,11 @@ except ImportError:
 # ----------------- 物理修复开始 -----------------
 try:
     # 尝试旧路径 (MMDet 2.x)
-    from mmdet.registry import DATASETS
+    from mmdet.datasets import DATASETS
 except ImportError:
     # 新路径 (MMDet 3.x)
     try:
-        from mmdet.registry import DATASETS
+        from mmdet.datasets import DATASETS
     except ImportError:
         # 如果都找不到，创建一个独立的注册表来保命
         # 注意：这里假设你之前的步骤已经正确导入了 Registry

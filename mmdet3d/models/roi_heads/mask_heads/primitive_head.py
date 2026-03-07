@@ -44,7 +44,7 @@ except ImportError:
         from mmdet.models.builder import HEADS
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表路径
-        from mmdet.registry import MODELS as HEADS
+        from mmdet.models import HEADS
 # ----------------- 物理修复结束 -----------------
 
 

@@ -7,7 +7,7 @@ except ImportError:
     try:
         from mmdet.models.builder import HEADS
     except ImportError:
-        from mmdet.registry import MODELS as HEADS
+        from mmdet.models import HEADS
 
 try:
     from mmcv.runner import BaseModule, auto_fp16

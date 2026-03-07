@@ -21,10 +21,10 @@ except ImportError:
 from mmdet.datasets import CocoDataset
 try:
     # 尝试旧路径 (MMDet 2.x)
-    from mmdet.registry import DATASETS
+    from mmdet.datasets import DATASETS
 except ImportError:
     # 适配 MMDetection 3.x 的新路径
-    from mmdet.registry import DATASETS
+    from mmdet.datasets import DATASETS
 # ----------------- 物理修复结束 -----------------
 from ..core import show_multi_modality_result
 from ..core.bbox import CameraInstance3DBoxes, get_box_type

@@ -37,7 +37,7 @@ except ImportError:
 try:
     from mmdet.models import HEADS
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
+    from mmdet.models import HEADS
 # ----------------- 物理修复结束 -----------------
 
 from ..builder import build_head

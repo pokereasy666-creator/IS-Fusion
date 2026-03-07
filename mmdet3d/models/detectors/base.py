@@ -22,7 +22,7 @@ except ImportError:
 try:
     from mmdet.models.builder import DETECTORS
 except ImportError:
-    from mmdet.registry import MODELS as DETECTORS
+    from mmdet.models import DETECTORS
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始：FP16 装饰器兼容 -----------------
 try:

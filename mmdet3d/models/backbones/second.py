@@ -13,7 +13,7 @@ from torch import nn as nn
 try:
     from mmdet.models import BACKBONES
 except ImportError:
-    from mmdet.registry import MODELS as BACKBONES
+    from mmdet.models import BACKBONES
     
 import torch
 

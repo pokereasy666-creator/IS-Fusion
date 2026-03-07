@@ -24,11 +24,11 @@ from mmdet3d.core.points import BasePoints
 # ----------------- 物理修复开始 -----------------
 try:
     # 尝试旧路径 (MMDet 2.x)
-    from mmdet.registry import TRANSFORMS as PIPELINES
+    from mmdet.datasets.builder import PIPELINES
 except ImportError:
     # 新路径 (MMDet 3.x)
     try:
-        from mmdet.registry import PIPELINES
+        from mmdet.datasets.builder import PIPELINES
     except ImportError:
         # 如果都找不到，创建一个独立的注册表来保命
         from mmcv.utils import Registry

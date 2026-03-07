@@ -17,7 +17,7 @@ except ImportError:
     try:
         from mmdet.models.builder import DETECTORS
     except ImportError:
-        from mmdet.registry import MODELS as DETECTORS
+        from mmdet.models import DETECTORS
 # ----------------- 物理修复结束 -----------------
 from torch.nn import functional as F
 
@@ -45,7 +45,7 @@ except ImportError:
         from mmdet.models.builder import DETECTORS
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.registry import MODELS as DETECTORS
+        from mmdet.models import DETECTORS
 # ----------------- 物理修复结束 -----------------
 from .. import builder
 from .single_stage import SingleStage3DDetector

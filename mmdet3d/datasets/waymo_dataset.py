@@ -12,7 +12,7 @@ except ImportError:
 # ----------------- 物理修复结束 -----------------
 from os import path as osp
 
-from mmdet.registry import DATASETS
+from mmdet.datasets import DATASETS
 from ..core.bbox import Box3DMode, points_cam2img
 from .kitti_dataset import KittiDataset
 from ..core.bbox import (Box3DMode, CameraInstance3DBoxes, Coord3DMode,

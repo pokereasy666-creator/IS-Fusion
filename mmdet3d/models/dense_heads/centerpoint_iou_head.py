@@ -49,7 +49,7 @@ try:
     from mmdet3d.models import builder
     from mmdet3d.models.builder import HEADS, build_loss
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
+    from mmdet.models import HEADS
     from mmdet3d.registry import MODELS
     def build_loss(cfg): return MODELS.build(cfg)
     
@@ -62,7 +62,7 @@ except ImportError:
 try:
     from mmdet.core import build_bbox_coder, multi_apply
 except ImportError:
-    from mmdet.models.task_modules import build_bbox_coder
+    from mmdet.core import build_bbox_coder
     from mmdet.models.utils import multi_apply
 # ----------------- 物理修复结束 -----------------
 

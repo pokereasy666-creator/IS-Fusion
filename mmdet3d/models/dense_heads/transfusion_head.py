@@ -67,10 +67,10 @@ try:
     from mmdet.core import build_bbox_coder, multi_apply, build_assigner, build_sampler, AssignResult
 except ImportError:
     # 适配 MMDet 3.x
-    from mmdet.models.task_modules import build_bbox_coder, build_assigner, build_sampler
+    from mmdet.core import build_bbox_coder, build_assigner, build_sampler
     from mmdet.models.utils import multi_apply
     try:
-        from mmdet.models.task_modules.assigners import AssignResult
+        from mmdet.core.bbox.assigners import AssignResult
     except ImportError:
         # 有些 MMEngine 版本会把它整合到 structures 里
         class AssignResult: pass # 终极保底：如果仅用于类型注解，空类即可防报错

@@ -16,11 +16,11 @@ from copy import deepcopy
 # ----------------- 物理修复开始 -----------------
 try:
     # 尝试旧路径 (MMDet 2.x)
-    from mmdet.registry import TRANSFORMS as PIPELINES
+    from mmdet.datasets.builder import PIPELINES
 except ImportError:
     # 针对 MMDet 3.x 的新路径
     try:
-        from mmdet.registry import PIPELINES
+        from mmdet.datasets.builder import PIPELINES
     except ImportError:
         # 保底方案：从 mmengine 导入通用注册表
         from mmcv.utils import Registry

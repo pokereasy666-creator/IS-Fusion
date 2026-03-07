@@ -17,7 +17,7 @@ try:
 except ImportError:
     # 适配 MMDetection 3.x 的新路径
     try:
-        from mmdet.registry import PIPELINES
+        from mmdet.datasets.builder import PIPELINES
     except ImportError:
         # 万能保底：手动定义一个
         from mmcv.utils import Registry

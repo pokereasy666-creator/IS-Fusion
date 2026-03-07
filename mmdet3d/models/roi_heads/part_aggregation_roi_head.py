@@ -12,7 +12,7 @@ except ImportError:
     except ImportError:
         try:
             # 适配 MMDet 3.x 路径
-            from mmdet.models.task_modules.assigners import AssignResult
+            from mmdet.core.bbox.assigners import AssignResult
         except ImportError:
             # 最后的物理保底：定义一个兼容的结构
             class AssignResult:
@@ -32,7 +32,7 @@ except ImportError:
         from mmdet.models.builder import build_assigner, build_sampler
     except ImportError:
         try:
-            from mmdet.registry import TASK_UTILS
+            from mmdet.core.bbox.builder import BBOX_ASSIGNERS as TASK_UTILS
             def build_assigner(cfg, **default_args):
                 return TASK_UTILS.build(cfg, default_args=default_args)
             def build_sampler(cfg, **default_args):
@@ -50,7 +50,7 @@ except ImportError:
         from mmdet.models.builder import HEADS
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表路径
-        from mmdet.registry import MODELS as HEADS
+        from mmdet.models import HEADS
 # ----------------- 物理修复结束 -----------------
 from ..builder import build_head, build_roi_extractor
 from .base_3droi_head import Base3DRoIHead

@@ -18,9 +18,9 @@ try:
 except ImportError:
     # 适配 MMDet 3.x
     try:
-        from mmdet.registry import IOU_CALCULATORS
+        from mmdet.core.bbox.iou_calculators import IOU_CALCULATORS
     except ImportError:
-        from mmdet.registry import TASK_UTILS as IOU_CALCULATORS
+        from mmdet.core.bbox.iou_calculators import IOU_CALCULATORS
 # ----------------- 物理修复结束 -----------------
 from ..structures import get_box_type
 

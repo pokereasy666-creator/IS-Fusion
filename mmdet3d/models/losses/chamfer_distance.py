@@ -8,7 +8,7 @@ try:
     from mmdet.models.builder import LOSSES
 except ImportError:
     # 适配 MMDet 3.x：使用 MMEngine 统一注册表体系
-    from mmdet.registry import MODELS as LOSSES
+    from mmdet.models import LOSSES
 # ----------------- 物理修复结束 -----------------
 
 

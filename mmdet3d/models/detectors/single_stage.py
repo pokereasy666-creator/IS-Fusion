@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 # ----------------- 物理修复开始：注册表与构建器终极适配 -----------------
 try:
-    from mmdet.registry import MODELS as DETECTORS
+    from mmdet.models import DETECTORS
     # 在新版中，build_backbone 等函数本质上就是 MODELS.build
     def build_backbone(cfg): return DETECTORS.build(cfg)
     def build_neck(cfg):     return DETECTORS.build(cfg)

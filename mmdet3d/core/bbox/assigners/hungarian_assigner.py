@@ -1,12 +1,12 @@
 # ----------------- 物理修复：跨时代导包兼容 -----------------
 try:
     # 新纪元 (MMDet 3.x / MMEngine)：统筹进 TASK_UTILS
-    from mmdet.registry import TASK_UTILS as BBOX_ASSIGNERS
-    from mmdet.registry import TASK_UTILS as MATCH_COST
+    from mmdet.core.bbox.builder import BBOX_ASSIGNERS
+    from mmdet.core.bbox.builder import MATCH_COST
     
     # 获取新版的基础类
     try:
-        from mmdet.models.task_modules.assigners import AssignResult, BaseAssigner
+        from mmdet.core.bbox.assigners import AssignResult, BaseAssigner
     except ImportError:
         # 终极保底：手捏空基类和数据结构
         class BaseAssigner: pass

@@ -5,7 +5,7 @@ try:
 except ImportError:
     # 适配 MMDet 3.x / MMEngine 路径
     try:
-        from mmdet.registry import MODELS as DETECTORS
+        from mmdet.models import DETECTORS
         from mmdet.models.detectors import TwoStageDetector
     except ImportError:
         # 兼容旧版 builder 路径

@@ -15,7 +15,7 @@ from torch import nn as nn
 try:
     from mmdet.models.builder import HEADS
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
+    from mmdet.models import HEADS
 # ----------------- 物理修复结束 -----------------
 
 

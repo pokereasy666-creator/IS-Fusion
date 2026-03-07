@@ -28,7 +28,7 @@ except ImportError:
         from mmdet.models.builder import NECKS
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表路径
-        from mmdet.registry import MODELS as NECKS
+        from mmdet.models import NECKS
 # ----------------- 物理修复结束 -----------------
 
 @NECKS.register_module()

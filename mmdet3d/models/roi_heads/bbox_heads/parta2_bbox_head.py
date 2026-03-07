@@ -49,7 +49,7 @@ except ImportError:
         from mmdet.models.builder import build_bbox_coder
     except ImportError:
         try:
-            from mmdet.registry import TASK_UTILS
+            from mmdet.core.bbox.builder import BBOX_ASSIGNERS as TASK_UTILS
             def build_bbox_coder(cfg, **default_args):
                 return TASK_UTILS.build(cfg, default_args=default_args)
         except ImportError:
@@ -76,7 +76,7 @@ except ImportError:
         from mmdet.models.builder import HEADS
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.registry import MODELS as HEADS
+        from mmdet.models import HEADS
 # ----------------- 物理修复结束 -----------------
 
 @HEADS.register_module()

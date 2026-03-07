@@ -20,7 +20,7 @@ except ImportError:
 try:
     from mmdet3d.core import PseudoSampler
 except ImportError:
-    from mmdet.models.task_modules import PseudoSampler
+    from mmdet.core.bbox.samplers import PseudoSampler
 
 # 2. 修复 box3d_multiclass_nms
 try:
@@ -46,15 +46,15 @@ try:
                             build_bbox_coder, build_sampler, multi_apply, 
                             images_to_levels)
 except ImportError:
-    from mmdet.models.task_modules import (build_anchor_generator, build_assigner,
-                                           build_bbox_coder, build_sampler)
+    from mmdet.core import (build_anchor_generator, build_assigner,
+                                    build_bbox_coder, build_sampler)
     from mmdet.models.utils import multi_apply, images_to_levels
 
 # 5. 修复 HEADS 注册表
 try:
     from mmdet.models import HEADS
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
+    from mmdet.models import HEADS
 
 # ----------------- 物理修复结束 -----------------
 

@@ -19,7 +19,7 @@ try:
 except ImportError:
     # 适配 MMDet 3.x / MMEngine 注册表
     try:
-        from mmdet.registry import MODELS as ROI_EXTRACTORS
+        from mmdet.models import ROI_EXTRACTORS
     except ImportError:
         # 最后的保底手动创建
         from mmcv.utils import Registry

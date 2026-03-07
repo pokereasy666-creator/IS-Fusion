@@ -25,7 +25,7 @@ except ImportError:
         from mmdet.models.builder import DETECTORS
     except ImportError:
         # 适配 MMEngine 最新注册表
-        from mmdet.registry import MODELS as DETECTORS
+        from mmdet.models import DETECTORS
 # ----------------- 物理修复结束 -----------------
 from .mvx_two_stage import MVXTwoStageDetector
 

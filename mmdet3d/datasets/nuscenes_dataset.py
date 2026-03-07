@@ -10,10 +10,10 @@ from os import path as osp
 # ----------------- 物理修复开始 -----------------
 try:
     # 尝试旧路径 (MMDet 2.x)
-    from mmdet.registry import DATASETS
+    from mmdet.datasets import DATASETS
 except ImportError:
     # 针对 MMDet 3.x / MMEngine 的新路径
-    from mmdet.registry import DATASETS
+    from mmdet.datasets import DATASETS
 # ----------------- 物理修复结束 -----------------
 from ..core import show_result
 from ..core.bbox import Box3DMode, Coord3DMode, LiDARInstance3DBoxes

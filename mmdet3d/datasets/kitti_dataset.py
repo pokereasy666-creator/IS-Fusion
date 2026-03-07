@@ -16,11 +16,11 @@ from os import path as osp
 # ----------------- 物理修复开始 -----------------
 try:
     # 尝试旧路径 (MMDet 2.x)
-    from mmdet.registry import DATASETS
+    from mmdet.datasets import DATASETS
 except ImportError:
     # 针对 MMDet 3.x 的新路径
     try:
-        from mmdet.registry import DATASETS
+        from mmdet.datasets import DATASETS
     except ImportError:
         # 万能保底
         from mmcv.utils import Registry

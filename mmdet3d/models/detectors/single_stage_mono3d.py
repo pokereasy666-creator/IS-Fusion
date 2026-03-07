@@ -29,7 +29,7 @@ except ImportError:
     try:
         from mmdet.models import DETECTORS
     except ImportError:
-        from mmdet.registry import MODELS as DETECTORS
+        from mmdet.models import DETECTORS
 # ----------------- 物理修复结束 -----------------
 from mmdet.models.detectors.single_stage import SingleStageDetector
 

@@ -17,7 +17,7 @@ except ImportError:
 try:
     from mmdet.core import build_bbox_coder, multi_apply
 except ImportError:
-    from mmdet.models.task_modules import build_bbox_coder
+    from mmdet.core import build_bbox_coder
     from mmdet.models.utils import multi_apply
 
 # ----------------- 物理修复 V3：MMDet3D 注册表与 Loss -----------------

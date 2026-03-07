@@ -21,7 +21,7 @@ try:
 except ImportError:
     # 适配 MMDet 3.x / MMEngine 路径
     try:
-        from mmdet.registry import MODELS as DETECTORS
+        from mmdet.models import DETECTORS
         def build_backbone(cfg): return DETECTORS.build(cfg)
         def build_neck(cfg):     return DETECTORS.build(cfg)
         def build_head(cfg):     return DETECTORS.build(cfg)

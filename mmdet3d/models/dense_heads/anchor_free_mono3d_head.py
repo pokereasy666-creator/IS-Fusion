@@ -35,8 +35,8 @@ try:
     from mmdet.models.builder import HEADS, build_loss
 except ImportError:
     # 适配 MMDet 3.x
-    from mmdet.registry import MODELS as HEADS
-    from mmdet.registry import MODELS
+    from mmdet.models import HEADS
+    from mmdet.models import MODELS
     
     # 新版中没有独立的 build_loss 函数，需要手动封装
     def build_loss(cfg):

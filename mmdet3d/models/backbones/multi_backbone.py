@@ -21,7 +21,7 @@ try:
     from mmdet.models import BACKBONES, build_backbone
 except ImportError:
     # 针对 MMDet 3.x 的修复：BACKBONES 统归于 MODELS，且 build_backbone 需手动封装
-    from mmdet.registry import MODELS as BACKBONES
+    from mmdet.models import BACKBONES
     
     def build_backbone(cfg):
         return BACKBONES.build(cfg)

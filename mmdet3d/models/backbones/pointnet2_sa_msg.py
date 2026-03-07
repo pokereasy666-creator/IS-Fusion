@@ -20,7 +20,7 @@ try:
     from mmdet.models import BACKBONES
 except ImportError:
     # 适配 MMDetection 3.x：BACKBONES 注册表已合并入 MODELS
-    from mmdet.registry import MODELS as BACKBONES
+    from mmdet.models import BACKBONES
 # ----------------- 物理修复结束 -----------------
 from .base_pointnet import BasePointNet
 

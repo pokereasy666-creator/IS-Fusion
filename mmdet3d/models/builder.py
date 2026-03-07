@@ -22,7 +22,7 @@ except ImportError:
     # 新版路径 (MMDet 3.x / MMSeg 1.x)
     # 在 3.x 架构中，所有模块统一注册在 MODELS 里
     try:
-        from mmdet.registry import MODELS
+        from mmdet.models import MODELS
     except ImportError:
         # 最后的保底，直接用 MMCV 的
         MODELS = MMCV_MODELS

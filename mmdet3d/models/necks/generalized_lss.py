@@ -25,7 +25,7 @@ try:
 except ImportError:
     # 适配 MMDet 3.x / MMEngine 注册表
     try:
-        from mmdet.registry import MODELS as NECKS
+        from mmdet.models import NECKS
     except ImportError:
         # 最后的保底，如果是在非常特殊的环境下
         from mmcv.utils import Registry

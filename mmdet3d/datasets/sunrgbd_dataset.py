@@ -17,7 +17,7 @@ except (ImportError, ModuleNotFoundError):
         def eval_map(*args, **kwargs):
             pass
 # ----------------- 物理修复结束 -----------------
-from mmdet.registry import DATASETS
+from mmdet.datasets import DATASETS
 from .custom_3d import Custom3DDataset
 from .pipelines import Compose
 

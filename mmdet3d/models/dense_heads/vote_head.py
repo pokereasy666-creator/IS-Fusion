@@ -40,13 +40,13 @@ try:
     from mmdet.core import build_bbox_coder, multi_apply
 except ImportError:
     # 适配 MMDet 3.x
-    from mmdet.models.task_modules import build_bbox_coder
+    from mmdet.core import build_bbox_coder
     from mmdet.models.utils import multi_apply
 
 try:
     from mmdet.models import HEADS
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
+    from mmdet.models import HEADS
 # ----------------- 物理修复结束 -----------------
 from .base_conv_bbox_head import BaseConvBboxHead
 

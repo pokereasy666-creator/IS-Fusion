@@ -29,7 +29,7 @@ except ImportError:
 try:
     from mmdet.models import HEADS
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
+    from mmdet.models import HEADS
 from .anchor3d_head import Anchor3DHead
 from .train_mixins import get_direction_target
 

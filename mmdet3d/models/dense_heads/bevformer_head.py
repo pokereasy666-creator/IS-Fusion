@@ -16,7 +16,7 @@ from mmdet.models.utils.transformer import inverse_sigmoid
 try:
     from mmdet.models import HEADS
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
+    from mmdet.models import HEADS
 from mmdet.models.dense_heads import DETRHead
 from mmdet3d.core.bbox.coders import build_bbox_coder
 from ...core.bbox.util import normalize_bbox

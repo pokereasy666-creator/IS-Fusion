@@ -21,7 +21,7 @@ from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu, nms_normal_gpu
 try:
     from mmdet.models import HEADS
 except ImportError:
-    from mmdet.registry import MODELS as HEADS
+    from mmdet.models import HEADS
 from .anchor3d_head import Anchor3DHead
 
 

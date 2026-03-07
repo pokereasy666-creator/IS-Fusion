@@ -25,7 +25,7 @@ from mmdet3d.core.bbox import (CameraInstance3DBoxes, DepthInstance3DBoxes,
                                LiDARInstance3DBoxes, box_np_ops)
                                
 try:
-    from mmdet.registry import PIPELINES
+    from mmdet.datasets.builder import PIPELINES
 except ImportError:
     from mmcv.utils import Registry
     PIPELINES = Registry('pipeline')

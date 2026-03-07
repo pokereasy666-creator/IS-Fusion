@@ -11,7 +11,7 @@ except ImportError:
         from mmdet.models.builder import DETECTORS
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.registry import MODELS as DETECTORS
+        from mmdet.models import DETECTORS
 # ----------------- 物理修复结束 -----------------
 from .. import builder
 from .two_stage import TwoStage3DDetector

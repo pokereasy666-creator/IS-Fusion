@@ -8,7 +8,7 @@ except ImportError:
         from mmcv.cnn.bricks import ATTENTION
     except ImportError:
         # 终极保底：通常归属于 MODELS 或 TASK_UTILS 注册表
-        from mmdet.registry import MODELS as ATTENTION
+        from mmdet.models import BACKBONES as ATTENTION
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始：分离导入 -----------------
 # 1. 独立导入 MultiheadAttention (大概率还在 transformer 里)

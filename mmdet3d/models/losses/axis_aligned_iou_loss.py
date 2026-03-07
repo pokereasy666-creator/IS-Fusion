@@ -7,7 +7,7 @@ try:
     from mmdet.models.builder import LOSSES
 except ImportError:
     # 适配 MMDet 3.x：使用统一的 MODELS 注册表
-    from mmdet.registry import MODELS as LOSSES
+    from mmdet.models import LOSSES
 
 try:
     from mmcv.runner import force_fp32
