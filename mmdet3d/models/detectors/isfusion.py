@@ -19,10 +19,7 @@ from torch.nn import functional as F
 from mmdet3d.core import (Box3DMode, Coord3DMode, bbox3d2result,
                           )
 from mmdet3d.ops import Voxelization
-try:
-    from mmdet.registry import MODELS as DETECTORS
-except ImportError:
-    from mmdet.registry import MODELS as DETECTORS
+from mmdet.models import DETECTORS
 from .mvx_two_stage import MVXTwoStageDetector
 
 
