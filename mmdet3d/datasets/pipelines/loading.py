@@ -6,13 +6,12 @@ import os.path as osp
 from PIL import Image
 from typing import Any, Dict, Tuple
 
-# [兼容性修复] 引入 MMEngine 组件
-import mmcv
-import mmcv
-from mmcv.utils import Registry; TRANSFORMS = Registry("pipeline")
-
-# [兼容性修复] 桥接注册表
-PIPELINES = TRANSFORMS
+# [兼容性修复] 使用与 transforms_3d.py 相同的共享注册表
+try:
+    from mmdet.datasets.builder import PIPELINES
+except ImportError:
+    from mmcv.utils import Registry
+    PIPELINES = Registry('pipeline')
 
 from mmdet3d.core.points import BasePoints, get_points_type
 
