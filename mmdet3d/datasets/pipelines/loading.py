@@ -17,14 +17,19 @@ from mmdet3d.core.points import BasePoints, get_points_type
 
 # [兼容性修复] 尝试导入基类
 try:
-    from mmdet.datasets.transforms import LoadAnnotations, LoadImageFromFile
+    # MMDet 2.x
+    from mmdet.datasets.pipelines import LoadAnnotations, LoadImageFromFile
 except ImportError:
     try:
-        from mmcv.transforms import LoadImageFromFile
-        from mmdet.datasets.transforms import LoadAnnotations
+        # MMDet 3.x
+        from mmdet.datasets.transforms import LoadAnnotations, LoadImageFromFile
     except ImportError:
-        class LoadImageFromFile: pass
-        class LoadAnnotations: pass
+        try:
+            from mmcv.transforms import LoadImageFromFile
+            from mmdet.datasets.transforms import LoadAnnotations
+        except ImportError:
+            class LoadImageFromFile: pass
+            class LoadAnnotations: pass
 
 @PIPELINES.register_module()
 class LoadMultiViewImageFromFilesV2:  # v2: bevfusion
