@@ -257,7 +257,6 @@ def create_groundtruth_database(dataset_class_name,
                     use_dim=[0, 1, 2, 3, 4],
                     pad_empty_sweeps=True,
                     remove_close=True),
-                dict(type='LoadMultiViewImageFromFiles'),
                 dict(
                     type='LoadAnnotations3D',
                     with_bbox_3d=True,
