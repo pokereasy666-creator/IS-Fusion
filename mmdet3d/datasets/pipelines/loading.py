@@ -709,20 +709,12 @@ class LoadAnnotations3D(LoadAnnotations):
                  seg_3d_dtype='int',
                  file_client_args=dict(backend='disk')):
         
-        # [自动纠错] disk -> local
-        if file_client_args.get('backend') == 'disk':
-            file_client_args['backend'] = 'local'
-
-        # [关键修复] 显式指定 box_type='hbox' (或者 'hbox')，防止 MMDetection 3.x 崩溃
-        # 同时将 file_client_args 转换为 backend_args
         super().__init__(
             with_bbox=with_bbox,
             with_label=with_label,
             with_mask=with_mask,
             with_seg=with_seg,
-            poly2mask=poly2mask,
-            box_type='hbox',  # <--- 必须指定，否则 get_box_type 会报错
-            backend_args=file_client_args)
+            poly2mask=poly2mask)
 
         self.with_bbox_3d = with_bbox_3d
         self.with_bbox_depth = with_bbox_depth
