@@ -19,6 +19,7 @@ from pycocotools.coco import COCO
 
 from mmdet3d.core.bbox import box_np_ops as box_np_ops
 from mmdet3d.datasets import build_dataset
+import mmdet3d.datasets.pipelines  # noqa: F401 - register pipeline transforms
 # ----------------- 物理修复开始 -----------------
 try:
     from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
