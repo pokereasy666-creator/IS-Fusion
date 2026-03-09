@@ -181,7 +181,7 @@ except ImportError:
         from mmdet.datasets.builder import build_dataset
         # 在 MMEngine 中，DataLoader 通常由 Runner 自动构建
         # 这里为了兼容旧接口，提供一个逻辑映射
-        def _mock_build_dataloader(dataset, samples_per_gpu, workers_per_gpu, **kwargs):
+        def _mock_build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1, **kwargs):
             from torch.utils.data import DataLoader
             from torch.utils.data.distributed import DistributedSampler as DefaultSampler
             return DataLoader(
