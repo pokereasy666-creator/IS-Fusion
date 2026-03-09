@@ -257,6 +257,8 @@ def create_groundtruth_database(dataset_class_name,
                     use_dim=[0, 1, 2, 3, 4],
                     pad_empty_sweeps=True,
                     remove_close=True),
+            ] + ([dict(type='LoadMultiViewImageFromFiles')]
+                 if with_mask or with_bbox else []) + [
                 dict(
                     type='LoadAnnotations3D',
                     with_bbox_3d=True,
