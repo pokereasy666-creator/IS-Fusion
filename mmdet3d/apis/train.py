@@ -189,7 +189,7 @@ except ImportError:
                 batch_size=samples_per_gpu,
                 num_workers=workers_per_gpu,
                 sampler=DefaultSampler(dataset, shuffle=kwargs.get('shuffle', False)),
-                **{k: v for k, v in kwargs.items() if k not in ['shuffle', 'dist']}
+                **{k: v for k, v in kwargs.items() if k not in ['shuffle', 'dist', 'seed']}
             )
         replace_ImageRootSiameseDataset = None
     except ImportError:
