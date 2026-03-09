@@ -264,19 +264,13 @@ class MyPad(object):
 
 @PIPELINES.register_module()
 class LoadMultiViewImageFromFiles(object):
-    def __init__(self, to_float32=False, color_type='unchanged', file_client_args=dict(backend='disk')):
+    def __init__(self, to_float32=False, color_type='unchanged', **kwargs):
         self.to_float32 = to_float32
         self.color_type = color_type
-        self.file_client_args = file_client_args.copy()
-        # [自动纠错] disk -> local
-        if self.file_client_args.get('backend') == 'disk':
-            self.file_client_args['backend'] = 'local'
 
     def __call__(self, results):
         filename = results['img_filename']
-        # 使用 mmengine.fileio 读取
-        img_bytes = [mmcv.load(name, backend_args=self.file_client_args) for name in filename]
-        img = np.stack([mmcv.imfrombytes(content, flag=self.color_type) for content in img_bytes], axis=-1)
+        img = np.stack([mmcv.imread(name, flag=self.color_type) for name in filename], axis=-1)
         if self.to_float32:
             img = img.astype(np.float32)
         results['filename'] = filename
