@@ -540,18 +540,8 @@ def main():
     logger.info(f'Model:\n{model}')
     datasets = [build_dataset(cfg.data.train)]
 
-    # --- OPTIMIZER MMEngine WRAPPER FIX ---
-    if "optimizer" in cfg and "type" in cfg.optimizer and cfg.optimizer["type"] != "OptimWrapper":
-        opt_cfg = cfg.optimizer.copy()
-        paramwise_cfg = opt_cfg.pop("paramwise_cfg", None)
-        optim_wrapper = dict(type="OptimWrapper", optimizer=opt_cfg)
-        if paramwise_cfg is not None:
-            optim_wrapper["paramwise_cfg"] = paramwise_cfg
-        if hasattr(cfg, "optimizer_config") and cfg.optimizer_config is not None:
-            if "grad_clip" in cfg.optimizer_config:
-                optim_wrapper["clip_grad"] = cfg.optimizer_config["grad_clip"]
-        cfg.optimizer = optim_wrapper
-    # --------------------------------------
+    # NOTE: OptimWrapper wrapping removed — mmcv 1.x build_optimizer
+    # expects a flat optimizer dict with 'lr' at the top level.
 
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
