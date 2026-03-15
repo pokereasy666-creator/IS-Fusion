@@ -278,6 +278,7 @@ def train_detector(model,
 
     # put model on gpus
     import gc
+    import torch
     gc.collect()
     torch.cuda.empty_cache()
 
@@ -315,7 +316,6 @@ def train_detector(model,
     print("🚀 IGNITION SUCCESSFUL! BYPASSING RUNNER...")
     print("=====================================")
     model.train()
-    import torch
     from tqdm import tqdm
     max_epochs = cfg.runner.max_epochs if "runner" in cfg else 10
     work_dir = cfg.work_dir if "work_dir" in cfg else "./work_dirs"
