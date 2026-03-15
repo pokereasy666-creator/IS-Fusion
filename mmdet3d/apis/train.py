@@ -282,6 +282,12 @@ def train_detector(model,
     gc.collect()
     torch.cuda.empty_cache()
 
+    # Convert model to fp16 before moving to GPU to halve VRAM usage
+    use_fp16 = hasattr(cfg, 'fp16') and cfg.fp16
+    if use_fp16:
+        logger.info('Converting model to fp16 before moving to GPU...')
+        model = model.half()
+
     if distributed:
         find_unused_parameters=False
         # Sets the `find_unused_parameters` parameter in
@@ -322,22 +328,27 @@ def train_detector(model,
     import os
     os.makedirs(work_dir, exist_ok=True)
     loader = data_loaders[0]
-    
+
+    # Set up AMP scaler when using fp16
+    scaler = torch.cuda.amp.GradScaler(enabled=use_fp16)
+
     for epoch in range(max_epochs):
         print(f"\n--- Epoch [{epoch+1}/{max_epochs}] ---")
         pbar = tqdm(loader, desc=f"Epoch {epoch+1}")
         for i, data_batch in enumerate(pbar):
             optimizer.zero_grad()
-            # 适配老版本返回字典的格式
-            loss = model(return_loss=True, **data_batch)
-            if isinstance(loss, dict):
-                total_loss = sum([v.sum() for k, v in loss.items() if "loss" in k])
-            else:
-                total_loss = loss.sum()
-            total_loss.backward()
-            optimizer.step()
+            with torch.cuda.amp.autocast(enabled=use_fp16):
+                # 适配老版本返回字典的格式
+                loss = model(return_loss=True, **data_batch)
+                if isinstance(loss, dict):
+                    total_loss = sum([v.sum() for k, v in loss.items() if "loss" in k])
+                else:
+                    total_loss = loss.sum()
+            scaler.scale(total_loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
             pbar.set_postfix({"Loss": f"{total_loss.item():.4f}"})
-            
+
         ckpt_path = f"{work_dir}/epoch_{epoch+1}.pth"
         torch.save(model.state_dict(), ckpt_path)
         print(f"Saved checkpoint to {ckpt_path}")
