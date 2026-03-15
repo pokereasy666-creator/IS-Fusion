@@ -64,7 +64,13 @@ if not dist.is_initialized():
     os.environ["RANK"] = "0"
     if torch.cuda.is_available():
         torch.cuda.set_device(0)
-        dist.init_process_group(backend="nccl")
+        # Only init NCCL when multi-GPU is actually needed;
+        # single-GPU NCCL wastes ~1-2 GB VRAM on communicator buffers.
+        _num_gpus = int(os.environ.get("WORLD_SIZE", "1"))
+        if _num_gpus > 1:
+            dist.init_process_group(backend="nccl")
+        else:
+            dist.init_process_group(backend="gloo")
 # ----------------------------------------------------
 
 
@@ -271,6 +277,10 @@ def train_detector(model,
     ]
 
     # put model on gpus
+    import gc
+    gc.collect()
+    torch.cuda.empty_cache()
+
     if distributed:
         find_unused_parameters=False
         # Sets the `find_unused_parameters` parameter in
