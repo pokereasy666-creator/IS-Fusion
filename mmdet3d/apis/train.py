@@ -282,24 +282,38 @@ def train_detector(model,
     gc.collect()
     torch.cuda.empty_cache()
 
+    # Force-clear any leftover GPU memory from previous runs
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+        torch.cuda.synchronize()
+        free_mem, total_mem = torch.cuda.mem_get_info(cfg.gpu_ids[0])
+        logger.info(f'GPU memory before model load: {free_mem/1024**3:.1f} GB free / {total_mem/1024**3:.1f} GB total')
+
     # Convert model to fp16 before moving to GPU to halve VRAM usage
     use_fp16 = hasattr(cfg, 'fp16') and cfg.fp16
     if use_fp16:
         logger.info('Converting model to fp16 before moving to GPU...')
         model = model.half()
 
+    # Move model to GPU module-by-module to avoid peak memory spike
+    device = torch.device(f'cuda:{cfg.gpu_ids[0]}')
+    for name, module in model.named_children():
+        module.to(device)
+        gc.collect()
+        torch.cuda.empty_cache()
+    # Ensure any remaining top-level parameters/buffers are on GPU
+    model = model.to(device)
+
     if distributed:
         find_unused_parameters=False
-        # Sets the `find_unused_parameters` parameter in
-        # torch.nn.parallel.DistributedDataParallel
         model = MMDistributedDataParallel(
-            model.cuda(),
+            model,
             device_ids=[torch.cuda.current_device()],
             broadcast_buffers=False,
             find_unused_parameters=False)
     else:
         model = MMDataParallel(
-            model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
+            model, device_ids=cfg.gpu_ids)
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
