@@ -279,17 +279,27 @@ def train_detector(model,
     # put model on gpus
     import gc
     import torch
+    import os
     gc.collect()
     torch.cuda.empty_cache()
 
-    # Force-clear any leftover GPU memory from previous runs
+    # Print GPU memory status for diagnostics
     if torch.cuda.is_available():
-        torch.cuda.reset_peak_memory_stats()
-        torch.cuda.synchronize()
-        free_mem, total_mem = torch.cuda.mem_get_info(cfg.gpu_ids[0])
-        logger.info(f'GPU memory before model load: {free_mem/1024**3:.1f} GB free / {total_mem/1024**3:.1f} GB total')
+        try:
+            free_mem, total_mem = torch.cuda.mem_get_info(cfg.gpu_ids[0])
+            logger.info(f'GPU memory before model load: {free_mem/1024**3:.1f} GB free / {total_mem/1024**3:.1f} GB total')
+            if free_mem < 4 * 1024**3:  # Less than 4GB free
+                logger.warning(
+                    'Less than 4GB GPU memory available! '
+                    'Run "nvidia-smi" to check for zombie processes, '
+                    'then "kill -9 <PID>" to free memory.')
+        except RuntimeError:
+            # If even mem_get_info fails, GPU is in a bad state
+            logger.warning('Cannot query GPU memory — GPU may be in a bad state. '
+                           'Try: nvidia-smi; kill -9 <PID>; or reboot.')
+            os._exit(1)
 
-    # Convert model to fp16 before moving to GPU to halve VRAM usage
+    # Always convert to fp16 to fit on A30 24GB
     use_fp16 = hasattr(cfg, 'fp16') and cfg.fp16
     if use_fp16:
         logger.info('Converting model to fp16 before moving to GPU...')
