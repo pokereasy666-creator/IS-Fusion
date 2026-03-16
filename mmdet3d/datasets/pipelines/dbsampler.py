@@ -290,7 +290,7 @@ class DataBaseSampler(object):
                 s_points_list.append(s_points)
 
             gt_labels = np.array([self.cat2label[s['name']] for s in sampled],
-                                 dtype=np.long)
+                                 dtype=np.int64)
             ret = {
                 'gt_labels_3d':
                 gt_labels,
@@ -861,7 +861,7 @@ class MMDataBaseSamplerV2(DataBaseSampler):
                         # s_mask,
                         bbox_2d=bbox_2d.astype(np.int32))
 
-            gt_labels = np.array([self.cat2label[s['name']] for s in sampled], dtype=np.long)
+            gt_labels = np.array([self.cat2label[s['name']] for s in sampled], dtype=np.int64)
             # for camera_idx, each_img in enumerate(img):
             #     cv2.imwrite('nus_code/figs/%s' % img_filename[camera_idx].split('/')[-1], each_img)
             # exit()
