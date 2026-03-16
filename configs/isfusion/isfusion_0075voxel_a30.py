@@ -1,9 +1,11 @@
 _base_ = ['./isfusion_0075voxel.py']
 
-# A30 (24 GB) — full-resolution model, single sample per GPU
-# The full model (Swin-T + SparseEncoder + ISFusion) in fp32 is tight on 24 GB,
-# so keep batch size at 1 and rely on fp16 + gradient checkpointing (inherited).
+# A30 (24 GB) — with fp16 + gradient checkpointing, batch 1 uses ~9.4 GB.
+# Increase to batch 2 to better utilize the 24 GB VRAM.
 data = dict(
-    samples_per_gpu=1,
+    samples_per_gpu=2,
     workers_per_gpu=4,
 )
+
+# Scale learning rate linearly with batch size (2x batch → 2x lr)
+optimizer = dict(lr=1.25e-05)
