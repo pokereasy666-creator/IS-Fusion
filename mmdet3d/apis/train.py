@@ -296,11 +296,10 @@ def train_detector(model,
                            'Try: nvidia-smi; kill -9 <PID>; or reboot.')
             os._exit(1)
 
-    # Always convert to fp16 to fit on A30 24GB
+    # FP16 is handled by mmcv's @auto_fp16/@force_fp32 decorators,
+    # NOT by torch.cuda.amp.autocast (which conflicts with them).
+    # Keep model in fp32 — the decorators handle per-op casting.
     use_fp16 = bool(hasattr(cfg, 'fp16') and cfg.fp16)
-    if use_fp16:
-        logger.info('Converting model to fp16 before moving to GPU...')
-        model = model.half()
 
     # Move model to GPU module-by-module to avoid peak memory spike
     device = torch.device(f'cuda:{cfg.gpu_ids[0]}')
@@ -350,7 +349,8 @@ def train_detector(model,
     os.makedirs(work_dir, exist_ok=True)
     loader = data_loaders[0]
 
-    # Set up AMP scaler when using fp16
+    # FP16 mixed precision is handled by mmcv decorators (@auto_fp16, @force_fp32)
+    # on individual layers. Do NOT use torch.cuda.amp.autocast here.
     scaler = torch.cuda.amp.GradScaler(enabled=use_fp16)
 
     for epoch in range(max_epochs):
@@ -358,16 +358,18 @@ def train_detector(model,
         pbar = tqdm(loader, desc=f"Epoch {epoch+1}")
         for i, data_batch in enumerate(pbar):
             optimizer.zero_grad()
-            with torch.cuda.amp.autocast(enabled=use_fp16):
-                # 适配老版本返回字典的格式
-                loss = model(return_loss=True, **data_batch)
-                if isinstance(loss, dict):
-                    total_loss = sum([v.sum() for k, v in loss.items() if "loss" in k])
-                else:
-                    total_loss = loss.sum()
-            scaler.scale(total_loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
+            loss = model(return_loss=True, **data_batch)
+            if isinstance(loss, dict):
+                total_loss = sum([v.sum() for k, v in loss.items() if "loss" in k])
+            else:
+                total_loss = loss.sum()
+            if use_fp16:
+                scaler.scale(total_loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                total_loss.backward()
+                optimizer.step()
             pbar.set_postfix({"Loss": f"{total_loss.item():.4f}"})
 
         ckpt_path = f"{work_dir}/epoch_{epoch+1}.pth"
