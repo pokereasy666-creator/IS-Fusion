@@ -166,23 +166,40 @@ class ISFusionDetector(MVXTwoStageDetector):
             v.append(rv); c.append(F.pad(rc, (1,0), value=i).to(torch.int32)); n.append(rn)
         return torch.cat(v, 0), torch.cat(n, 0), torch.cat(c, 0).contiguous()
 
+    def _unwrap_pts(self, pts):
+        """Unwrap points from DataContainer to list of tensors."""
+        device = next(self.parameters()).device
+        def _g(x):
+            if isinstance(x, torch.Tensor): return [x]
+            if hasattr(x, 'data'): return _g(x.data)
+            if isinstance(x, (list, tuple)): return [i for s in x for i in _g(s)]
+            return []
+        return [p.to(device).float().contiguous() for p in _g(pts)]
+
     def extract_pts_feat(self, pts, img_feats, img_metas, **kwargs):
         """Extract features of points."""
         if not self.with_pts_bbox:
             return None
 
-        voxels, coors = self.dynamic_voxelize(pts)
-        voxel_features, feature_coors = self.pts_voxel_encoder(voxels, coors, pts, img_feats, img_metas)
-        batch_size = coors[-1, 0].item() + 1
-        batch_size = int(feature_coors[-1, 0].item()) + 1
-        feature_coors = feature_coors.to(torch.int32)
-        if feature_coors.shape[1] == 4:
-            ss = self.pts_middle_encoder.sparse_shape
-            feature_coors[:, 0].clamp_(0, batch_size - 1)
-            feature_coors[:, 1].clamp_(0, ss[0] - 1)
-            feature_coors[:, 2].clamp_(0, ss[1] - 1)
-            feature_coors[:, 3].clamp_(0, ss[2] - 1)
-        x, _, kwargs = self.pts_middle_encoder(voxel_features, feature_coors, batch_size, **kwargs)
+        if self.pts_voxel_encoder is not None:
+            # Original path: DynamicVFE + SparseEncoder
+            voxels, coors = self.dynamic_voxelize(pts)
+            voxel_features, feature_coors = self.pts_voxel_encoder(voxels, coors, pts, img_feats, img_metas)
+            batch_size = coors[-1, 0].item() + 1
+            batch_size = int(feature_coors[-1, 0].item()) + 1
+            feature_coors = feature_coors.to(torch.int32)
+            if feature_coors.shape[1] == 4:
+                ss = self.pts_middle_encoder.sparse_shape
+                feature_coors[:, 0].clamp_(0, batch_size - 1)
+                feature_coors[:, 1].clamp_(0, ss[0] - 1)
+                feature_coors[:, 2].clamp_(0, ss[1] - 1)
+                feature_coors[:, 3].clamp_(0, ss[2] - 1)
+            x, _, kwargs = self.pts_middle_encoder(voxel_features, feature_coors, batch_size, **kwargs)
+        else:
+            # Mamba path: raw points -> MambaMiddleEncoder
+            raw_points = self._unwrap_pts(pts)
+            batch_size = len(raw_points)
+            x, _, kwargs = self.pts_middle_encoder(raw_points, batch_size, **kwargs)
 
         x, ins_heatmap = self.isfusion(pts, x, img_feats, img_metas, batch_size, **kwargs)
 

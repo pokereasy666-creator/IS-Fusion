@@ -1,0 +1,89 @@
+"""
+Hilbert Order
+Modified from https://github.com/PrincetonLIPS/numpy-hilbert-curve
+
+Author: Xiaoyang Wu (xiaoyang.wu.cs@gmail.com), Kaixin Xu
+Please cite our work if the code is helpful to you.
+"""
+
+import torch
+
+
+def right_shift(binary, k=1, axis=-1):
+    if binary.shape[axis] <= k:
+        return torch.zeros_like(binary)
+    slicing = [slice(None)] * len(binary.shape)
+    slicing[axis] = slice(None, -k)
+    shifted = torch.nn.functional.pad(
+        binary[tuple(slicing)], (k, 0), mode="constant", value=0
+    )
+    return shifted
+
+
+def binary2gray(binary, axis=-1):
+    shifted = right_shift(binary, axis=axis)
+    gray = torch.logical_xor(binary, shifted)
+    return gray
+
+
+def gray2binary(gray, axis=-1):
+    shift = 2 ** (torch.Tensor([gray.shape[axis]]).log2().ceil().int() - 1)
+    while shift > 0:
+        gray = torch.logical_xor(gray, right_shift(gray, shift))
+        shift = torch.div(shift, 2, rounding_mode="floor")
+    return gray
+
+
+def encode(locs, num_dims, num_bits):
+    orig_shape = locs.shape
+    bitpack_mask = 1 << torch.arange(0, 8).to(locs.device)
+    bitpack_mask_rev = bitpack_mask.flip(-1)
+
+    if orig_shape[-1] != num_dims:
+        raise ValueError(
+            "The last dimension was of size %d, but num_dims=%d." % (orig_shape[-1], num_dims)
+        )
+
+    if num_dims * num_bits > 63:
+        raise ValueError(
+            "num_dims=%d and num_bits=%d for %d bits total, can't encode into int64."
+            % (num_dims, num_bits, num_dims * num_bits)
+        )
+
+    locs_uint8 = locs.long().view(torch.uint8).reshape((-1, num_dims, 8)).flip(-1)
+
+    gray = (
+        locs_uint8.unsqueeze(-1)
+        .bitwise_and(bitpack_mask_rev)
+        .ne(0)
+        .byte()
+        .flatten(-2, -1)[..., -num_bits:]
+    )
+
+    for bit in range(0, num_bits):
+        for dim in range(0, num_dims):
+            mask = gray[:, dim, bit]
+            gray[:, 0, bit + 1:] = torch.logical_xor(
+                gray[:, 0, bit + 1:], mask[:, None]
+            )
+            to_flip = torch.logical_and(
+                torch.logical_not(mask[:, None]).repeat(1, gray.shape[2] - bit - 1),
+                torch.logical_xor(gray[:, 0, bit + 1:], gray[:, dim, bit + 1:]),
+            )
+            gray[:, dim, bit + 1:] = torch.logical_xor(
+                gray[:, dim, bit + 1:], to_flip
+            )
+            gray[:, 0, bit + 1:] = torch.logical_xor(gray[:, 0, bit + 1:], to_flip)
+
+    gray = gray.swapaxes(1, 2).reshape((-1, num_bits * num_dims))
+    hh_bin = gray2binary(gray)
+    extra_dims = 64 - num_bits * num_dims
+    padded = torch.nn.functional.pad(hh_bin, (extra_dims, 0), "constant", 0)
+    hh_uint8 = (
+        (padded.flip(-1).reshape((-1, 8, 8)) * bitpack_mask)
+        .sum(2)
+        .squeeze()
+        .type(torch.uint8)
+    )
+    hh_uint64 = hh_uint8.view(torch.int64).squeeze()
+    return hh_uint64
