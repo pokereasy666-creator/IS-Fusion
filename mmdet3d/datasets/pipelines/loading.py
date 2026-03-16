@@ -744,7 +744,7 @@ class LoadAnnotations3D(LoadAnnotations):
             pts_instance_mask = np.frombuffer(mask_bytes, dtype=np.int)
         except Exception:
             pts_instance_mask = np.fromfile(
-                pts_instance_mask_path, dtype=np.long)
+                pts_instance_mask_path, dtype=np.int64)
 
         results['pts_instance_mask'] = pts_instance_mask
         results['pts_mask_fields'].append('pts_instance_mask')
@@ -759,7 +759,7 @@ class LoadAnnotations3D(LoadAnnotations):
                 mask_bytes, dtype=self.seg_3d_dtype).copy()
         except Exception:
             pts_semantic_mask = np.fromfile(
-                pts_semantic_mask_path, dtype=np.long)
+                pts_semantic_mask_path, dtype=np.int64)
 
         results['pts_semantic_mask'] = pts_semantic_mask
         results['pts_seg_fields'].append('pts_semantic_mask')
