@@ -1,0 +1,43 @@
+# Unified environment requirements for IS-Fusion + PointMamba (Mamba encoder)
+#
+# Base environment: CUDA 11.7, PyTorch 1.13.1
+#
+# Install order:
+#   1. Install PyTorch first:
+#      pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1+cu117 \
+#          --extra-index-url https://download.pytorch.org/whl/cu117
+#   2. pip install -r requirements_mamba.txt
+#   3. Build CUDA extensions:
+#      pip install -e /path/to/PointMamba/mamba/   (mamba_ssm)
+#      cd IS-Fusion && python setup.py develop
+#
+# ---- Shared / Aligned Dependencies ----
+numpy>=1.22.0,<2.0.0
+scipy>=1.7.0
+
+# ---- PointMamba / Mamba SSM Dependencies ----
+einops==0.7.0
+timm==0.4.5
+addict==2.4.0
+transformers==4.36.2        # PINNED: mamba_ssm imports GreedySearchDecoderOnlyOutput (removed in 5.x)
+triton==2.2.0
+causal-conv1d==1.1.1        # Optional but recommended for Mamba performance
+packaging
+ninja
+
+# ---- IS-Fusion / MMDetection3D Dependencies ----
+# mmcv-full>=1.3.8,<=1.4.0  # Build from source with matching CUDA/PyTorch
+# mmdet>=2.14.0,<3.0.0      # Build from source
+# mmseg>=0.14.1,<1.0.0      # Build from source
+numba>=0.57.0
+networkx>=2.2,<2.3
+tensorboard
+nuscenes-devkit
+lyft_dataset_sdk
+trimesh>=2.35.39
+scikit-image
+plyfile
+
+# ---- PointMamba CUDA Extensions (install separately) ----
+# knn-cuda==0.2              # pip install from PointMamba/extensions or PyPI
+# pointnet2-ops==3.0.0       # No longer needed (pillarization replaces FPS+KNN)
