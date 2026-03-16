@@ -92,17 +92,18 @@ except ImportError:
 # from __future__ import division
 
 
-# --- 🚀 HOTFIX: 彻底解决 PyTorch 2.x DDP 与 Checkpoint 冲突 ---
+# --- HOTFIX: PyTorch 2.x checkpoint use_reentrant compatibility ---
 import torch
 import torch.utils.checkpoint
+import inspect
 _orig_cp = torch.utils.checkpoint.checkpoint
 
-def _patched_cp(*args, **kwargs):
-    kwargs['use_reentrant'] = False
-    return _orig_cp(*args, **kwargs)
-
-torch.utils.checkpoint.checkpoint = _patched_cp
-print("🚀 [HOTFIX] 已强制全局 Checkpoint 使用 use_reentrant=False！")
+# Only patch if the installed PyTorch actually supports use_reentrant
+if 'use_reentrant' in inspect.signature(_orig_cp).parameters:
+    def _patched_cp(*args, **kwargs):
+        kwargs.setdefault('use_reentrant', False)
+        return _orig_cp(*args, **kwargs)
+    torch.utils.checkpoint.checkpoint = _patched_cp
 # -------------------------------------------------------------
 
 import argparse
