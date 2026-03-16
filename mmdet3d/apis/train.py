@@ -297,7 +297,7 @@ def train_detector(model,
             os._exit(1)
 
     # Always convert to fp16 to fit on A30 24GB
-    use_fp16 = hasattr(cfg, 'fp16') and cfg.fp16
+    use_fp16 = bool(hasattr(cfg, 'fp16') and cfg.fp16)
     if use_fp16:
         logger.info('Converting model to fp16 before moving to GPU...')
         model = model.half()
