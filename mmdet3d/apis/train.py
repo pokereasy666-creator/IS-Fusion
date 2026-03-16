@@ -78,16 +78,8 @@ if not dist.is_initialized():
 from functools import partial
 def _mock_build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1, dist=False, shuffle=True, seed=None, runner_type="EpochBasedRunner", persistent_workers=False, **kwargs):
     from torch.utils.data import DataLoader
-    collate_fn = None
-    try:
-        from mmcv.parallel import collate
-        collate_fn = partial(collate, samples_per_gpu=samples_per_gpu)
-    except ImportError:
-        try:
-            from mmcv.parallel import collate as pseudo_collate
-            collate_fn = pseudo_collate
-        except ImportError:
-            pass
+    from mmcv.parallel import collate
+    collate_fn = partial(collate, samples_per_gpu=samples_per_gpu)
     sampler = None
     if dist:
         from torch.utils.data import DistributedSampler
@@ -190,12 +182,17 @@ except ImportError:
         def _mock_build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1, **kwargs):
             from torch.utils.data import DataLoader
             from torch.utils.data.distributed import DistributedSampler as DefaultSampler
+            from functools import partial
+            from mmcv.parallel import collate
+            collate_fn = partial(collate, samples_per_gpu=samples_per_gpu)
+            filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['shuffle', 'dist', 'seed', 'collate_fn']}
             return DataLoader(
                 dataset,
                 batch_size=samples_per_gpu,
                 num_workers=workers_per_gpu,
                 sampler=DefaultSampler(dataset, shuffle=kwargs.get('shuffle', False)),
-                **{k: v for k, v in kwargs.items() if k not in ['shuffle', 'dist', 'seed']}
+                collate_fn=collate_fn,
+                **filtered_kwargs
             )
         replace_ImageRootSiameseDataset = None
     except ImportError:
