@@ -37,7 +37,7 @@ def serialization(pos, feat=None, x_res=None, order="z", layers_outputs=[], grid
 
     batch_idx = torch.arange(0, pos.shape[0], 1.0).unsqueeze(1).repeat(1, pos.shape[1]).to(torch.int64).to(pos.device)
 
-    point_dict = {'batch': batch_idx.flatten(), 'grid_coord': grid_coord.flatten(0, 1)}
+    point_dict = {'batch': batch_idx.flatten(), 'grid_coord': grid_coord.flatten(0, 1), 'coord': pos.flatten(0, 1)}
     point_dict = Point(**point_dict)
     point_dict.serialization(order=order)
 

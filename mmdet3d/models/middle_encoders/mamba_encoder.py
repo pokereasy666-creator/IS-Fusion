@@ -301,11 +301,11 @@ class MambaMiddleEncoder(nn.Module):
                 coords_batched[b, :k] = pillar_coords[offset:offset + k]
             offset += k
 
-        # Hilbert serialization: forward and backward
+        # Radial/azimuthal serialization
         _, _, inv_fwd, tokens_forward, pos_forward = serialization_func(
-            centers_batched, tokens_batched, pos_batched, 'hilbert')
+            centers_batched, tokens_batched, pos_batched, 'radial')
         _, _, inv_bwd, tokens_backward, pos_backward = serialization_func(
-            centers_batched, tokens_batched, pos_batched, 'hilbert-trans')
+            centers_batched, tokens_batched, pos_batched, 'azimuthal')
 
         # Apply OrderScale
         tokens_forward = apply_OrderScale(
