@@ -56,4 +56,5 @@ data = dict(
         img_prefix=data_root,
         classes=class_names,
         pipeline=test_pipeline))
-evaluation = dict(metric=['bbox', 'segm'])
+val_cfg = dict()
+val_evaluator = dict(type='CocoMetric', metric=['bbox', 'segm'])

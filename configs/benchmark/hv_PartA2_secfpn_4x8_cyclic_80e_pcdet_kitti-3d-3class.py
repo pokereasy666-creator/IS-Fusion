@@ -299,34 +299,35 @@ data = dict(
         test_mode=True))
 # optimizer
 lr = 0.001  # max learning rate
-optimizer = dict(type='AdamW', lr=lr, betas=(0.95, 0.99), weight_decay=0.01)
-optimizer_config = dict(grad_clip=dict(max_norm=10, norm_type=2))
-lr_config = dict(
-    policy='cyclic',
-    target_ratio=(10, 1e-4),
-    cyclic_times=1,
-    step_ratio_up=0.4)
-momentum_config = dict(
-    policy='cyclic',
-    target_ratio=(0.85 / 0.95, 1),
-    cyclic_times=1,
-    step_ratio_up=0.4)
-checkpoint_config = dict(interval=1)
-evaluation = dict(interval=1, pipeline=eval_pipeline)
-# yapf:disable
-log_config = dict(
-    interval=50,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='TensorboardLoggerHook')
-    ])
-# yapf:enable
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(type='AdamW', lr=lr, betas=(0.95, 0.99), weight_decay=0.01),
+    clip_grad=dict(max_norm=10, norm_type=2))
+param_scheduler = [dict(type='CosineAnnealingLR', by_epoch=True)]
+
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=80, val_interval=1)
+val_cfg = dict()
+val_evaluator = dict(type='KittiMetric')
+
+default_scope = 'mmdet3d'
+default_hooks = dict(
+    timer=dict(type='IterTimerHook'),
+    logger=dict(type='LoggerHook', interval=50),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    checkpoint=dict(type='CheckpointHook', interval=1),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+)
+env_cfg = dict(
+    cudnn_benchmark=False,
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0),
+    dist_cfg=dict(backend='nccl', port=29506),
+)
+log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
+vis_backends = [dict(type='TensorboardVisBackend')]
+visualizer = dict(type='Det3DLocalVisualizer', vis_backends=vis_backends)
 # runtime settings
-runner = dict(type='EpochBasedRunner', max_epochs=80)
-dist_params = dict(backend='nccl', port=29506)
 log_level = 'INFO'
 find_unused_parameters = True
 work_dir = './work_dirs/parta2_secfpn_80e'
 load_from = None
-resume_from = None
-workflow = [('train', 1)]
+resume = False

@@ -136,7 +136,5 @@ data = dict(
         test_mode=True,
         box_type_3d='LiDAR'))
 # For nuScenes dataset, we usually evaluate the model at the end of training.
-# Since the models are trained by 24 epochs by default, we set evaluation
-# interval to be 24. Please change the interval accordingly if you do not
-# use a default schedule.
-evaluation = dict(interval=24, pipeline=eval_pipeline)
+val_cfg = dict()
+val_evaluator = dict(type='NuScenesMetric')

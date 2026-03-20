@@ -6,13 +6,12 @@ import warnings
 from os import path as osp
 from torch.utils.data import Dataset
 
-# ----------------- 物理修复开始 -----------------
+from mmdet3d.registry import DATASETS
 from ..core.bbox import get_box_type
 from .pipelines import Compose
 from .utils import extract_result_dict, get_loading_pipeline
-import pickle
 
-from mmdet3d.compat import Registry
+
 @DATASETS.register_module()
 class Custom3DDataset(Dataset):
     """Customized 3D dataset.
@@ -65,18 +64,6 @@ class Custom3DDataset(Dataset):
         self.data_infos = self.load_annotations(self.ann_file)
 
         if pipeline is not None:
-            # ----------------- 物理修复：强制同步旧版 Pipeline 到 TRANSFORMS -----------------
-            try:
-                from mmcv.utils import Registry; TRANSFORMS = Registry("pipeline")
-                import mmdet3d.datasets.pipelines as custom_pipelines
-                # 遍历旧版的所有 pipeline 类，批量注册到新版的 TRANSFORMS 中
-                for name in dir(custom_pipelines):
-                    obj = getattr(custom_pipelines, name)
-                    if isinstance(obj, type) and not TRANSFORMS.get(name):
-                        TRANSFORMS.register_module(module=obj, force=True)
-            except Exception as e:
-                print(f"[Warning] Pipeline batch registration failed: {e}")
-            # ----------------- 物理修复结束 -----------------
             self.pipeline = Compose(pipeline)
 
         # set group flag for the sampler

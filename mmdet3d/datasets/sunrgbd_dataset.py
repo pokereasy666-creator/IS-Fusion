@@ -5,19 +5,8 @@ from os import path as osp
 
 from mmdet3d.core import show_multi_modality_result, show_result
 from mmdet3d.core.bbox import DepthInstance3DBoxes
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmdet.core import eval_map
-except (ImportError, ModuleNotFoundError):
-    # 针对 MMDet 3.x 的新路径
-    try:
-        from mmdet.evaluation import eval_map
-    except ImportError:
-        # 极简保底：定义一个空函数防止导入报错，数据预处理阶段用不到它
-        def eval_map(*args, **kwargs):
-            pass
-# ----------------- 物理修复结束 -----------------
-from mmdet.datasets import DATASETS
+from mmdet.evaluation.functional import eval_map
+from mmdet3d.registry import DATASETS
 from .custom_3d import Custom3DDataset
 from .pipelines import Compose
 

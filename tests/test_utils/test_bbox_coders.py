@@ -2,7 +2,7 @@
 import torch
 
 from mmdet3d.core.bbox import DepthInstance3DBoxes, LiDARInstance3DBoxes
-from mmdet.core import build_bbox_coder
+from mmdet.models.task_modules import build_bbox_coder
 
 
 def test_partial_bin_based_box_coder():

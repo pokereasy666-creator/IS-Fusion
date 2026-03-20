@@ -3,56 +3,16 @@ import copy
 import torch
 from torch import nn
 from mmcv.cnn import ConvModule, build_conv_layer
-
-# ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
-from mmdet3d.compat import BaseModule, build_bbox_coder, force_fp32, multi_apply
-try:
-    from mmdet3d.core import (circle_nms, draw_heatmap_gaussian, gaussian_radius, xywhr2xyxyr)
-except ImportError:
-    # 适配 MMDet3D 1.x
-    
-    # 1. 寻找 circle_nms
-    try:
-        from mmdet3d.core.post_processing import circle_nms
-    except ImportError:
-        try:
-            from mmdet3d.models.layers import circle_nms
-        except ImportError:
-            from mmdet3d.models.task_modules import circle_nms
-            
-    # 2. 寻找高斯相关函数 (常常被下放到 mmdet 中)
-    try:
-        from mmdet3d.core.utils.gaussian import draw_heatmap_gaussian, gaussian_radius
-    except ImportError:
-        try:
-            from mmdet3d.models.utils import draw_heatmap_gaussian, gaussian_radius
-        except ImportError:
-            from mmdet.models.utils.gaussian_target import draw_heatmap_gaussian, gaussian_radius
-
-    # 3. 寻找 xywhr2xyxyr
-    try:
-        from mmdet3d.core.bbox import xywhr2xyxyr
-    except ImportError:
-        from mmdet3d.structures import xywhr2xyxyr
-# ----------------- 物理修复结束 -----------------
+from mmengine.model import BaseModule
+from mmdet.models.utils import multi_apply
+from mmdet.models.task_modules.builder import build_bbox_coder
+from mmdet3d.core import circle_nms, draw_heatmap_gaussian, gaussian_radius, xywhr2xyxyr
 from mmdet3d.models.utils import clip_sigmoid
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
+from mmdet3d.models import builder
+from mmdet3d.models.builder import HEADS, build_loss
 
-# ----------------- 物理修复开始：注册表与 builder -----------------
-try:
-    from mmdet3d.models import builder
-    from mmdet3d.models.builder import HEADS, build_loss
-except ImportError:
-    from mmdet.models import HEADS
-    from mmdet3d.registry import MODELS
-    def build_loss(cfg): return MODELS.build(cfg)
-    
-    # 构建一个兼容替身，防止下面的 builder.build_head 报错
-    class builder:
-        build_head = MODELS.build
-# ----------------- 物理修复结束 -----------------
 
-# ----------------- 物理修复开始：MMDet 核心组件 -----------------
 @HEADS.register_module()
 class CenterFPNHead(BaseModule):
     """CenterHead for CenterPoint.
@@ -398,7 +358,6 @@ class CenterFPNHead(BaseModule):
             inds.append(ind)
         return heatmaps, anno_boxes, inds, masks
 
-    @force_fp32(apply_to=('preds_dicts'))
     def loss(self, gt_bboxes_3d, gt_labels_3d, preds_dicts, **kwargs):
         """Loss function for CenterHead.
 

@@ -395,47 +395,43 @@ data = dict(
         box_type_3d='LiDAR'))
 
 
-optimizer = dict(type='AdamW', lr=0.0001, weight_decay=0.01, paramwise_cfg=dict(
-    custom_keys={
-        'img_backbone': dict(lr_mult=0.1),
-    }),)  # for 8gpu * 2sample_per_gpu
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(type='AdamW', lr=0.0001, weight_decay=0.01, paramwise_cfg=dict(
+        custom_keys={
+            'img_backbone': dict(lr_mult=0.1),
+        })),
+    clip_grad=dict(max_norm=0.01, norm_type=2))  # for 8gpu * 2sample_per_gpu
 
-optimizer_config = dict(grad_clip=dict(max_norm=0.01, norm_type=2))
-lr_config = dict(
-    policy='cyclic',
-    target_ratio=(10, 0.0001),
-    cyclic_times=1,
-    step_ratio_up=0.4)
-momentum_config = dict(
-    policy='cyclic',
-    target_ratio=(0.8947368421052632, 1),
-    cyclic_times=1,
-    step_ratio_up=0.4)
+param_scheduler = [dict(type='CosineAnnealingLR', by_epoch=True)]
 
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=10, val_interval=total_epochs//2)
+val_cfg = dict()
+val_evaluator = dict(type='NuScenesMetric')
 
 # runtime settings
 custom_hooks = [dict(type='EmptyCacheHook', after_iter=True, priority='HIGH')]
-runner = dict(type='CustomEpochBasedRunner', max_epochs=total_epochs)
-evaluation = dict(interval=total_epochs//2)
 
-checkpoint_config = dict(interval=1)
-
-log_config = dict(
-    interval=50,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='TensorboardLoggerHook')
-    ])
-# yapf:enable
-dist_params = dict(backend='nccl')
+default_scope = 'mmdet3d'
+default_hooks = dict(
+    timer=dict(type='IterTimerHook'),
+    logger=dict(type='LoggerHook', interval=50),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    checkpoint=dict(type='CheckpointHook', interval=1),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+)
+env_cfg = dict(
+    cudnn_benchmark=False,
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0),
+    dist_cfg=dict(backend='nccl'),
+)
+log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
+vis_backends = [dict(type='TensorboardVisBackend')]
+visualizer = dict(type='Det3DLocalVisualizer', vis_backends=vis_backends)
 log_level = 'INFO'
-work_dir = None
 load_from = '/home/poker/IS-Fusion-master/checkpoints/IS-Fusion_epoch_10.pth'
-resume_from = None
-workflow = [('train', 1)]
-gpu_ids = [0]
+resume = False
 find_unused_parameters=True
 
 
 fp16 = dict(loss_scale=512.0)
-runner = dict(type="EpochBasedRunner", max_epochs=10)

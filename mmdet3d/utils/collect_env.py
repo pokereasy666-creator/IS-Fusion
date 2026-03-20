@@ -2,17 +2,8 @@
 import mmdet
 import mmdet3d
 import mmseg
-
-try:
-    from mmengine.utils import collect_env as collect_base_env
-except ImportError:
-    from mmcv.utils import collect_env as collect_base_env
-
-try:
-    from mmengine.utils import get_git_hash
-except ImportError:
-    def get_git_hash():
-        return 'unknown'
+from mmengine.utils import collect_env as collect_base_env
+from mmengine.utils import get_git_hash
 
 
 def collect_env():
@@ -20,13 +11,7 @@ def collect_env():
     env_info = collect_base_env()
     env_info['MMDetection'] = mmdet.__version__
     env_info['MMSegmentation'] = mmseg.__version__
-
-    try:
-        git_hash = get_git_hash()
-    except Exception:
-        git_hash = 'unknown'
-
-    env_info['MMDetection3D'] = mmdet3d.__version__ + '+' + git_hash[:7]
+    env_info['MMDetection3D'] = mmdet3d.__version__ + '+' + get_git_hash()[:7]
     return env_info
 
 

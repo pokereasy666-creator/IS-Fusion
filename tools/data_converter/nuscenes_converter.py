@@ -1,17 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import mmcv
 import numpy as np
 import os
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv import track_iter_progress
-except ImportError:
-    try:
-        from mmcv.utils import track_iter_progress
-    except ImportError:
-        from mmcv.utils import track_iter_progress
-# ----------------- 物理修复结束 -----------------
+from mmengine.utils import track_iter_progress
 from collections import OrderedDict
 from nuscenes.nuscenes import NuScenes
 from nuscenes.utils.geometry_utils import view_points

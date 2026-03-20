@@ -3,16 +3,7 @@ import torch
 from torch.nn import functional as F
 
 from mmdet3d.ops import Voxelization
-# ----------------- 物理修复：针对 mmdet.models.DETECTORS 缺失 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import DETECTORS
 from .. import builder
 from .two_stage import TwoStage3DDetector
 

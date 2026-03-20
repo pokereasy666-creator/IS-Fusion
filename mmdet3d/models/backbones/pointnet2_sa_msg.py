@@ -1,18 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from mmcv.cnn import ConvModule
-# ----------------- 修正后的代码 (注意缩进) -----------------
 from torch import nn as nn
 
 from mmdet3d.ops import build_sa_module
-# ----------------- 物理修复开始 -----------------
-from mmdet3d.compat import auto_fp16
-try:
-    from mmdet.models import BACKBONES
-except ImportError:
-    # 适配 MMDetection 3.x：BACKBONES 注册表已合并入 MODELS
-    from mmdet.models import BACKBONES
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import MODELS as BACKBONES
 from .base_pointnet import BasePointNet
 
 
@@ -127,7 +119,6 @@ class PointNet2SAMSG(BasePointNet):
                         bias=True))
                 sa_in_channel = cur_aggregation_channel
 
-    @auto_fp16(apply_to=('points', ))
     def forward(self, points):
         """Forward pass.
 

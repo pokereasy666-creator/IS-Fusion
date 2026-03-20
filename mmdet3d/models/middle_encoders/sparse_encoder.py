@@ -1,16 +1,11 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-# ----------------- 物理修复：针对 mmcv.runner.auto_fp16 缺失 -----------------
 from torch import nn as nn
 
 from mmdet3d.ops import SparseBasicBlock, make_sparse_convmodule
-# spconv v1
-# from mmdet3d.ops import spconv as spconv
-
 from ..builder import MIDDLE_ENCODERS
 
 from mmdet3d.ops.spconv import IS_SPCONV2_AVAILABLE
-from mmdet3d.compat import auto_fp16
-if IS_SPCONV2_AVAILABLE:  # spconv v1
+if IS_SPCONV2_AVAILABLE:
     from spconv.pytorch import SparseConvTensor, SparseSequential
 else:
     from mmcv.ops import SparseConvTensor, SparseSequential
@@ -105,7 +100,6 @@ class SparseEncoder(nn.Module):
             conv_type='SparseConv3d')
 
 
-    @auto_fp16(apply_to=('voxel_features', ))
     def forward(self, voxel_features, coors, batch_size, swin_format=False, img_feats=None, **kwargs):
         """Forward of SparseEncoder.
 

@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 import torch
-from mmcv.parallel import DataContainer
+from mmengine.structures import BaseDataElement as DataContainer
 
 from mmdet3d.datasets.pipelines import (DefaultFormatBundle,
                                         LoadMultiViewImageFromFiles)

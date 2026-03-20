@@ -1,16 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import torch
-# ----------------- 物理修复开始：DataContainer 替身 -----------------
-from mmdet3d.compat import DataContainer, auto_fp16, force_fp32
-try:
-    from mmdet.models.builder import DETECTORS
-except ImportError:
-    from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始：FP16 装饰器兼容 -----------------
 from os import path as osp
 
+from mmdet3d.registry import DETECTORS
 from mmdet3d.core import Box3DMode, Coord3DMode, show_result
 from mmdet.models.detectors import BaseDetector
 
@@ -49,7 +42,6 @@ class Base3DDetector(BaseDetector):
         else:
             return self.aug_test(points, img_metas, img, **kwargs)
 
-    @auto_fp16(apply_to=('img', 'points'))
     def forward(self, return_loss=True, **kwargs):
         """Calls either forward_train or forward_test depending on whether
         return_loss=True.
@@ -66,6 +58,14 @@ class Base3DDetector(BaseDetector):
         else:
             return self.forward_test(**kwargs)
 
+    def loss(self, batch_inputs, batch_data_samples, **kwargs):
+        return self.forward_train(**batch_inputs, **kwargs)
+
+    def predict(self, batch_inputs, batch_data_samples=None, **kwargs):
+        return self.forward_test(**batch_inputs, **kwargs)
+
+    def _forward(self, batch_inputs, batch_data_samples=None, **kwargs):
+        return self.extract_feat(**batch_inputs)
 
     def show_results(self, data, result, out_dir):
         """Results visualization.
@@ -113,4 +113,3 @@ class Base3DDetector(BaseDetector):
                     f'Unsupported box_mode_3d {box_mode_3d} for convertion!')
             pred_bboxes = pred_bboxes.tensor.cpu().numpy()
             show_result(points, None, pred_bboxes, out_dir, file_name)
-

@@ -2,19 +2,7 @@
 import platform
 from functools import partial
 
-from mmdet3d.compat import Registry, build_from_cfg, collate
-
-# ── Registries ──
-try:
-    from mmdet.registry import DATASETS
-except ImportError:
-    DATASETS = Registry('dataset')
-
-try:
-    from mmdet3d.datasets.dataset_wrappers import CBGSDataset
-except ImportError:
-    def CBGSDataset(dataset, *args, **kwargs):
-        return dataset
+from mmdet3d.registry import DATASETS, TRANSFORMS, OBJECTSAMPLERS
 
 if platform.system() != 'Windows':
     import resource
@@ -24,43 +12,40 @@ if platform.system() != 'Windows':
     soft_limit = min(max(4096, base_soft_limit), hard_limit)
     resource.setrlimit(resource.RLIMIT_NOFILE, (soft_limit, hard_limit))
 
-OBJECTSAMPLERS = Registry('Object sampler')
-PIPELINES = Registry('pipeline')
+# Keep PIPELINES as alias for backward compat within mmdet3d
+PIPELINES = TRANSFORMS
 
 
 def build_dataset(cfg, default_args=None):
     from torch.utils.data import ConcatDataset
-
-    try:
-        from mmdet.datasets.dataset_wrappers import RepeatDataset, ClassBalancedDataset
-    except ImportError:
-        RepeatDataset = None
-        ClassBalancedDataset = None
+    from mmdet.datasets.dataset_wrappers import RepeatDataset, ClassBalancedDataset
 
     if isinstance(cfg, (list, tuple)):
         dataset = ConcatDataset([build_dataset(c, default_args) for c in cfg])
     elif cfg['type'] == 'ConcatDataset':
         dataset = ConcatDataset(
             [build_dataset(c, default_args) for c in cfg['datasets']])
-    elif cfg['type'] == 'RepeatDataset' and RepeatDataset is not None:
+    elif cfg['type'] == 'RepeatDataset':
         dataset = RepeatDataset(
             build_dataset(cfg['dataset'], default_args), cfg['times'])
-    elif cfg['type'] == 'ClassBalancedDataset' and ClassBalancedDataset is not None:
+    elif cfg['type'] == 'ClassBalancedDataset':
         dataset = ClassBalancedDataset(
             build_dataset(cfg['dataset'], default_args), cfg['oversample_thr'])
     elif cfg['type'] == 'CBGSDataset':
+        from mmdet3d.datasets.dataset_wrappers import CBGSDataset
         dataset = CBGSDataset(build_dataset(cfg['dataset'], default_args))
     else:
-        dataset = build_from_cfg(cfg, DATASETS, default_args)
+        dataset = DATASETS.build(cfg, default_args=default_args)
 
     return dataset
 
 
 def build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1,
-                     dist=False, shuffle=True, seed=None, persistent_workers=False,
-                     **kwargs):
+                     dist=False, shuffle=True, seed=None,
+                     persistent_workers=False, **kwargs):
     """Build a PyTorch DataLoader."""
     from torch.utils.data import DataLoader
+    from torch.utils.data.dataloader import default_collate
 
     sampler = None
     if dist:
@@ -74,6 +59,6 @@ def build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1,
         num_workers=workers_per_gpu,
         sampler=sampler,
         shuffle=shuffle if sampler is None else False,
-        collate_fn=collate_fn,
+        collate_fn=default_collate,
         persistent_workers=persistent_workers and workers_per_gpu > 0,
     )

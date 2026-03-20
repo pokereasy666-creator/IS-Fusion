@@ -4,7 +4,7 @@ import os
 import pytest
 import tempfile
 import torch
-from mmcv.parallel import MMDataParallel
+import torch.nn as nn
 from os.path import dirname, exists, join
 
 from mmdet3d.apis import (convert_SyncBN, inference_detector,
@@ -36,7 +36,7 @@ def _get_config_directory():
 
 def _get_config_module(fname):
     """Load a configuration as a python module."""
-    from mmcv import Config
+    from mmengine.config import Config
     config_dpath = _get_config_directory()
     config_fpath = join(config_dpath, fname)
     config_mod = Config.fromfile(config_fpath)
@@ -350,7 +350,7 @@ def test_single_gpu_test():
         workers_per_gpu=cfg.data.workers_per_gpu,
         dist=False,
         shuffle=False)
-    model = MMDataParallel(model, device_ids=[0])
+    model = nn.DataParallel(model, device_ids=[0])
     results = single_gpu_test(model, data_loader)
     bboxes_3d = results[0]['boxes_3d']
     scores_3d = results[0]['scores_3d']

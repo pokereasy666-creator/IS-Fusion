@@ -1,17 +1,10 @@
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmdet.models import BACKBONES
-except ImportError:
-    # 适配 MMDet 3.x：BACKBONES 注册表已合并入 MODELS
-    from mmdet.models import BACKBONES
-# ----------------- 物理修复结束 -----------------
-
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
 import copy
 from mmcv.cnn import build_conv_layer, build_norm_layer, ConvModule
 from mmdet3d.models.sst.sst_basic_block_v2 import BasicShiftBlockV2
+from mmdet3d.registry import MODELS as BACKBONES
 
 
 @BACKBONES.register_module()

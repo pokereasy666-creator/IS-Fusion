@@ -1,17 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-# ----------------- 物理修复：针对 mmdet.models 组件缺失 -----------------
-try:
-    from mmdet.models import DETECTORS, TwoStageDetector
-except ImportError:
-    # 适配 MMDet 3.x / MMEngine 路径
-    try:
-        from mmdet.models import DETECTORS
-        from mmdet.models.detectors import TwoStageDetector
-    except ImportError:
-        # 兼容旧版 builder 路径
-        from mmdet.models.builder import DETECTORS
-        from mmdet.models.detectors.two_stage import TwoStageDetector
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import DETECTORS
+from mmdet.models import TwoStageDetector
 from .base import Base3DDetector
 
 

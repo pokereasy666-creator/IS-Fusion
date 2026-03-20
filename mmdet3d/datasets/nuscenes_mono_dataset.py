@@ -9,23 +9,10 @@ import warnings
 from nuscenes.utils.data_classes import Box as NuScenesBox
 from os import path as osp
 
-# ----------------- 物理修复开始 -----------------
 from mmdet3d.core import bbox3d2result, xywhr2xyxyr
-try:
-    from mmdet3d.core import box3d_multiclass_nms
-except ImportError:
-    # 适配 MMDetection 3D 1.x 的新路径
-    from mmdet3d.core.post_processing import box3d_multiclass_nms
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
+from mmdet3d.core.post_processing import box3d_multiclass_nms
 from mmdet.datasets import CocoDataset
-try:
-    # 尝试旧路径 (MMDet 2.x)
-    from mmdet.datasets import DATASETS
-except ImportError:
-    # 适配 MMDetection 3.x 的新路径
-    from mmdet.datasets import DATASETS
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import DATASETS
 from ..core import show_multi_modality_result
 from ..core.bbox import CameraInstance3DBoxes, get_box_type
 from .pipelines import Compose

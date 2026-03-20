@@ -1,11 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 import torch
-# ----------------- 物理修复开始 -----------------
 from terminaltables import AsciiTable
-
-
-from mmdet3d.compat import print_log
+from mmengine.logging import print_log
 def average_precision(recalls, precisions, mode='area'):
     """Calculate average precision (for single or multiple scales).
 

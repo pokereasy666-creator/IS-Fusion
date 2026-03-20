@@ -1,16 +1,11 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
+import torch
 from mmcv.cnn import build_conv_layer, build_norm_layer
-# ----------------- 物理修复开始 -----------------
+from mmengine.model import BaseModule
 from torch import nn as nn
 
-from mmdet3d.compat import BaseModule
-try:
-    from mmdet.models import BACKBONES
-except ImportError:
-    from mmdet.models import BACKBONES
-    
-import torch
+from mmdet3d.registry import MODELS as BACKBONES
 
 @BACKBONES.register_module()  # original
 class SECOND(BaseModule):

@@ -6,16 +6,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as cp
-# ----------------- 物理修复开始 -----------------
 from mmcv.cnn import build_norm_layer
-from mmdet3d.compat import BaseModule, ModuleList, load_checkpoint, to_2tuple
-try:
-    from mmcv.cnn import constant_init, trunc_normal_init
-except ImportError:
-    from mmcv.cnn import constant_init, trunc_normal_init
-# ----------------- 物理修复结束 -----------------
+from mmcv.cnn import constant_init, trunc_normal_init
 from mmcv.cnn.bricks.transformer import FFN, build_dropout
-# ----------------- 物理修复开始 -----------------
+from mmengine.model import BaseModule, ModuleList
+from mmengine.runner import load_checkpoint
+from mmengine.utils import to_2tuple
+
 from ...utils import get_root_logger
 from ..builder import BACKBONES
 from ..utils.ckpt_convert import swin_converter

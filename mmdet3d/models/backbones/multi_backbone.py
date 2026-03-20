@@ -3,19 +3,14 @@ import copy
 import torch
 import warnings
 from mmcv.cnn import ConvModule
-from mmdet3d.compat import BaseModule, auto_fp16
+from mmengine.model import BaseModule
 from torch import nn as nn
 
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmdet.models import BACKBONES, build_backbone
-except ImportError:
-    # 针对 MMDet 3.x 的修复：BACKBONES 统归于 MODELS，且 build_backbone 需手动封装
-    from mmdet.models import BACKBONES
-    
-    def build_backbone(cfg):
-        return BACKBONES.build(cfg)
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import MODELS as BACKBONES
+
+
+def build_backbone(cfg):
+    return BACKBONES.build(cfg)
 
 
 @BACKBONES.register_module()
@@ -97,7 +92,6 @@ class MultiBackbone(BaseModule):
                           'please use "init_cfg" instead')
             self.init_cfg = dict(type='Pretrained', checkpoint=pretrained)
 
-    @auto_fp16()
     def forward(self, points):
         """Forward pass.
 

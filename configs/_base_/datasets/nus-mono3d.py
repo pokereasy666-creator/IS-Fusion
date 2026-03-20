@@ -97,4 +97,5 @@ data = dict(
         modality=input_modality,
         test_mode=True,
         box_type_3d='Camera'))
-evaluation = dict(interval=2)
+val_cfg = dict()
+val_evaluator = dict(type='NuScenesMetric')

@@ -2,23 +2,15 @@
 import mmcv
 import torch
 import warnings
-from mmdet3d.compat import DETECTORS, DataContainer as DC, auto_fp16, bbox2result, force_fp32, multi_apply
+from mmcv.utils import DataContainer as DC
 from os import path as osp
 from torch.nn import functional as F
 
+from mmdet3d.registry import DETECTORS
 from mmdet3d.core import (Box3DMode, Coord3DMode, bbox3d2result,
                           merge_aug_bboxes_3d, show_result)
 from mmdet3d.ops import Voxelization
-# ----------------- 物理修复开始：mmdet.core 迁移 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMDet 3.x 的最新注册表机制
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
+from mmdet.models.utils import multi_apply
 from .. import builder
 from .base import Base3DDetector
 
@@ -230,7 +222,6 @@ class MVXTwoStageDetector(Base3DDetector):
         return (img_feats, pts_feats)
 
     @torch.no_grad()
-    @force_fp32()
     def voxelize(self, points):
         """Apply dynamic voxelization to points.
 

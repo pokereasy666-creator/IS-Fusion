@@ -1,45 +1,14 @@
 import mmcv
 import torch
-# ----------------- 物理修复：针对 mmcv.parallel 缺失 -----------------
 from os import path as osp
 from torch import nn as nn
 from torch.nn import functional as F
 
-# ----------------- 物理修复：针对 mmdet3d.core 组件迁移 -----------------
-from mmdet3d.compat import DataContainer, force_fp32, multi_apply
-try:
-    from mmdet3d.core import (Box3DMode, Coord3DMode, bbox3d2result,
-                              merge_aug_bboxes_3d, show_result)
-except ImportError:
-    # 适配 MMDet3D 1.x 路径
-    try:
-        from mmdet3d.structures import Box3DMode, Coord3DMode
-    except ImportError:
-        # 最后的保底，如果连结构定义都变了，只能手动补齐
-        class Box3DMode: LiDAR = 0; CAM = 1; DEPTH = 2
-        class Coord3DMode: LiDAR = 0; CAM = 1; DEPTH = 2
-    
-    try:
-        from mmdet3d.core.bbox import bbox3d2result, merge_aug_bboxes_3d
-    except ImportError:
-        # 定义空函数保底，防止加载崩溃
-        def bbox3d2result(*args, **kwargs): return None
-        def merge_aug_bboxes_3d(*args, **kwargs): return None
-    
-    # show_result 通常移动到了 visualization 
-    def show_result(*args, **kwargs): return None
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import DETECTORS
+from mmdet3d.core import (Box3DMode, Coord3DMode, bbox3d2result,
+                          merge_aug_bboxes_3d, show_result)
 from mmdet3d.ops import Voxelization
-# ----------------- 物理修复：针对 multi_apply 路径彻底消失 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
+from mmdet.models.utils import multi_apply
 from .. import builder
 from .mvx_two_stage import MVXTwoStageDetector
 
@@ -101,7 +70,6 @@ class TransFusionDetector(MVXTwoStageDetector):
         return x
 
     @torch.no_grad()
-    @force_fp32()
     def voxelize(self, points):
         """Apply dynamic voxelization to points.
 

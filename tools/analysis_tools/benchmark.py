@@ -2,9 +2,9 @@
 import argparse
 import time
 import torch
-from mmcv import Config
-from mmcv.parallel import MMDataParallel
-from mmcv.runner import load_checkpoint, wrap_fp16_model
+from mmengine.config import Config
+import torch.nn as nn
+from mmengine.runner import load_checkpoint
 
 from mmdet3d.datasets import build_dataloader, build_dataset
 from mmdet3d.models import build_detector
@@ -50,14 +50,11 @@ def main():
     # build the model and load checkpoint
     cfg.model.train_cfg = None
     model = build_detector(cfg.model, test_cfg=cfg.get('test_cfg'))
-    fp16_cfg = cfg.get('fp16', None)
-    if fp16_cfg is not None:
-        wrap_fp16_model(model)
     load_checkpoint(model, args.checkpoint, map_location='cpu')
     if args.fuse_conv_bn:
         model = fuse_module(model)
 
-    model = MMDataParallel(model, device_ids=[0])
+    model = nn.DataParallel(model, device_ids=[0])
 
     model.eval()
 

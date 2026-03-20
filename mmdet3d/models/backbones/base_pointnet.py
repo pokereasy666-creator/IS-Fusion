@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 from abc import ABCMeta
-# ----------------- 物理修复开始 -----------------
-from mmdet3d.compat import BaseModule
+
+from mmengine.model import BaseModule
 class BasePointNet(BaseModule, metaclass=ABCMeta):
     """Base class for PointNet."""
 

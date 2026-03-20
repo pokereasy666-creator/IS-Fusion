@@ -1,12 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复：针对 mmcv.runner 组件迁移 -----------------
 from mmdet3d.ops import SparseBasicBlock, make_sparse_convmodule
 from mmdet3d.ops import spconv as spconv
+from mmengine.model import BaseModule
 from ..builder import MIDDLE_ENCODERS
-
-
-from mmdet3d.compat import BaseModule, auto_fp16
 @MIDDLE_ENCODERS.register_module()
 class SparseUNet(BaseModule):
     r"""SparseUNet for PartA^2.
@@ -94,7 +91,6 @@ class SparseUNet(BaseModule):
             indice_key='spconv_down2',
             conv_type='SparseConv3d')
 
-    @auto_fp16(apply_to=('voxel_features', ))
     def forward(self, voxel_features, coors, batch_size):
         """Forward of SparseUNet.
 

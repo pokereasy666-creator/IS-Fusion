@@ -2,14 +2,7 @@
 import numba
 import numpy as np
 import warnings
-# ----------------- 物理修复开始 -----------------
-try:
-    # 新版 Numba
-    from numba.core.errors import NumbaPerformanceWarning
-except ImportError:
-    # 旧版 Numba
-    from numba.errors import NumbaPerformanceWarning
-# ----------------- 物理修复结束 -----------------
+from numba.core.errors import NumbaPerformanceWarning
 
 from mmdet3d.core.bbox import box_np_ops
 

@@ -3,49 +3,15 @@ import copy
 import torch
 from torch import nn
 from mmcv.cnn import ConvModule, build_conv_layer
-
-# ----------------- 物理修复 V3：BaseModule 与 force_fp32 -----------------
-from mmdet3d.compat import BaseModule, build_bbox_coder, force_fp32, multi_apply
-try:
-    from mmdet3d.models.builder import HEADS, build_loss
-except ImportError:
-    from mmdet3d.registry import MODELS as HEADS
-    from mmdet3d.registry import MODELS
-    def build_loss(cfg):
-        return MODELS.build(cfg)
-
-# ----------------- 保留原版特有组件 (精准路径修复) -----------------
-# 1. 修复 circle_nms
-try:
-    from mmdet3d.core import circle_nms
-except ImportError:
-    from mmdet3d.core.post_processing import circle_nms
-
-# 2. 修复 xywhr2xyxyr
-try:
-    from mmdet3d.core import xywhr2xyxyr
-except ImportError:
-    from mmdet3d.core.bbox import xywhr2xyxyr
-
-# 3. 修复高斯热图工具
-try:
-    from mmdet3d.core import draw_heatmap_gaussian, gaussian_radius
-except ImportError:
-    try:
-        from mmdet3d.core.utils import draw_heatmap_gaussian, gaussian_radius
-    except ImportError:
-        # 如果 mmdet3d 里也没有，通常在 mmdet 的 utils 里
-        from mmdet.models.utils import draw_heatmap_gaussian, gaussian_radius
-# -----------------------------------------------------------------
-
+from mmengine.model import BaseModule
+from mmdet.models.utils import multi_apply
+from mmdet.models.task_modules.builder import build_bbox_coder
+from mmdet3d.models.builder import HEADS, build_loss
+from mmdet3d.core import circle_nms, xywhr2xyxyr
+from mmdet3d.core import draw_heatmap_gaussian, gaussian_radius
 from mmdet3d.models import builder
 from mmdet3d.models.utils import clip_sigmoid
-
-try:
-    from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
-except ImportError:
-    # 兼容新版 iou3d 路径
-    from mmcv.ops import nms as nms_gpu
+from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
 
 
 @HEADS.register_module()
@@ -605,7 +571,6 @@ class CenterHead(BaseModule):
             inds.append(ind)
         return heatmaps, anno_boxes, inds, masks
 
-    @force_fp32(apply_to=('preds_dicts'))
     def loss(self, gt_bboxes_3d, gt_labels_3d, preds_dicts, **kwargs):
         """Loss function for CenterHead.
 

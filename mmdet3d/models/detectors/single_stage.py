@@ -1,18 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-# ----------------- 物理修复开始：注册表与构建器终极适配 -----------------
-try:
-    from mmdet.models import DETECTORS
-    # 在新版中，build_backbone 等函数本质上就是 MODELS.build
-    def build_backbone(cfg): return DETECTORS.build(cfg)
-    def build_neck(cfg):     return DETECTORS.build(cfg)
-    def build_head(cfg):     return DETECTORS.build(cfg)
-except ImportError:
-    # 这里的代码是为了兼容极少数还在用旧版的老环境
-    try:
-        from mmdet.models.builder import DETECTORS, build_backbone, build_head, build_neck
-    except ImportError:
-        from mmdet.models import DETECTORS, build_backbone, build_head, build_neck
-# ----------------- 物理修复结束 -----------------from mmdet.models import DETECTORS, build_backbone, build_head, build_neck
+from mmdet3d.registry import DETECTORS
+from mmdet3d.models.builder import build_backbone, build_head, build_neck
 from .base import Base3DDetector
 
 

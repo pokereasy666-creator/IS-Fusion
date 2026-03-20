@@ -1,43 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复开始：FP16 与 注册表兼容 -----------------
-from mmdet3d.compat import auto_fp16, force_fp32
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
 from torch.nn import functional as F
 
-# ----------------- 物理修复开始：后处理工具兼容 -----------------
-try:
-    from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
-except ImportError:
-    # 适配 MMDet3D 1.x / OpenMMLab 2.0 路径
-    try:
-        from mmdet3d.core.bbox import bbox3d2result, merge_aug_bboxes_3d
-    except ImportError:
-        try:
-            from mmdet3d.core.post_processing import bbox3d2result, merge_aug_bboxes_3d
-        except ImportError:
-            # 保底空函数，防止初始化报错
-            def bbox3d2result(*args, **kwargs): pass
-            def merge_aug_bboxes_3d(*args, **kwargs): pass
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import DETECTORS
+from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
 from mmdet3d.ops import Voxelization
-# ----------------- 物理修复开始：检测器注册表兼容 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
 from .. import builder
 from .single_stage import SingleStage3DDetector
 
@@ -81,7 +48,6 @@ class VoxelNet(SingleStage3DDetector):
         return x
 
     @torch.no_grad()
-    @force_fp32()
     def voxelize(self, points):
         """Apply hard voxelization to points."""
         voxels, coors, num_points = [], [], []

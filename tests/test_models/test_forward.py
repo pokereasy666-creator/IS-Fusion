@@ -28,7 +28,7 @@ def _get_config_directory():
 
 def _get_config_module(fname):
     """Load a configuration as a python module."""
-    from mmcv import Config
+    from mmengine.config import Config
     config_dpath = _get_config_directory()
     config_fpath = join(config_dpath, fname)
     config_mod = Config.fromfile(config_fpath)
@@ -50,7 +50,8 @@ def _test_two_stage_forward(cfg_file):
     model = _get_detector_cfg(cfg_file)
     model['pretrained'] = None
 
-    from mmdet.models import build_detector
+    from mmdet3d.registry import MODELS
+    build_detector = MODELS.build
     detector = build_detector(model)
 
     input_shape = (1, 3, 256, 256)
@@ -108,7 +109,8 @@ def _test_single_stage_forward(cfg_file):
     model = _get_detector_cfg(cfg_file)
     model['pretrained'] = None
 
-    from mmdet.models import build_detector
+    from mmdet3d.registry import MODELS
+    build_detector = MODELS.build
     detector = build_detector(model)
 
     input_shape = (1, 3, 300, 300)
@@ -154,7 +156,7 @@ def _demo_mm_inputs(input_shape=(1, 3, 300, 300),
         num_classes (int):
             number of different labels a box might have
     """
-    from mmdet.core import BitmapMasks
+    from mmdet.structures.mask import BitmapMasks
 
     (N, C, H, W) = input_shape
 

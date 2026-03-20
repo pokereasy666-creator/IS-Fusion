@@ -111,4 +111,5 @@ data = dict(
         test_mode=True,
         box_type_3d='Depth'))
 
-evaluation = dict(pipeline=eval_pipeline)
+val_cfg = dict()
+val_evaluator = dict(type='IndoorMetric')

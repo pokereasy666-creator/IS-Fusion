@@ -42,4 +42,28 @@ assert (mmseg_version >= digit_version(mmseg_minimum_version)
     f'MMSEG=={mmseg.__version__} is used but incompatible. ' \
     f'Please install mmseg>={mmseg_minimum_version}, <={mmseg_maximum_version}.'
 
-__all__ = ['__version__', 'short_version']
+# Initialize registries
+from mmdet3d import registry  # noqa: F401
+
+
+def register_all_modules(init_default_scope=True):
+    """Register all modules in mmdet3d into the registries.
+
+    Args:
+        init_default_scope (bool): Whether to initialize the default scope.
+            Defaults to True. When used with other OpenMMLab projects,
+            set to False to avoid conflicts.
+    """
+    import mmdet3d.models  # noqa: F401
+    import mmdet3d.datasets  # noqa: F401
+    import mmdet3d.core  # noqa: F401
+
+    if init_default_scope:
+        from mmengine.registry import DefaultScope
+        never_created = DefaultScope.get_current_instance() is None \
+            or not DefaultScope.check_instance_created('mmdet3d')
+        if never_created:
+            DefaultScope.get_instance('mmdet3d', scope_name='mmdet3d')
+
+
+__all__ = ['__version__', 'short_version', 'register_all_modules']

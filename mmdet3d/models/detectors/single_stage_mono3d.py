@@ -8,15 +8,7 @@ from mmdet3d.compat import DataContainer as DC, bbox2result, is_list_of
 
 from mmdet3d.core import (CameraInstance3DBoxes, bbox3d2result,
                           show_multi_modality_result)
-# ----------------- 物理修复：针对 mmdet.models.builder 缺失 -----------------
-try:
-    from mmdet.models.builder import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models import DETECTORS
-    except ImportError:
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import DETECTORS
 from mmdet.models.detectors.single_stage import SingleStageDetector
 
 

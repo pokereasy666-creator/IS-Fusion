@@ -1,10 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-# ----------------- 物理修复开始 -----------------
 from terminaltables import AsciiTable
-
-
-from mmdet3d.compat import print_log
+from mmengine.logging import print_log
 def fast_hist(preds, labels, num_classes):
     """Compute the confusion matrix for every batch.
 

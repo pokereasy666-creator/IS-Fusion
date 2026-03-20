@@ -1,12 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复：针对 mmcv.runner.auto_fp16 缺失 -----------------
 from torch import nn
 
 from ..builder import MIDDLE_ENCODERS
-
-
-from mmdet3d.compat import auto_fp16
 @MIDDLE_ENCODERS.register_module()
 class PointPillarsScatter(nn.Module):
     """Point Pillar's Scatter.

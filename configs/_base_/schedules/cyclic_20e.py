@@ -4,21 +4,30 @@
 # use a default schedule.
 # optimizer
 # This schedule is mainly used by models on nuScenes dataset
-optimizer = dict(type='AdamW', lr=1e-4, weight_decay=0.01)
-# max_norm=10 is better for SECOND
-optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
-lr_config = dict(
-    policy='cyclic',
-    target_ratio=(10, 1e-4),
-    cyclic_times=1,
-    step_ratio_up=0.4,
-)
-momentum_config = dict(
-    policy='cyclic',
-    target_ratio=(0.85 / 0.95, 1),
-    cyclic_times=1,
-    step_ratio_up=0.4,
-)
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(type='AdamW', lr=1e-4, weight_decay=0.01),
+    # max_norm=10 is better for SECOND
+    clip_grad=dict(max_norm=35, norm_type=2))
+
+param_scheduler = [
+    dict(
+        type='CosineAnnealingLR',
+        T_max=8,
+        eta_min=1e-4 * 10,
+        begin=0,
+        end=8,
+        by_epoch=True,
+        convert_to_iter_based=True),
+    dict(
+        type='CosineAnnealingLR',
+        T_max=12,
+        eta_min=1e-4 * 1e-4,
+        begin=8,
+        end=20,
+        by_epoch=True,
+        convert_to_iter_based=True)
+]
 
 # runtime settings
-runner = dict(type='EpochBasedRunner', max_epochs=20)
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=20, val_interval=1)

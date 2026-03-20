@@ -1,39 +1,36 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-# ----------------- 物理修复开始 -----------------
+import torch
 from mmdet3d.core.bbox import BaseInstance3DBoxes
 from mmdet3d.core.points import BasePoints
-# ----------------- 物理修复开始 -----------------
-import torch
-import numpy as np
+from mmdet3d.datasets.builder import PIPELINES
 
-from mmdet3d.compat import DataContainer, Registry
-try:
-    from mmdet.datasets.pipelines import to_tensor
-except ImportError:
-    # MMDetection 3.x 移除了 to_tensor，我们手动定义一个兼容版本
-    def to_tensor(data):
-        """Convert objects of various python types to :obj:`torch.Tensor`."""
-        if isinstance(data, torch.Tensor):
-            return data
-        elif isinstance(data, np.ndarray):
-            return torch.from_numpy(data)
-        elif isinstance(data, int):
-            return torch.tensor([data])
-        elif isinstance(data, float):
-            return torch.tensor([data])
-        elif isinstance(data, (list, tuple)):
-            return torch.tensor(data)
-        else:
-            raise TypeError(f'type {type(data)} cannot be converted to tensor.')
-# ----------------- 物理修复结束 -----------------
 
-# ----------------- 物理修复开始 -----------------
-# 使用 pop(key, None) 来安全地删除，即使不存在也不会报错
-PIPELINES._module_dict.pop('DefaultFormatBundle', None)
-# ----------------- 物理修复结束 -----------------
+# DataContainer is no longer available in v2; use a minimal stand-in.
+class DC:
+    """Minimal DataContainer replacement for v2 compatibility."""
 
-import torch
+    def __init__(self, data, stack=False, pad_dims=None, cpu_only=False):
+        self.data = data
+        self.stack = stack
+        self.pad_dims = pad_dims
+        self.cpu_only = cpu_only
+
+
+def to_tensor(data):
+    """Convert objects of various python types to :obj:`torch.Tensor`."""
+    if isinstance(data, torch.Tensor):
+        return data
+    elif isinstance(data, np.ndarray):
+        return torch.from_numpy(data)
+    elif isinstance(data, int):
+        return torch.tensor([data])
+    elif isinstance(data, float):
+        return torch.tensor([data])
+    elif isinstance(data, (list, tuple)):
+        return torch.tensor(data)
+    else:
+        raise TypeError(f'type {type(data)} cannot be converted to tensor.')
 
 @PIPELINES.register_module()
 class DefaultFormatBundle(object):

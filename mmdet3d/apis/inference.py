@@ -1,17 +1,13 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import mmcv
 import numpy as np
 import re
 import torch
 from copy import deepcopy
-# ----------------- 物理修复开始 -----------------
-from mmdet3d.compat import collate, load_checkpoint
-try:
-    from mmcv.runner import wrap_fp16_model
-except ImportError:
-    def wrap_fp16_model(model): return model
-# ----------------- 物理修复结束 -----------------
 from os import path as osp
+
+from mmengine.config import Config
+from mmengine.fileio import load as fileio_load
+from mmengine.runner import load_checkpoint
 
 from mmdet3d.core import (Box3DMode, CameraInstance3DBoxes,
                           DepthInstance3DBoxes, LiDARInstance3DBoxes,
@@ -23,12 +19,7 @@ from mmdet3d.models import build_model
 
 
 def convert_SyncBN(config):
-    """Convert config's naiveSyncBN to BN.
-
-    Args:
-         config (str or :obj:`mmcv.Config`): Config file path or the config
-            object.
-    """
+    """Convert config's naiveSyncBN to BN."""
     if isinstance(config, dict):
         for item in config:
             if item == 'norm_cfg':
@@ -39,22 +30,10 @@ def convert_SyncBN(config):
 
 
 def init_model(config, checkpoint=None, device='cuda:0'):
-    """Initialize a model from config file, which could be a 3D detector or a
-    3D segmentor.
-
-    Args:
-        config (str or :obj:`mmcv.Config`): Config file path or the config
-            object.
-        checkpoint (str, optional): Checkpoint path. If left as None, the model
-            will not load any weights.
-        device (str): Device to use.
-
-    Returns:
-        nn.Module: The constructed detector.
-    """
+    """Initialize a model from config file."""
     if isinstance(config, str):
-        config = mmcv.Config.fromfile(config)
-    elif not isinstance(config, mmcv.Config):
+        config = Config.fromfile(config)
+    elif not isinstance(config, Config):
         raise TypeError('config must be a filename or Config object, '
                         f'but got {type(config)}')
     config.model.pretrained = None
@@ -62,32 +41,34 @@ def init_model(config, checkpoint=None, device='cuda:0'):
     config.model.train_cfg = None
     model = build_model(config.model, test_cfg=config.get('test_cfg'))
     if checkpoint is not None:
-        checkpoint = load_checkpoint(model, checkpoint)
-        if 'CLASSES' in checkpoint['meta']:
-            model.CLASSES = checkpoint['meta']['CLASSES']
+        ckpt = load_checkpoint(model, checkpoint)
+        if 'CLASSES' in ckpt.get('meta', {}):
+            model.CLASSES = ckpt['meta']['CLASSES']
         else:
             model.CLASSES = config.class_names
-        if 'PALETTE' in checkpoint['meta']:  # 3D Segmentor
-            model.PALETTE = checkpoint['meta']['PALETTE']
-    model.cfg = config  # save the config in the model for convenience
+        if 'PALETTE' in ckpt.get('meta', {}):
+            model.PALETTE = ckpt['meta']['PALETTE']
+    model.cfg = config
     model.to(device)
     model.eval()
     return model
 
 
+def _prepare_data(data, device):
+    """Move data to device, handling nested dicts and lists."""
+    if isinstance(data, dict):
+        return {k: _prepare_data(v, device) for k, v in data.items()}
+    elif isinstance(data, (list, tuple)):
+        return type(data)(_prepare_data(v, device) for v in data)
+    elif isinstance(data, torch.Tensor):
+        return data.to(device)
+    return data
+
+
 def inference_detector(model, pcd):
-    """Inference point cloud with the detector.
-
-    Args:
-        model (nn.Module): The loaded detector.
-        pcd (str): Point cloud files.
-
-    Returns:
-        tuple: Predicted results and data from pipeline.
-    """
+    """Inference point cloud with the detector."""
     cfg = model.cfg
-    device = next(model.parameters()).device  # model device
-    # build the data pipeline
+    device = next(model.parameters()).device
     test_pipeline = deepcopy(cfg.data.test.pipeline)
     test_pipeline = Compose(test_pipeline)
     box_type_3d, box_mode_3d = get_box_type(cfg.data.test.box_type_3d)
@@ -95,10 +76,8 @@ def inference_detector(model, pcd):
         pts_filename=pcd,
         box_type_3d=box_type_3d,
         box_mode_3d=box_mode_3d,
-        # for ScanNet demo we need axis_align_matrix
         ann_info=dict(axis_align_matrix=np.eye(4)),
         sweeps=[],
-        # set timestamp = 0
         timestamp=[0],
         img_fields=[],
         bbox3d_fields=[],
@@ -108,41 +87,21 @@ def inference_detector(model, pcd):
         mask_fields=[],
         seg_fields=[])
     data = test_pipeline(data)
-    data = collate([data], samples_per_gpu=1)
-    if next(model.parameters()).is_cuda:
-        # scatter to specified GPU
-        data = scatter(data, [device.index])[0]
-    else:
-        # this is a workaround to avoid the bug of MMDataParallel
-        data['img_metas'] = data['img_metas'][0].data
-        data['points'] = data['points'][0].data
-    # forward the model
+    data = _prepare_data(data, device)
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
     return result, data
 
 
 def inference_multi_modality_detector(model, pcd, image, ann_file):
-    """Inference point cloud with the multi-modality detector.
-
-    Args:
-        model (nn.Module): The loaded detector.
-        pcd (str): Point cloud files.
-        image (str): Image files.
-        ann_file (str): Annotation files.
-
-    Returns:
-        tuple: Predicted results and data from pipeline.
-    """
+    """Inference point cloud with the multi-modality detector."""
     cfg = model.cfg
-    device = next(model.parameters()).device  # model device
-    # build the data pipeline
+    device = next(model.parameters()).device
     test_pipeline = deepcopy(cfg.data.test.pipeline)
     test_pipeline = Compose(test_pipeline)
     box_type_3d, box_mode_3d = get_box_type(cfg.data.test.box_type_3d)
-    # get data info containing calib
-    data_infos = mmcv.load(ann_file)
-    image_idx = int(re.findall(r'\d+', image)[-1])  # xxx/sunrgbd_000017.jpg
+    data_infos = fileio_load(ann_file)
+    image_idx = int(re.findall(r'\d+', image)[-1])
     for x in data_infos:
         if int(x['image']['image_idx']) != image_idx:
             continue
@@ -163,60 +122,35 @@ def inference_multi_modality_detector(model, pcd, image, ann_file):
         seg_fields=[])
     data = test_pipeline(data)
 
-    # TODO: this code is dataset-specific. Move lidar2img and
-    #       depth2img to .pkl annotations in the future.
-    # LiDAR to image conversion
     if box_mode_3d == Box3DMode.LIDAR:
         rect = info['calib']['R0_rect'].astype(np.float32)
         Trv2c = info['calib']['Tr_velo_to_cam'].astype(np.float32)
         P2 = info['calib']['P2'].astype(np.float32)
         lidar2img = P2 @ rect @ Trv2c
-        data['img_metas'][0].data['lidar2img'] = lidar2img
-    # Depth to image conversion
+        if 'img_metas' in data:
+            data['img_metas'][0].data['lidar2img'] = lidar2img
     elif box_mode_3d == Box3DMode.DEPTH:
         rt_mat = info['calib']['Rt']
-        # follow Coord3DMode.convert_point
         rt_mat = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]
                            ]) @ rt_mat.transpose(1, 0)
         depth2img = info['calib']['K'] @ rt_mat
-        data['img_metas'][0].data['depth2img'] = depth2img
+        if 'img_metas' in data:
+            data['img_metas'][0].data['depth2img'] = depth2img
 
-    data = collate([data], samples_per_gpu=1)
-    if next(model.parameters()).is_cuda:
-        # scatter to specified GPU
-        data = scatter(data, [device.index])[0]
-    else:
-        # this is a workaround to avoid the bug of MMDataParallel
-        data['img_metas'] = data['img_metas'][0].data
-        data['points'] = data['points'][0].data
-        data['img'] = data['img'][0].data
-
-    # forward the model
+    data = _prepare_data(data, device)
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
     return result, data
 
 
 def inference_mono_3d_detector(model, image, ann_file):
-    """Inference image with the monocular 3D detector.
-
-    Args:
-        model (nn.Module): The loaded detector.
-        image (str): Image files.
-        ann_file (str): Annotation files.
-
-    Returns:
-        tuple: Predicted results and data from pipeline.
-    """
+    """Inference image with the monocular 3D detector."""
     cfg = model.cfg
-    device = next(model.parameters()).device  # model device
-    # build the data pipeline
+    device = next(model.parameters()).device
     test_pipeline = deepcopy(cfg.data.test.pipeline)
     test_pipeline = Compose(test_pipeline)
     box_type_3d, box_mode_3d = get_box_type(cfg.data.test.box_type_3d)
-    # get data info containing calib
-    data_infos = mmcv.load(ann_file)
-    # find the info corresponding to this image
+    data_infos = fileio_load(ann_file)
     for x in data_infos['images']:
         if osp.basename(x['file_name']) != osp.basename(image):
             continue
@@ -235,40 +169,20 @@ def inference_mono_3d_detector(model, image, ann_file):
         mask_fields=[],
         seg_fields=[])
 
-    # camera points to image conversion
     if box_mode_3d == Box3DMode.CAM:
         data['img_info'].update(dict(cam_intrinsic=img_info['cam_intrinsic']))
 
     data = test_pipeline(data)
-
-    data = collate([data], samples_per_gpu=1)
-    if next(model.parameters()).is_cuda:
-        # scatter to specified GPU
-        data = scatter(data, [device.index])[0]
-    else:
-        # this is a workaround to avoid the bug of MMDataParallel
-        data['img_metas'] = data['img_metas'][0].data
-        data['img'] = data['img'][0].data
-
-    # forward the model
+    data = _prepare_data(data, device)
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
     return result, data
 
 
 def inference_segmentor(model, pcd):
-    """Inference point cloud with the segmentor.
-
-    Args:
-        model (nn.Module): The loaded segmentor.
-        pcd (str): Point cloud files.
-
-    Returns:
-        tuple: Predicted results and data from pipeline.
-    """
+    """Inference point cloud with the segmentor."""
     cfg = model.cfg
-    device = next(model.parameters()).device  # model device
-    # build the data pipeline
+    device = next(model.parameters()).device
     test_pipeline = deepcopy(cfg.data.test.pipeline)
     test_pipeline = Compose(test_pipeline)
     data = dict(
@@ -281,15 +195,7 @@ def inference_segmentor(model, pcd):
         mask_fields=[],
         seg_fields=[])
     data = test_pipeline(data)
-    data = collate([data], samples_per_gpu=1)
-    if next(model.parameters()).is_cuda:
-        # scatter to specified GPU
-        data = scatter(data, [device.index])[0]
-    else:
-        # this is a workaround to avoid the bug of MMDataParallel
-        data['img_metas'] = data['img_metas'][0].data
-        data['points'] = data['points'][0].data
-    # forward the model
+    data = _prepare_data(data, device)
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
     return result, data
@@ -313,12 +219,10 @@ def show_det_result_meshlab(data,
         pred_bboxes = result[0]['boxes_3d'].tensor.numpy()
         pred_scores = result[0]['scores_3d'].numpy()
 
-    # filter out low score bboxes for visualization
     if score_thr > 0:
         inds = pred_scores > score_thr
         pred_bboxes = pred_bboxes[inds]
 
-    # for now we convert points into depth mode
     box_mode = data['img_metas'][0][0]['box_mode_3d']
     if box_mode != Box3DMode.DEPTH:
         points = points[..., [1, 0, 2]]
@@ -353,10 +257,9 @@ def show_seg_result_meshlab(data,
     pred_seg = result[0]['semantic_mask'].numpy()
 
     if palette is None:
-        # generate random color map
         max_idx = pred_seg.max()
         palette = np.random.randint(0, 256, size=(max_idx + 1, 3))
-    palette = np.array(palette).astype(np.int)
+    palette = np.array(palette).astype(np.int32)
 
     show_seg_result(
         points,
@@ -378,12 +281,12 @@ def show_proj_det_result_meshlab(data,
                                  show=False,
                                  snapshot=False):
     """Show result of projecting 3D bbox to 2D image by meshlab."""
+    import mmcv
     assert 'img' in data.keys(), 'image data is not provided for visualization'
 
     img_filename = data['img_metas'][0][0]['filename']
     file_name = osp.split(img_filename)[-1].split('.')[0]
 
-    # read from file because img in data_dict has undergone pipeline transform
     img = mmcv.imread(img_filename)
 
     if 'pts_bbox' in result[0].keys():
@@ -393,7 +296,6 @@ def show_proj_det_result_meshlab(data,
     pred_bboxes = result[0]['boxes_3d'].tensor.numpy()
     pred_scores = result[0]['scores_3d'].numpy()
 
-    # filter out low score bboxes for visualization
     if score_thr > 0:
         inds = pred_scores > score_thr
         pred_bboxes = pred_bboxes[inds]
@@ -460,22 +362,7 @@ def show_result_meshlab(data,
                         snapshot=False,
                         task='det',
                         palette=None):
-    """Show result by meshlab.
-
-    Args:
-        data (dict): Contain data from pipeline.
-        result (dict): Predicted result from model.
-        out_dir (str): Directory to save visualized result.
-        score_thr (float): Minimum score of bboxes to be shown. Default: 0.0
-        show (bool): Visualize the results online. Defaults to False.
-        snapshot (bool): Whether to save the online results. Defaults to False.
-        task (str): Distinguish which task result to visualize. Currently we
-            support 3D detection, multi-modality detection and 3D segmentation.
-            Defaults to 'det'.
-        palette (list[list[int]]] | np.ndarray | None): The palette of
-                segmentation map. If None is given, random palette will be
-                generated. Defaults to None.
-    """
+    """Show result by meshlab."""
     assert task in ['det', 'multi_modality-det', 'seg', 'mono-det'], \
         f'unsupported visualization task {task}'
     assert out_dir is not None, 'Expect out_dir, got none.'

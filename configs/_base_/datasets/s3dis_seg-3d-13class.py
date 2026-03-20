@@ -136,4 +136,5 @@ data = dict(
         test_mode=True,
         ignore_index=len(class_names)))
 
-evaluation = dict(pipeline=eval_pipeline)
+val_cfg = dict()
+val_evaluator = dict(type='SegMetric')

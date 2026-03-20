@@ -5,21 +5,8 @@ import numpy as np
 import os
 import tempfile
 import torch
-# ----------------- 物理修复开始 -----------------
-
-# ----------------- 物理修复开始 -----------------
-from mmdet3d.compat import Registry, print_log
-try:
-    # 尝试旧路径 (MMDet 2.x)
-    from mmdet.datasets import DATASETS
-except ImportError:
-    # 针对 MMDet 3.x 的新路径
-    try:
-        from mmdet.datasets import DATASETS
-    except ImportError:
-        # 万能保底
-        DATASETS = Registry('dataset')
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import DATASETS
+from mmengine.logging import print_log
 from ..core import show_multi_modality_result, show_result
 from ..core.bbox import (Box3DMode, CameraInstance3DBoxes, Coord3DMode,
                          LiDARInstance3DBoxes, points_cam2img)

@@ -1,14 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-# ----------------- 物理修复：针对 mmdet.models.DETECTORS 缺失 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.registry import DETECTORS
 from .votenet import VoteNet
 
 

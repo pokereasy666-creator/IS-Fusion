@@ -8,10 +8,7 @@ from PIL import Image
 
 from mmdet3d.core.bbox import box_np_ops, LiDARInstance3DBoxes
 from mmdet3d.datasets.pipelines import data_augment_utils
-# ----------------- 物理修复开始 -----------------
-from ..builder import OBJECTSAMPLERS
-
-from mmdet3d.compat import Registry
+from ..builder import OBJECTSAMPLERS, PIPELINES
 class BatchSampler:
     """Class for sampling specific category of ground truths.
 

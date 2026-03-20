@@ -4,15 +4,12 @@ import mmcv
 import numpy as np
 import tempfile
 import torch
-# ----------------- 物理修复开始 -----------------
 from os import path as osp
 
-# ----------------- 物理修复开始 -----------------
+from mmdet3d.registry import DATASETS
+from mmengine.logging import print_log
 from ..core.bbox import Box3DMode, CameraInstance3DBoxes, points_cam2img
 from .nuscenes_mono_dataset import NuScenesMonoDataset
-
-
-from mmdet3d.compat import Registry, print_log
 @DATASETS.register_module()
 class KittiMonoDataset(NuScenesMonoDataset):
     """Monocular 3D detection on KITTI Dataset.

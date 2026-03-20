@@ -8,4 +8,4 @@ data = dict(
 )
 
 # Scale learning rate linearly with batch size (3x batch → 3x lr)
-optimizer = dict(lr=1.875e-05)
+optim_wrapper = dict(optimizer=dict(lr=1.875e-05))

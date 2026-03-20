@@ -6,14 +6,12 @@ import warnings
 from os import path as osp
 from torch.utils.data import Dataset
 
-# ----------------- 物理修复开始 -----------------
+from mmdet3d.registry import DATASETS
 from .pipelines import Compose
 from .utils import extract_result_dict, get_loading_pipeline
 
 
-from mmdet3d.compat import Registry
 @DATASETS.register_module()
-@SEG_DATASETS.register_module()
 class Custom3DSegDataset(Dataset):
     """Customized 3D dataset for semantic segmentation task.
 

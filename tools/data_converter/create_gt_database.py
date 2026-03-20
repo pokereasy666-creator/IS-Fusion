@@ -1,17 +1,7 @@
 import mmcv
-import mmcv
 import numpy as np
 import pickle
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv import track_iter_progress
-except ImportError:
-    # 适配 MMCV 2.x / MMEngine 路径
-    try:
-        from mmcv.utils import track_iter_progress
-    except ImportError:
-        from mmcv.utils import track_iter_progress
-# ----------------- 物理修复结束 -----------------
+from mmengine.utils import track_iter_progress
 from mmcv.ops import roi_align
 from os import path as osp
 from pycocotools import mask as maskUtils
@@ -19,18 +9,7 @@ from pycocotools.coco import COCO
 
 from mmdet3d.core.bbox import box_np_ops as box_np_ops
 from mmdet3d.datasets import build_dataset
-import mmdet3d.datasets.pipelines  # noqa: F401 - register pipeline transforms
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
-except (ImportError, ModuleNotFoundError):
-    # 针对 MMDetection 3.x 的新路径
-    try:
-        from mmdet.evaluation.functional import bbox_overlaps
-    except ImportError:
-        # 备选路径：有些版本将其放在了 structures 中
-        from mmdet.structures.bbox import bbox_overlaps
-# ----------------- 物理修复结束 -----------------
+from mmdet.evaluation.functional import bbox_overlaps
 
 
 def _poly2mask(mask_ann, img_h, img_w):
