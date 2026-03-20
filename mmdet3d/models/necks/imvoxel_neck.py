@@ -2,7 +2,6 @@
 from mmcv.cnn import ConvModule
 from torch import nn
 
-# ----------------- 物理修复：针对 mmdet.models.NECKS 缺失 -----------------
 try:
     from mmdet.models import NECKS
 except ImportError:
@@ -11,7 +10,6 @@ except ImportError:
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表系统
         from mmdet.models import NECKS
-# ----------------- 物理修复结束 -----------------
 
 
 @NECKS.register_module()

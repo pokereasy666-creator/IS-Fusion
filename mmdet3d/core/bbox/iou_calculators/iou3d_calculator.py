@@ -1,17 +1,15 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
-# ----------------- 物理修复开始 -----------------
 from mmdet3d.compat import bbox_overlaps
 try:
-    from mmdet.core.bbox.iou_calculators.builder import IOU_CALCULATORS
+    from mmdet.models.task_modules.builder import IOU_CALCULATORS
 except ImportError:
     try:
-        from mmdet.models.task_modules.builder import IOU_CALCULATORS
+        from mmdet.core.bbox.iou_calculators.builder import IOU_CALCULATORS
     except ImportError:
         from mmdet3d.compat import Registry
         IOU_CALCULATORS = Registry('iou_calculators')
-# ----------------- 物理修复结束 -----------------
 from ..structures import get_box_type
 
 

@@ -10,10 +10,10 @@ from mmcv.ops.nms import batched_nms
 
 from mmdet3d.compat import build_assigner, build_sampler, force_fp32, multi_apply
 try:
-    from mmdet.core import MlvlPointGenerator, bbox_xyxy_to_cxcywh
-except ImportError:
     from mmdet.models.task_modules import MlvlPointGenerator
     from mmdet.structures.bbox import bbox_xyxy_to_cxcywh
+except ImportError:
+    from mmdet.core import MlvlPointGenerator, bbox_xyxy_to_cxcywh
 from ..builder import HEADS, build_loss
 from .base_dense_head import BaseDenseHead
 from .dense_test_mixins import BBoxTestMixin

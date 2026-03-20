@@ -5,12 +5,12 @@ from inspect import signature
 import torch
 
 try:
-    from mmdet.core import bbox_mapping_back, merge_aug_proposals, multiclass_nms
+    from mmdet.models.utils import merge_aug_proposals
+    from mmdet.structures.bbox import bbox_mapping_back
+    from mmdet.utils import multiclass_nms
 except ImportError:
     try:
-        from mmdet.models.utils import merge_aug_proposals
-        from mmdet.structures.bbox import bbox_mapping_back
-        from mmdet.utils import multiclass_nms
+        from mmdet.core import bbox_mapping_back, merge_aug_proposals, multiclass_nms
     except ImportError:
         def bbox_mapping_back(*args, **kwargs):
             raise NotImplementedError("bbox_mapping_back unavailable")

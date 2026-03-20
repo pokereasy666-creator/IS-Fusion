@@ -4,10 +4,8 @@ import torch
 import warnings
 from mmcv.cnn import ConvModule
 
-# ----------------- 物理修复开始：BaseModule -----------------
 from torch import nn as nn
 
-# ----------------- 物理修复开始：核心组件导入路径适配 -----------------
 # 1. 修复 box3d_multiclass_nms, limit_period, xywhr2xyxyr
 from mmdet3d.compat import BaseModule, multi_apply
 try:
@@ -26,7 +24,6 @@ try:
     from mmdet.models import HEADS
 except ImportError:
     from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 
 from ..builder import build_head
 from .anchor3d_head import Anchor3DHead

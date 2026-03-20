@@ -1,6 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from abc import ABCMeta, abstractmethod
-# ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
 from mmdet3d.compat import BaseModule
 class Base3DRoIHead(BaseModule, metaclass=ABCMeta):
     """Base class for 3d RoIHeads."""

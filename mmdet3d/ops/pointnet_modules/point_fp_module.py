@@ -1,7 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from mmcv.cnn import ConvModule
-# ----------------- 物理修复开始 -----------------
 from torch import nn as nn
 from typing import List
 

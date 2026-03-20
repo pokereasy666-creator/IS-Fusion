@@ -3,7 +3,6 @@ import numpy as np
 import torch
 
 from mmdet3d.core import limit_period
-# ----------------- 物理修复开始 -----------------
 from mmdet3d.compat import images_to_levels, multi_apply
 class AnchorTrainMixin(object):
     """Mixin class for target assigning of dense heads."""

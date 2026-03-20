@@ -1,7 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from mmcv.cnn import ConvModule
-# ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
 from torch import nn as nn
 from torch.nn import functional as F
 
@@ -10,7 +9,6 @@ from mmdet3d.core.post_processing import aligned_3d_nms
 from mmdet3d.models.builder import build_loss
 from mmdet3d.models.losses import chamfer_distance
 from mmdet3d.ops import build_sa_module
-# ----------------- 物理修复：针对 mmdet.core 组件迁移 -----------------
 from mmdet3d.compat import BBOX_ASSIGNERS, BaseModule, build_bbox_coder, multi_apply
 try:
     from mmdet.models import HEADS
@@ -20,7 +18,6 @@ except ImportError:
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表
         from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 
 
 @HEADS.register_module()

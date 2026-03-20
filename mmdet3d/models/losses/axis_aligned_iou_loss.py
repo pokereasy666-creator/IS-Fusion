@@ -2,7 +2,6 @@
 import torch
 from torch import nn as nn
 
-# ----------------- 物理修复开始 -----------------
 from mmdet3d.compat import force_fp32
 try:
     from mmdet.models.builder import LOSSES
@@ -11,7 +10,6 @@ except ImportError:
     from mmdet.models import LOSSES
 
 from mmdet.models.losses.utils import weighted_loss
-# ----------------- 物理修复开始：AxisAlignedBboxOverlaps3D -----------------
 try:
     from ...core.bbox import AxisAlignedBboxOverlaps3D
 except (ImportError, ValueError):
@@ -25,7 +23,6 @@ except (ImportError, ValueError):
         except ImportError:
             # 终极保底：如果实在找不到，手动定义一个类名以防语法报错
             class AxisAlignedBboxOverlaps3D: pass 
-# ----------------- 物理修复结束 -----------------
 
 @weighted_loss
 def axis_aligned_iou_loss(pred, target):

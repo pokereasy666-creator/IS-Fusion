@@ -2,7 +2,8 @@
 import argparse
 import numpy as np
 import warnings
-from mmcv import Config, DictAction, mkdir_or_exist, track_iter_progress
+from mmengine.config import Config, DictAction
+from mmengine.utils import mkdir_or_exist, track_iter_progress
 from os import path as osp
 
 from mmdet3d.core.bbox import (Box3DMode, CameraInstance3DBoxes, Coord3DMode,

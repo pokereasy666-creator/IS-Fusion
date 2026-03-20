@@ -1,7 +1,6 @@
 import copy
 import numpy as np
 import torch
-# ----------------- 物理修复开始：kaiming_init -----------------
 from mmcv.cnn import ConvModule, build_conv_layer
 from mmdet3d.compat import AssignResult, BaseModule, build_assigner, build_bbox_coder, build_sampler, force_fp32, multi_apply
 try:
@@ -9,15 +8,12 @@ try:
 except ImportError:
     # 适配 MMEngine / MMCV 2.x
     from mmcv.cnn import kaiming_init
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
 from torch import nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from torch.nn import Linear
 from torch.nn.init import xavier_uniform_, constant_
 
-# ----------------- 物理修复开始：mmdet3d.core 迁移 -----------------
 try:
     from mmdet3d.core import (circle_nms, draw_heatmap_gaussian, gaussian_radius, xywhr2xyxyr)
 except ImportError:
@@ -46,7 +42,6 @@ except ImportError:
         from mmdet3d.core.bbox import xywhr2xyxyr
     except ImportError:
         from mmdet3d.structures import xywhr2xyxyr
-# ----------------- 物理修复结束 -----------------
 from mmdet3d.core.bbox.structures import rotation_3d_in_axis
 from mmdet3d.core import Box3DMode, LiDARInstance3DBoxes
 from mmdet3d.models import builder
@@ -54,7 +49,6 @@ from mmdet3d.models.builder import HEADS, build_loss
 from mmdet3d.models.utils import clip_sigmoid
 from mmdet3d.models.fusion_layers import apply_3d_transformation
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
-# ----------------- 物理修复开始：mmdet.core 组件大迁移 -----------------
 class PositionEmbeddingLearned(nn.Module):
     """
     Absolute pos embedding, learned.

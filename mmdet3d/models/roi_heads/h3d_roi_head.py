@@ -1,6 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmdet3d.core.bbox import bbox3d2result
-# ----------------- 物理修复：针对 HEADS 和 mmcv.runner 迁移 -----------------
 from mmdet3d.compat import BaseModule, auto_fp16
 try:
     from mmdet.models import HEADS

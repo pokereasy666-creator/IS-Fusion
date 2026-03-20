@@ -24,10 +24,10 @@ except ImportError:
 from mmdet3d.compat import force_fp32, auto_fp16, multi_apply, HEADS, build_bbox_coder
 
 try:
-    from mmdet.core import reduce_mean
+    from mmengine.dist import reduce_mean
 except ImportError:
     try:
-        from mmengine.dist import reduce_mean
+        from mmdet.core import reduce_mean
     except ImportError:
         def reduce_mean(tensor):
             return tensor.mean()

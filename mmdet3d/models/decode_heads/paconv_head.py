@@ -1,13 +1,11 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmcv.cnn.bricks import ConvModule
 
-# ----------------- 物理修复开始 -----------------
 try:
     from mmdet.models import HEADS
 except ImportError:
     # 适配 MMDet 3.x：HEADS 注册表已合并入 MODELS
     from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 from .pointnet2_head import PointNet2Head
 
 

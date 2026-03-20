@@ -2,10 +2,8 @@
 import numpy as np
 import torch
 from mmcv.cnn import Scale
-# ----------------- 物理修复开始 -----------------
 from torch import nn as nn
 
-# ----------------- 物理修复开始 -----------------
 # 1. 修复 box3d_multiclass_nms
 from mmdet3d.compat import BaseModule, force_fp32, multi_apply
 try:
@@ -29,8 +27,6 @@ except ImportError:
             # 终极保底：适配 MMDet3D 1.x 最新版
             from mmdet3d.structures import xywhr2xyxyr
             from mmdet3d.models.utils import limit_period
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
 try:
     from mmdet.models.builder import HEADS, build_loss
 except ImportError:
@@ -40,7 +36,6 @@ except ImportError:
     # 手动封装 build_loss 以适配 MMDet 3.x
     def build_loss(cfg):
         return MODELS.build(cfg)
-# ----------------- 物理修复结束 -----------------
 from .anchor_free_mono3d_head import AnchorFreeMono3DHead
 
 INF = 1e8

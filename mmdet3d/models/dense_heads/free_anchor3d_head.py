@@ -1,9 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复开始 -----------------
 from torch.nn import functional as F
 
-# ----------------- 物理修复开始：bbox_overlaps_nearest_3d -----------------
 from mmdet3d.compat import BaseModule, force_fp32
 try:
     from mmdet3d.core.bbox import bbox_overlaps_nearest_3d
@@ -18,7 +16,6 @@ except ImportError:
         except ImportError:
             # 终极保底
             from mmdet3d.evaluation.functional import bbox_overlaps_nearest_3d
-# ----------------- 物理修复结束 -----------------
 try:
     from mmdet.models import HEADS
 except ImportError:

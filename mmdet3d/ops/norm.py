@@ -1,6 +1,5 @@
 import torch
 
-# ----------------- 物理修复开始：兼容 MMCV 2.x -----------------
 from mmdet3d.compat import force_fp32
 try:
     from mmcv.cnn import NORM_LAYERS
@@ -12,9 +11,7 @@ except ImportError:
                 return cls
             return _register
     NORM_LAYERS = DummyRegistry()
-# ----------------- 物理修复结束 -----------------
 
-# ----------------- 物理修复开始 (替换第 16 行) -----------------
 from torch import distributed as dist
 from torch import nn as nn
 from torch.autograd.function import Function

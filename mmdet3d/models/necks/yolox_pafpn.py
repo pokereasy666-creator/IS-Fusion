@@ -4,7 +4,6 @@ import math
 import torch
 import torch.nn as nn
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
-# ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
 from ..builder import NECKS
 from ..utils import CSPLayer
 

@@ -3,10 +3,10 @@ import mmcv
 import torch
 
 try:
-    from mmdet.core.anchor import ANCHOR_GENERATORS
+    from mmdet.registry import TASK_UTILS as ANCHOR_GENERATORS
 except ImportError:
     try:
-        from mmdet.registry import TASK_UTILS as ANCHOR_GENERATORS
+        from mmdet.core.anchor import ANCHOR_GENERATORS
     except ImportError:
         from mmdet3d.compat import Registry
         ANCHOR_GENERATORS = Registry('anchor_generators')

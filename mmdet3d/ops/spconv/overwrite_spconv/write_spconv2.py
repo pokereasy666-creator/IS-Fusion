@@ -1,7 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import itertools
 
-# ----------------- 物理修复开始 -----------------
 try:
     from mmcv.cnn.bricks.registry import CONV_LAYERS
 except ImportError:
@@ -17,7 +16,6 @@ except ImportError:
             def _register_module(self, module=None, name=None, force=False):
                 return self.register_module(module=module, name=name, force=force)
         CONV_LAYERS = DummyRegistry()
-# ----------------- 物理修复结束 -----------------
 from torch.nn.parameter import Parameter
 
 

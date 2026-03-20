@@ -1,5 +1,4 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-# ----------------- 物理修复开始 -----------------
 from mmdet3d.compat import ATTENTION
 try:
     from mmcv.cnn.bricks.transformer import MultiheadAttention

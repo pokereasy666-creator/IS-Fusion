@@ -1,7 +1,6 @@
 import copy
 import torch
 
-# ----------------- 物理修复开始：分离 init 函数导入 -----------------
 from mmcv.cnn import ConvModule, build_activation_layer, build_norm_layer
 
 try:
@@ -10,7 +9,6 @@ try:
 except ImportError:
     # 如果失败，从新位置导入 (MMCV 2.x / MMEngine)
     from mmcv.cnn import constant_init, kaiming_init
-# ----------------- 物理修复结束 -----------------
 
 from torch import nn as nn
 from torch.nn import functional as F

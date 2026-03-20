@@ -4,7 +4,6 @@ import torch
 from torch.nn import functional as F
 from torch import nn as nn
 
-# ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
 from mmdet3d.compat import BaseModule, build_bbox_coder, force_fp32, multi_apply
 try:
     from mmdet3d.core.post_processing import aligned_3d_nms
@@ -22,14 +21,11 @@ except ImportError:
 from mmdet3d.models.losses import chamfer_distance
 from mmdet3d.models.model_utils import VoteModule
 from mmdet3d.ops import build_sa_module, furthest_point_sample
-# ----------------- 物理修复结束 -----------------
 
-# ----------------- 物理修复开始：MMDet 核心组件与 HEADS -----------------
 try:
     from mmdet.models import HEADS
 except ImportError:
     from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 from .base_conv_bbox_head import BaseConvBboxHead
 
 

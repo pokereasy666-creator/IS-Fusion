@@ -3,9 +3,9 @@ import numpy as np
 import torch
 
 try:
-    from mmdet.core.bbox import BaseBBoxCoder
-except ImportError:
     from mmdet.models.task_modules.coders import BaseBBoxCoder
+except ImportError:
+    from mmdet.core.bbox import BaseBBoxCoder
 
 
 from mmdet3d.compat import BBOX_CODERS

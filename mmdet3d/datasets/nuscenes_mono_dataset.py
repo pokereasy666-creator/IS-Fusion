@@ -335,7 +335,7 @@ class NuScenesMonoDataset(CocoDataset):
                 score_thr=0.01,
                 min_bbox_size=0,
                 max_per_frame=500)
-            from mmcv import Config
+            from mmengine.config import Config
             nms_cfg = Config(nms_cfg)
             cam_boxes3d_for_nms = xywhr2xyxyr(cam_boxes3d.bev)
             boxes3d = cam_boxes3d.tensor

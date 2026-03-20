@@ -1,7 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from mmcv.cnn import build_norm_layer
-# ----------------- 物理修复：通用兼容性 force_fp32 装饰器 -----------------
 from torch import nn
 
 from mmdet3d.ops import DynamicScatter

@@ -20,7 +20,7 @@ def _get_config_directory():
 def test_config_build_model():
     """Test that all detection models defined in the configs can be
     initialized."""
-    from mmcv import Config
+    from mmengine.config import Config
 
     from mmdet3d.models import build_model
 
@@ -74,7 +74,7 @@ def test_config_build_model():
 def test_config_build_pipeline():
     """Test that all detection models defined in the configs can be
     initialized."""
-    from mmcv import Config
+    from mmengine.config import Config
 
     from mmdet3d.datasets.pipelines import Compose
 

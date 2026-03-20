@@ -1,5 +1,4 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-# ----------------- 物理修复开始 -----------------
 from mmdet3d.compat import Registry, build_from_cfg
 SA_MODULES = Registry('point_sa_module')
 

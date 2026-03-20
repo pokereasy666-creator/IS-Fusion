@@ -3,13 +3,11 @@ import torch
 from torch import nn as nn
 
 from mmdet3d.ops import PAConv, PAConvCUDA
-# ----------------- 物理修复开始 -----------------
 try:
     from mmdet.models.builder import LOSSES
 except ImportError:
     # 适配 MMDet 3.x：LOSSES 现在统一归属于 MODELS 注册表
     from mmdet.models import LOSSES
-# ----------------- 物理修复结束 -----------------
 from mmdet.models.losses.utils import weight_reduce_loss
 
 

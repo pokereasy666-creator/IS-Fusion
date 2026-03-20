@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import pytest
 import torch
-from mmcv import Config
+from mmengine.config import Config
 from torch.nn import BatchNorm1d, ReLU
 
 from mmdet3d.core.bbox import Box3DMode, LiDARInstance3DBoxes

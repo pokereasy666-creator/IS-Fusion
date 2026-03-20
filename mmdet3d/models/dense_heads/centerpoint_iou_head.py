@@ -4,7 +4,6 @@ import torch
 from torch import nn
 from mmcv.cnn import ConvModule, build_conv_layer
 
-# ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
 from mmdet3d.compat import BaseModule, build_bbox_coder, force_fp32, multi_apply
 try:
     from mmdet3d.core import (circle_nms, draw_heatmap_gaussian, gaussian_radius, xywhr2xyxyr)
@@ -30,12 +29,10 @@ except ImportError:
         from mmdet3d.core.bbox import xywhr2xyxyr
     except ImportError:
         from mmdet3d.structures import xywhr2xyxyr
-# ----------------- 物理修复结束 -----------------
 
 from mmdet3d.models.utils import clip_sigmoid
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
 
-# ----------------- 物理修复开始：注册表与 builder -----------------
 try:
     from mmdet3d.models import builder
     from mmdet3d.models.builder import HEADS, build_loss
@@ -47,9 +44,7 @@ except ImportError:
     # 构建一个兼容替身，防止后续的 builder 调用报错
     class builder:
         build_head = MODELS.build
-# ----------------- 物理修复结束 -----------------
 
-# ----------------- 物理修复开始：MMDet 核心组件 -----------------
 @HEADS.register_module()
 class CenterIoUHead(BaseModule):
     """CenterHead for CenterPoint.

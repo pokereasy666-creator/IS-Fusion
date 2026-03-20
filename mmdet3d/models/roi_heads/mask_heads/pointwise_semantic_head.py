@@ -1,12 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
 from torch import nn as nn
 from torch.nn import functional as F
 
 from mmdet3d.core.bbox.structures import rotation_3d_in_axis
 from mmdet3d.models.builder import build_loss
-# ----------------- 物理修复：针对 multi_apply 缺失 -----------------
 from mmdet3d.compat import BaseModule, multi_apply
 try:
     from mmdet.models import HEADS
@@ -16,7 +14,6 @@ except ImportError:
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表路径
         from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 
 
 @HEADS.register_module()

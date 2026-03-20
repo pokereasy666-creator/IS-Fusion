@@ -1,4 +1,3 @@
-# ----------------- 物理修复：跨时代导包兼容 -----------------
 from ...bbox.util import normalize_bbox
 
 import torch

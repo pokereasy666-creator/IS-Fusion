@@ -4,7 +4,6 @@ import torch
 from torch import nn as nn
 from torch.nn import functional as F
 
-# ----------------- 物理修复：针对 add_prefix 路径迁移 -----------------
 try:
     from mmseg.core import add_prefix
 except ImportError:
@@ -19,7 +18,6 @@ except ImportError:
             for name, value in inputs.items():
                 outputs[f'{prefix}.{name}'] = value
             return outputs
-# ----------------- 物理修复结束 -----------------
 from mmseg.models import SEGMENTORS
 from ..builder import build_backbone, build_head, build_loss, build_neck
 from .base import Base3DSegmentor

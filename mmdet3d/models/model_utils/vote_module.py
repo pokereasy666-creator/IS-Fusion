@@ -1,6 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复开始：is_tuple_of -----------------
 from mmcv.cnn import ConvModule
 from torch import nn as nn
 

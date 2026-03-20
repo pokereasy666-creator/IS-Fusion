@@ -1,6 +1,5 @@
 import torch
 from mmcv.cnn import build_norm_layer
-# ----------------- 物理修复：针对装饰器路径及参数兼容 -----------------
 from torch import nn
 
 from mmdet3d.ops import DynamicScatter

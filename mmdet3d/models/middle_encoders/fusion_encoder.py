@@ -1,7 +1,6 @@
 
 import copy
 import warnings
-# ----------------- 物理修复：针对 mmcv.cnn.bricks.registry 迁移 -----------------
 import numpy as np
 import torch
 import torch.nn as nn
@@ -13,7 +12,6 @@ import cv2 as cv
 import math
 import mmcv
 import random
-# ----------------- 物理修复：针对 mmcv.runner 缺失 -----------------
 from mmcv.utils import ext_loader
 from ...models import builder
 from ...models.builder import FUSION_LAYERS
@@ -35,7 +33,6 @@ else:
 from mmdet3d.models.middle_encoders.multi_scale_deformable_attn_function import MultiScaleDeformableAttnFunction_fp32
 from mmcv.ops.multi_scale_deform_attn import multi_scale_deformable_attn_pytorch
 
-# ----------------- 物理修复：针对 mmcv.cnn.bricks.registry 再次尝试 -----------------
 class MultiheadAttention(nn.Module):
     r"""Allows the model to jointly attend to information
     from different representation subspaces.

@@ -1,7 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 import torch
-# ----------------- 物理修复：针对 normal_init 路径迁移 -----------------
 from mmdet3d.compat import BBOX_ASSIGNERS, BaseModule, build_bbox_coder, multi_apply
 try:
     from mmcv.cnn import ConvModule, normal_init
@@ -20,8 +19,6 @@ except ImportError:
                     nn.init.normal_(module.weight, mean, std)
                 if hasattr(module, 'bias') and module.bias is not None:
                     nn.init.constant_(module.bias, bias)
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 BaseModule 再次报错 -----------------
 from torch import nn as nn
 
 from mmdet3d.core.bbox.structures import (LiDARInstance3DBoxes,
@@ -30,7 +27,6 @@ from mmdet3d.models.builder import build_loss
 from mmdet3d.ops import make_sparse_convmodule
 from mmdet3d.ops import spconv as spconv
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu, nms_normal_gpu
-# ----------------- 物理修复：针对 mmdet.core 组件再次消失 -----------------
 try:
     from mmdet.models import HEADS
 except ImportError:
@@ -39,7 +35,6 @@ except ImportError:
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表
         from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 
 @HEADS.register_module()
 class PartA2BboxHead(BaseModule):

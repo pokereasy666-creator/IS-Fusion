@@ -3,7 +3,6 @@ from __future__ import division
 
 import numpy as np
 import torch
-# ----------------- 物理修复开始 -----------------
 from mmdet3d.core import limit_period, xywhr2xyxyr
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu, nms_normal_gpu
 from mmdet3d.compat import BaseModule, force_fp32

@@ -2,29 +2,18 @@
 import copy
 import numpy as np
 import torch
-# ----------------- 物理修复开始：ConfigDict -----------------
 from mmdet3d.compat import BaseModule, build_bbox_coder, force_fp32, multi_apply
-try:
-    from mmcv import ConfigDict
-except ImportError:
-    try:
-        from mmcv.utils import ConfigDict
-    except ImportError:
-        from mmengine.config import ConfigDict
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始：xavier_init -----------------
+from mmengine.config import ConfigDict
 from mmcv.cnn import ConvModule
 try:
     from mmcv.cnn import xavier_init
 except ImportError:
     from mmcv.cnn import xavier_init
-# ----------------- 物理修复结束 -----------------
 from mmcv.cnn.bricks.transformer import (build_positional_encoding,
                                          build_transformer_layer)
 from torch import nn as nn
 from torch.nn import functional as F
 
-# ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
 try:
     from mmdet3d.core.post_processing import aligned_3d_nms
 except ImportError:
@@ -38,7 +27,6 @@ except ImportError:
 
 from mmdet3d.ops import Points_Sampler, gather_points
 
-# ----------------- 物理修复开始：MMDet 核心组件与 HEADS -----------------
 try:
     from mmdet.models import HEADS
 except ImportError:

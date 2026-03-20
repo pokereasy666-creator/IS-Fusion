@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import ConvModule
-# ----------------- 物理修复：针对 BaseModule 等组件迁移 -----------------
 from mmdet3d.compat import BaseModule, Registry, auto_fp16
 __all__ = ["GeneralizedLSSFPN"]
 

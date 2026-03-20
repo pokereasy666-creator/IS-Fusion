@@ -2,10 +2,8 @@
 import numpy as np
 import torch
 from mmcv.cnn import build_conv_layer, build_norm_layer, build_upsample_layer
-# ----------------- 物理修复：针对 BaseModule 等组件迁移 -----------------
 from torch import nn as nn
 
-# ----------------- 物理修复：针对 mmdet.models.NECKS 缺失 -----------------
 from mmdet3d.compat import BaseModule, auto_fp16
 try:
     from mmdet.models import NECKS
@@ -15,7 +13,6 @@ except ImportError:
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表路径
         from mmdet.models import NECKS
-# ----------------- 物理修复结束 -----------------
 
 @NECKS.register_module()
 class SECONDFPN(BaseModule):

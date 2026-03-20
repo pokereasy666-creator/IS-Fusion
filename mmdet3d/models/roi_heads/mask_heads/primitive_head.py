@@ -1,14 +1,12 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from mmcv.cnn import ConvModule
-# ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
 from torch import nn as nn
 from torch.nn import functional as F
 
 from mmdet3d.models.builder import build_loss
 from mmdet3d.models.model_utils import VoteModule
 from mmdet3d.ops import build_sa_module, furthest_point_sample
-# ----------------- 物理修复：针对 multi_apply 路径迁移 -----------------
 from mmdet3d.compat import BaseModule, multi_apply
 try:
     from mmdet.models import HEADS
@@ -18,7 +16,6 @@ except ImportError:
     except ImportError:
         # 适配 MMDet 3.x / MMEngine 注册表路径
         from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 
 
 @HEADS.register_module()

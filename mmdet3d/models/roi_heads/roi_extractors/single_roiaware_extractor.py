@@ -1,8 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
 from mmdet3d import ops
-# ----------------- 物理修复：针对 ROI_EXTRACTORS 注册表缺失 -----------------
 from mmdet3d.compat import BaseModule, Registry
 @ROI_EXTRACTORS.register_module()
 class Single3DRoIAwareExtractor(BaseModule):
