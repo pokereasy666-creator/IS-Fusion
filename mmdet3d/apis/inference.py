@@ -5,21 +5,7 @@ import re
 import torch
 from copy import deepcopy
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.parallel import collate, scatter
-except ImportError:
-    # MMEngine / MMCV 2.x 移除了 mmcv.parallel
-    # 我们定义假的函数来骗过解释器，防止 ImportError
-    def collate(*args, **kwargs): pass
-    def scatter(*args, **kwargs): pass
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import load_checkpoint
-except ImportError:
-    from mmcv.runner import load_checkpoint
-
-# 如果还有 wrap_fp16_model，也一并修了
+from mmdet3d.compat import collate, load_checkpoint
 try:
     from mmcv.runner import wrap_fp16_model
 except ImportError:

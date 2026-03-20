@@ -8,6 +8,7 @@ import torch.nn.functional as F
 import torch.utils.checkpoint as cp
 # ----------------- 物理修复开始 -----------------
 from mmcv.cnn import build_norm_layer
+from mmdet3d.compat import BaseModule, ModuleList, load_checkpoint, to_2tuple
 try:
     from mmcv.cnn import constant_init, trunc_normal_init
 except ImportError:
@@ -15,20 +16,6 @@ except ImportError:
 # ----------------- 物理修复结束 -----------------
 from mmcv.cnn.bricks.transformer import FFN, build_dropout
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import BaseModule, ModuleList, _load_checkpoint
-except ImportError:
-    from mmcv.runner import BaseModule, ModuleList
-    from mmcv.runner import load_checkpoint as _load_checkpoint
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.utils import to_2tuple
-except ImportError:
-    # MMEngine 中该工具移到了 mmengine.utils
-    from mmcv.utils import to_2tuple
-# ----------------- 物理修复结束 -----------------
-
 from ...utils import get_root_logger
 from ..builder import BACKBONES
 from ..utils.ckpt_convert import swin_converter

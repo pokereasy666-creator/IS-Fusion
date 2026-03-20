@@ -1,25 +1,11 @@
 import torch
-try:
-    from mmcv.runner import force_fp32, auto_fp16
-except ImportError:
-    try:
-        from mmcv.cnn.utils.amp import force_fp32, auto_fp16
-    except ImportError:
-        def force_fp32(*args, **kwargs):
-            def decorator(func): return func
-            return decorator
-        def auto_fp16(*args, **kwargs):
-            def decorator(func): return func
-            return decorator
 
 import mmcv
-import torch
 from torch.nn import functional as F
 
-from mmdet3d.core import (Box3DMode, Coord3DMode, bbox3d2result,
-                          )
+from mmdet3d.compat import force_fp32, auto_fp16, DETECTORS
+from mmdet3d.core import (Box3DMode, Coord3DMode, bbox3d2result)
 from mmdet3d.ops import Voxelization
-from mmdet.models import DETECTORS
 from .mvx_two_stage import MVXTwoStageDetector
 
 

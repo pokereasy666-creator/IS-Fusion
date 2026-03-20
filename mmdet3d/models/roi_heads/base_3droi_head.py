@@ -1,17 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from abc import ABCMeta, abstractmethod
 # ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module # 终极保底
-# ----------------- 物理修复结束 -----------------
-
+from mmdet3d.compat import BaseModule
 class Base3DRoIHead(BaseModule, metaclass=ABCMeta):
     """Base class for 3d RoIHeads."""
 

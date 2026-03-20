@@ -2,14 +2,9 @@
 import warnings
 from mmcv.cnn import build_conv_layer, build_norm_layer
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    # MMEngine 中 BaseModule 移到了 mmengine.model
-    from mmcv.runner import BaseModule
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 
+from mmdet3d.compat import BaseModule
 try:
     from mmdet.models import BACKBONES
 except ImportError:

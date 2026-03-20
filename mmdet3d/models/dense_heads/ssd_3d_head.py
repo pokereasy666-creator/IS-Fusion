@@ -4,45 +4,19 @@ import torch
 from mmcv.ops.nms import batched_nms
 from torch.nn import functional as F
 
-# ----------------- 物理修复开始：force_fp32 -----------------
-try:
-    # 这里的 4 个空格缩进非常关键
-    from mmcv.runner import force_fp32
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    # 定义空装饰器以保持旧代码运行而不报错
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import force_fp32, multi_apply, HEADS
 
 from mmdet3d.core.bbox.structures import (DepthInstance3DBoxes,
                                           LiDARInstance3DBoxes,
                                           rotation_3d_in_axis)
 
-# ----------------- 物理修复开始：build_loss 与 multi_apply -----------------
 try:
     from mmdet3d.models.builder import build_loss
 except ImportError:
-    # 适配 MMDet3D 1.x
     from mmdet3d.registry import MODELS
     def build_loss(cfg):
         return MODELS.build(cfg)
 
-try:
-    from mmdet.core import multi_apply
-except ImportError:
-    # 适配 MMDet 3.x
-    from mmdet.models.utils import multi_apply
-# ----------------- 物理修复结束 -----------------
-
-# ----------------- 物理修复开始：HEADS 注册表 -----------------
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 from .vote_head import VoteHead
 
 

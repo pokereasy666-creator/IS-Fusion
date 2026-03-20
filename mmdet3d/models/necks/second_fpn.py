@@ -3,24 +3,10 @@ import numpy as np
 import torch
 from mmcv.cnn import build_conv_layer, build_norm_layer, build_upsample_layer
 # ----------------- 物理修复：针对 BaseModule 等组件迁移 -----------------
-try:
-    from mmcv.runner import BaseModule, auto_fp16
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module
-    
-    # 定义空装饰器保底
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 
 # ----------------- 物理修复：针对 mmdet.models.NECKS 缺失 -----------------
+from mmdet3d.compat import BaseModule, auto_fp16
 try:
     from mmdet.models import NECKS
 except ImportError:

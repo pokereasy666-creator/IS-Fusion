@@ -3,20 +3,13 @@ import torch
 from torch import nn as nn
 
 # ----------------- 物理修复开始 -----------------
+from mmdet3d.compat import force_fp32
 try:
     from mmdet.models.builder import LOSSES
 except ImportError:
     # 适配 MMDet 3.x：使用统一的 MODELS 注册表
     from mmdet.models import LOSSES
 
-try:
-    from mmcv.runner import force_fp32
-except ImportError:
-    # 适配 MMEngine：提供空装饰器
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from mmdet.models.losses.utils import weighted_loss
 # ----------------- 物理修复开始：AxisAlignedBboxOverlaps3D -----------------
 try:

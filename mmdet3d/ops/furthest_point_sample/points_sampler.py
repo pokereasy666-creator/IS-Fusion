@@ -1,20 +1,8 @@
 import torch
 from torch import nn as nn
 from typing import List
-import torch
-from torch import nn as nn
-from typing import List
 
-# ----------------- 物理修复开始：兼容 MMCV 2.x -----------------
-try:
-    from mmcv.runner import force_fp32
-except ImportError:
-    # 如果找不到 mmcv.runner (即 MMCV 2.x)，定义一个空的装饰器
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import force_fp32
 
 from .furthest_point_sample import (furthest_point_sample,
                                     furthest_point_sample_with_dist)

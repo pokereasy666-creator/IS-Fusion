@@ -1,17 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import force_fp32, BaseModule
-except ImportError:
-    from mmcv.runner import BaseModule
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch.nn import functional as F
 
 # ----------------- 物理修复开始：bbox_overlaps_nearest_3d -----------------
+from mmdet3d.compat import BaseModule, force_fp32
 try:
     from mmdet3d.core.bbox import bbox_overlaps_nearest_3d
 except ImportError:

@@ -4,44 +4,10 @@ from abc import abstractmethod
 from torch import nn as nn
 from mmcv.cnn import ConvModule
 
-# ----------------- 物理修复开始：mmcv 初始化函数 -----------------
-try:
-    from mmcv.cnn import bias_init_with_prob, normal_init
-except ImportError:
-    # 适配 MMEngine：初始化函数移到了 mmengine.model
-    from mmcv.cnn import bias_init_with_prob, normal_init
+from mmdet3d.compat import (BaseModule, force_fp32, bias_init_with_prob,
+                            normal_init, HEADS, multi_apply)
 
-# ----------------- 物理修复开始：mmcv BaseModule 和 force_fp32 -----------------
-try:
-    from mmcv.runner import force_fp32, BaseModule
-except ImportError:
-    # 适配 MMEngine：BaseModule 移到了 mmengine.model
-    from mmcv.runner import BaseModule
-    # force_fp32 在新版中机制改变，定义空装饰器以保持兼容
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-
-# ----------------- 物理修复开始：mmdet multi_apply -----------------
-try:
-    from mmdet.core import multi_apply
-except ImportError:
-    # 适配 MMDet 3.x：multi_apply 移到了 mmdet.models.utils
-    from mmdet.models.utils import multi_apply
-
-# ----------------- 物理修复开始：mmdet HEADS 和 build_loss -----------------
-try:
-    from mmdet.models.builder import HEADS, build_loss
-except ImportError:
-    # 适配 MMDet 3.x
-    from mmdet.models import HEADS
-    from mmdet.models import MODELS
-    
-    # 新版中没有独立的 build_loss 函数，需要手动封装
-    def build_loss(cfg):
-        return MODELS.build(cfg)
-# ----------------- 物理修复结束 -----------------
+from ..builder import build_loss
 
 from .base_mono3d_dense_head import BaseMono3DDenseHead
 

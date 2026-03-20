@@ -6,14 +6,9 @@ import os
 import tempfile
 import torch
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.utils import print_log
-except ImportError:
-    from mmcv.utils import print_log
-# ----------------- 物理修复结束 -----------------
-from os import path as osp
 
 # ----------------- 物理修复开始 -----------------
+from mmdet3d.compat import Registry, print_log
 try:
     # 尝试旧路径 (MMDet 2.x)
     from mmdet.datasets import DATASETS
@@ -23,7 +18,6 @@ except ImportError:
         from mmdet.datasets import DATASETS
     except ImportError:
         # 万能保底
-        from mmcv.utils import Registry
         DATASETS = Registry('dataset')
 # ----------------- 物理修复结束 -----------------
 from ..core import show_multi_modality_result, show_result

@@ -3,12 +3,6 @@ import math
 import numpy as np
 
 import torch
-try:
-    from mmcv.runner import auto_fp16
-except ImportError:
-    def auto_fp16(*args, **kwargs):
-        def decorator(func): return func
-        return decorator
 from torch import nn
 
 from ..builder import MIDDLE_ENCODERS
@@ -20,6 +14,7 @@ import os
 from mmdet3d.ops import spconv as spconv
 from mmdet3d.ops import SparseBasicBlock, make_sparse_convmodule
 
+from mmdet3d.compat import auto_fp16
 @MIDDLE_ENCODERS.register_module()
 class SSTInputLayerV2(nn.Module):
     """

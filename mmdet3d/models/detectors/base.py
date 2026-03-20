@@ -2,41 +2,13 @@
 import mmcv
 import torch
 # ----------------- 物理修复开始：DataContainer 替身 -----------------
-try:
-    from mmcv.parallel import DataContainer as DC
-except ImportError:
-    # 适配 MMCV 2.x：造一个拥有相同属性的假 DC 类来骗过旧代码
-    class DC:
-        def __init__(self, data, cpu_only=False, stack=False, pad_dims=None, padding_value=0):
-            self._data = data
-            self.cpu_only = cpu_only
-            self.stack = stack
-            self.pad_dims = pad_dims
-            self.padding_value = padding_value
-        @property
-        def data(self):
-            return self._data
-# ----------------- 物理修复结束 -----------------
-
-# ----------------- 物理修复开始：注册表适配 -----------------
+from mmdet3d.compat import DataContainer, auto_fp16, force_fp32
 try:
     from mmdet.models.builder import DETECTORS
 except ImportError:
     from mmdet.models import DETECTORS
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始：FP16 装饰器兼容 -----------------
-try:
-    from mmcv.runner import auto_fp16, force_fp32
-except ImportError:
-    # 适配 MMEngine：提供空装饰器，绕过旧版混合精度检查
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-        
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from os import path as osp
 
 from mmdet3d.core import Box3DMode, Coord3DMode, show_result

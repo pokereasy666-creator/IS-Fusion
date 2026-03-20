@@ -3,35 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import ConvModule
 # ----------------- 物理修复：针对 BaseModule 等组件迁移 -----------------
-try:
-    from mmcv.runner import BaseModule, auto_fp16
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module
-    
-    # 定义空装饰器保底
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
-
-# ----------------- 物理修复：针对 mmdet.models.builder 缺失 -----------------
-try:
-    from mmdet.models.builder import NECKS
-except ImportError:
-    # 适配 MMDet 3.x / MMEngine 注册表
-    try:
-        from mmdet.models import NECKS
-    except ImportError:
-        # 最后的保底，如果是在非常特殊的环境下
-        from mmcv.utils import Registry
-        NECKS = Registry('neck')
-# ----------------- 物理修复结束 -----------------
-
+from mmdet3d.compat import BaseModule, Registry, auto_fp16
 __all__ = ["GeneralizedLSSFPN"]
 
 

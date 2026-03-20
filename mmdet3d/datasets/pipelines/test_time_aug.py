@@ -1,39 +1,17 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import mmcv
-# ----------------- 物理修复：猴子补丁补全 mmcv.is_list_of -----------------
-if not hasattr(mmcv, 'is_list_of'):
-    try:
-        from mmcv.utils import is_list_of
-        mmcv.is_list_of = is_list_of
-    except ImportError:
-        def is_list_of(seq, expected_type):
-            return isinstance(seq, list) and all(isinstance(item, expected_type) for item in seq)
-        mmcv.is_list_of = is_list_of
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import Registry, build_from_cfg, is_list_of
 import warnings
 from copy import deepcopy
 
-# ----------------- 物理修复开始 -----------------
 try:
-    # 尝试旧路径 (MMDet 2.x)
     from mmdet.datasets.builder import PIPELINES
 except ImportError:
-    # 针对 MMDet 3.x 的新路径
-    try:
-        from mmdet.datasets.builder import PIPELINES
-    except ImportError:
-        # 保底方案：从 mmengine 导入通用注册表
-        from mmcv.utils import Registry
-        PIPELINES = Registry('pipeline')
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
+    PIPELINES = Registry('pipeline')
+
 try:
     from mmdet.datasets.pipelines import Compose
 except (ImportError, ModuleNotFoundError):
-    # 针对 MMEngine / MMCV 2.x 的新路径
-    from mmcv.utils import build_from_cfg
-    # Compose will be imported from local pipelines
-# ----------------- 物理修复结束 -----------------
+    from mmdet.datasets.transforms import Compose
 
 
 @PIPELINES.register_module()
@@ -67,35 +45,14 @@ class MultiScaleFlipAug3D(object):
                  flip_direction='horizontal',
                  pcd_horizontal_flip=False,
                  pcd_vertical_flip=False):
-                 # ----------------- 物理修复：终极注册表同步术 -----------------
-        try:
-            from mmcv.utils import Registry; TRANSFORMS = Registry("pipeline")
-            # 1. 尝试同步 mmdet 的旧注册表
-            try:
-                from mmdet.datasets.builder import PIPELINES as DET_PIPELINES
-                for name, obj in DET_PIPELINES.module_dict.items():
-                    if not TRANSFORMS.get(name): 
-                        TRANSFORMS.register_module(name=name, module=obj, force=True)
-            except Exception: pass
-            
-            # 2. 尝试同步 mmdet3d 的旧注册表
-            try:
-                from mmdet3d.datasets.builder import PIPELINES as DET3D_PIPELINES
-                for name, obj in DET3D_PIPELINES.module_dict.items():
-                    if not TRANSFORMS.get(name): 
-                        TRANSFORMS.register_module(name=name, module=obj, force=True)
-            except Exception: pass
-        except Exception as e:
-            print(f"[Warning] Ultimate pipeline sync failed: {e}")
-        # ----------------- 物理修复结束 -----------------
         self.transforms = Compose(transforms)
         self.img_scale = img_scale if isinstance(img_scale,
                                                  list) else [img_scale]
         self.pts_scale_ratio = pts_scale_ratio \
             if isinstance(pts_scale_ratio, list) else[float(pts_scale_ratio)]
 
-        assert mmcv.is_list_of(self.img_scale, tuple)
-        assert mmcv.is_list_of(self.pts_scale_ratio, float)
+        assert is_list_of(self.img_scale, tuple)
+        assert is_list_of(self.pts_scale_ratio, float)
 
         self.flip = flip
         self.pcd_horizontal_flip = pcd_horizontal_flip
@@ -103,7 +60,7 @@ class MultiScaleFlipAug3D(object):
 
         self.flip_direction = flip_direction if isinstance(
             flip_direction, list) else [flip_direction]
-        assert mmcv.is_list_of(self.flip_direction, str)
+        assert is_list_of(self.flip_direction, str)
         if not self.flip and self.flip_direction != ['horizontal']:
             warnings.warn(
                 'flip_direction has no effect when flip is set to False')

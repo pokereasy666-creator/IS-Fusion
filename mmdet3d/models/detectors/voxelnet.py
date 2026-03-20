@@ -1,16 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 # ----------------- 物理修复开始：FP16 与 注册表兼容 -----------------
-try:
-    from mmcv.runner import force_fp32, auto_fp16
-except ImportError:
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-
+from mmdet3d.compat import auto_fp16, force_fp32
 try:
     from mmdet.models import DETECTORS
 except ImportError:

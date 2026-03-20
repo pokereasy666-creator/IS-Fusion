@@ -4,14 +4,7 @@ import torch
 
 from mmdet3d.core import limit_period
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmdet.core import images_to_levels, multi_apply
-except ImportError:
-    # 适配 MMDet 3.x：这些工具函数移到了 mmdet.models.utils
-    from mmdet.models.utils import images_to_levels, multi_apply
-# ----------------- 物理修复结束 -----------------
-
-
+from mmdet3d.compat import images_to_levels, multi_apply
 class AnchorTrainMixin(object):
     """Mixin class for target assigning of dense heads."""
 

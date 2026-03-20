@@ -2,26 +2,6 @@
 import copy
 import warnings
 # ----------------- 物理修复：针对 mmcv.cnn.bricks.registry 迁移 -----------------
-try:
-    from mmcv.cnn.bricks.registry import (ATTENTION, FEEDFORWARD_NETWORK,
-                                           TRANSFORMER_LAYER, TRANSFORMER_LAYER_SEQUENCE)
-except ImportError:
-    # 适配 MMCV 2.x / MMEngine
-    # 在新版中，这些通常都统一注册在 MODELS 或各个特定的子注册表中
-    # 为了保证代码能跑通，我们直接从 mmengine 导入对应的 Registry
-    try:
-        from mmcv.utils import Registry; MODELS_REG = Registry("models")
-        ATTENTION = MODELS_REG
-        FEEDFORWARD_NETWORK = MODELS_REG
-        TRANSFORMER_LAYER = MODELS_REG
-        TRANSFORMER_LAYER_SEQUENCE = MODELS_REG
-    except ImportError:
-        # 最后的保底（如果环境极其特殊）
-        ATTENTION = None
-        FEEDFORWARD_NETWORK = None
-        TRANSFORMER_LAYER = None
-        TRANSFORMER_LAYER_SEQUENCE = None
-# ----------------- 物理修复结束 -----------------
 import numpy as np
 import torch
 import torch.nn as nn
@@ -34,21 +14,10 @@ import math
 import mmcv
 import random
 # ----------------- 物理修复：针对 mmcv.runner 缺失 -----------------
-try:
-    from mmcv.runner import force_fp32, auto_fp16
-except ImportError:
-    # 适配 MMCV 2.x / MMEngine，定义空装饰器
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from mmcv.utils import ext_loader
 from ...models import builder
 from ...models.builder import FUSION_LAYERS
+from mmdet3d.compat import ATTENTION, BaseModule, FEEDFORWARD_NETWORK, ModuleList, Sequential, auto_fp16, build_from_cfg, force_fp32, to_2tuple
 ext_module = ext_loader.load_ext(
     '_ext', ['ms_deform_attn_backward', 'ms_deform_attn_forward'])
 
@@ -67,50 +36,6 @@ from mmdet3d.models.middle_encoders.multi_scale_deformable_attn_function import 
 from mmcv.ops.multi_scale_deform_attn import multi_scale_deformable_attn_pytorch
 
 # ----------------- 物理修复：针对 mmcv.cnn.bricks.registry 再次尝试 -----------------
-try:
-    from mmcv.cnn.bricks.registry import ATTENTION
-except ImportError:
-    try:
-        from mmcv.utils import Registry; ATTENTION = Registry("attention")
-    except ImportError:
-        ATTENTION = None
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 BaseModule 等组件迁移 -----------------
-try:
-    from mmcv.runner.base_module import BaseModule, ModuleList, Sequential
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    try:
-        from mmcv.runner import BaseModule, ModuleList, Sequential
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module # 最后的保底
-        ModuleList = nn.ModuleList
-        Sequential = nn.Sequential
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmcv.utils 工具函数迁移 -----------------
-try:
-    from mmcv.utils import (ConfigDict, build_from_cfg, deprecated_api_warning, to_2tuple)
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    try:
-        from mmcv.utils import ConfigDict
-        from mmcv.utils import build_from_cfg
-        # deprecated_api_warning 通常在 mmengine.utils 或 mmdet.utils
-        from mmcv.utils import deprecated_api_warning
-        # to_2tuple 通常在 mmcv.utils.helpers 或 timm，简单定义保底
-        def to_2tuple(x): return (x, x) if isinstance(x, int) else x
-    except ImportError:
-        # 最后的保底定义
-        ConfigDict = dict
-        def build_from_cfg(cfg, registry, default_args=None): return registry.build(cfg)
-        def deprecated_api_warning(name, error=True):
-            def decorator(func): return func
-            return decorator
-        def to_2tuple(x): return (x, x) if isinstance(x, int) else x
-# ----------------- 物理修复结束 -----------------
-
-
 class MultiheadAttention(nn.Module):
     r"""Allows the model to jointly attend to information
     from different representation subspaces.

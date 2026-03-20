@@ -1,14 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from abc import ABCMeta, abstractmethod
 
-# ----------------- 物理修复开始 -----------------
-try:
-    # 这里的 4 个空格非常关键
-    from mmcv.runner import BaseModule
-except ImportError:
-    # 适配 MMEngine：BaseModule 移到了 mmengine.model
-    from mmcv.runner import BaseModule
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import BaseModule
 
 
 class BaseMono3DDenseHead(BaseModule, metaclass=ABCMeta):

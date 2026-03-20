@@ -2,12 +2,7 @@
 import torch
 import torch.nn as nn
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    from mmcv.runner import BaseModule
-
-
+from mmdet3d.compat import BaseModule
 class DarknetBottleneck(BaseModule):
     """The basic bottleneck block used in Darknet.
     Each ResBlock consists of two ConvModules and the input is added to the

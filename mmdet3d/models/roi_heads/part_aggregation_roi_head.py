@@ -3,46 +3,9 @@ import warnings
 from torch.nn import functional as F
 
 # ----------------- 物理修复：针对 AssignResult 路径迁移 -----------------
-try:
-    from mmdet3d.core import AssignResult
-except ImportError:
-    try:
-        # 尝试从 mmdet 结构体中导入
-        from mmdet.core import AssignResult
-    except ImportError:
-        try:
-            # 适配 MMDet 3.x 路径
-            from mmdet.core.bbox.assigners import AssignResult
-        except ImportError:
-            # 最后的物理保底：定义一个兼容的结构
-            class AssignResult:
-                def __init__(self, num_gts, gt_inds, max_overlaps, labels=None):
-                    self.num_gts = num_gts
-                    self.gt_inds = gt_inds
-                    self.max_overlaps = max_overlaps
-                    self.labels = labels
-# ----------------- 物理修复结束 -----------------
 from mmdet3d.core.bbox import bbox3d2result, bbox3d2roi
 # ----------------- 物理修复：针对 build_assigner/sampler 迁移 -----------------
-try:
-    from mmdet.core import build_assigner, build_sampler
-except ImportError:
-    # 适配 MMDet 3.x / MMEngine 注册表系统
-    try:
-        from mmdet.models.builder import build_assigner, build_sampler
-    except ImportError:
-        try:
-            from mmdet.core.bbox.builder import BBOX_ASSIGNERS as TASK_UTILS
-            def build_assigner(cfg, **default_args):
-                return TASK_UTILS.build(cfg, default_args=default_args)
-            def build_sampler(cfg, **default_args):
-                return TASK_UTILS.build(cfg, default_args=default_args)
-        except ImportError:
-            # 最后的物理保底
-            build_assigner = None
-            build_sampler = None
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmdet.models.HEADS 缺失 -----------------
+from mmdet3d.compat import AssignResult, BBOX_ASSIGNERS, build_assigner, build_sampler
 try:
     from mmdet.models import HEADS
 except ImportError:

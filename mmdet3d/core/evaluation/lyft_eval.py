@@ -6,12 +6,7 @@ from lyft_dataset_sdk.eval.detection.mAP_evaluation import (Box3D, get_ap,
                                                             get_ious,
                                                             group_by_key,
                                                             wrap_in_box)
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.utils import print_log
-except ImportError:
-    from mmcv.utils import print_log
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import print_log
 from os import path as osp
 from terminaltables import AsciiTable
 

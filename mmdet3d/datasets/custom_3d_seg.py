@@ -7,35 +7,11 @@ from os import path as osp
 from torch.utils.data import Dataset
 
 # ----------------- 物理修复开始 -----------------
-try:
-    # 尝试旧路径 (MMDet 2.x)
-    from mmdet.datasets import DATASETS
-except ImportError:
-    # 针对 MMDet 3.x 的新路径
-    try:
-        from mmdet.datasets import DATASETS
-    except ImportError:
-        # 万能保底
-        from mmcv.utils import Registry
-        DATASETS = Registry('dataset')
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
-try:
-    # 尝试旧路径 (MMSeg 0.x)
-    from mmseg.datasets import DATASETS as SEG_DATASETS
-except ImportError:
-    # 针对 MMSeg 1.x 的新路径
-    try:
-        from mmseg.datasets import DATASETS as SEG_DATASETS
-    except ImportError:
-        # 万能保底：如果还是找不到，造一个空的注册表防止崩溃
-        from mmcv.utils import Registry
-        SEG_DATASETS = Registry('seg_dataset')
-# ----------------- 物理修复结束 -----------------
 from .pipelines import Compose
 from .utils import extract_result_dict, get_loading_pipeline
 
 
+from mmdet3d.compat import Registry
 @DATASETS.register_module()
 @SEG_DATASETS.register_module()
 class Custom3DSegDataset(Dataset):

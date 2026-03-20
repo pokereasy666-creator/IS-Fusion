@@ -1,43 +1,22 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 import warnings
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.utils import is_tuple_of
-except ImportError:
-    try:
-        from mmcv.utils import is_tuple_of
-    except ImportError:
-        # 如果实在找不到，手动定义这个简单的工具函数
-        def is_tuple_of(obj, cls):
-            return isinstance(obj, tuple) and all(isinstance(item, cls) for item in obj)
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.utils import build_from_cfg
-except ImportError:
-    # MMCV 2.x / MMEngine 环境下的新路径
-    from mmcv.utils import build_from_cfg
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import is_tuple_of, build_from_cfg, Registry
 
 from mmdet3d.core import VoxelGenerator
 from mmdet3d.core.bbox import (CameraInstance3DBoxes, DepthInstance3DBoxes,
                                LiDARInstance3DBoxes, box_np_ops)
-                               
+
 try:
     from mmdet.datasets.builder import PIPELINES
 except ImportError:
-    from mmcv.utils import Registry
     PIPELINES = Registry('pipeline')
-    
-# ----------------- 物理修复开始 -----------------
+
 try:
-    # 尝试旧路径 (MMDet 2.x)
     from mmdet.datasets.pipelines import RandomFlip
 except (ImportError, ModuleNotFoundError):
-    # 针对 MMDet 3.x 的新路径
     from mmdet.datasets.transforms import RandomFlip
-# ----------------- 物理修复结束 -----------------
+
 from ..builder import OBJECTSAMPLERS
 from .data_augment_utils import noise_per_object_v3_
 import mmcv

@@ -1,26 +1,12 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 # ----------------- 物理修复：针对 mmcv.runner 组件迁移 -----------------
-try:
-    from mmcv.runner import BaseModule, auto_fp16
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module
-    
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
-
 from mmdet3d.ops import SparseBasicBlock, make_sparse_convmodule
 from mmdet3d.ops import spconv as spconv
 from ..builder import MIDDLE_ENCODERS
 
 
+from mmdet3d.compat import BaseModule, auto_fp16
 @MIDDLE_ENCODERS.register_module()
 class SparseUNet(BaseModule):
     r"""SparseUNet for PartA^2.

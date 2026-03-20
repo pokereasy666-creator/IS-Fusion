@@ -1,43 +1,13 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.parallel import DataContainer as DC
-except ImportError:
-    # MMCV 2.x 移除了 DataContainer，我们需要造一个假的来兼容旧代码
-    class DataContainer:
-        def __init__(self, data, stack=False, padding_value=0, cpu_only=False, pad_dims=2):
-            self.data = data
-            self.stack = stack
-            self.padding_value = padding_value
-            self.cpu_only = cpu_only
-            self.pad_dims = pad_dims
-            
-        def __repr__(self):
-            return f'{self.__class__.__name__}({self.data})'
-            
-    DC = DataContainer
-# ----------------- 物理修复结束 -----------------
-
 from mmdet3d.core.bbox import BaseInstance3DBoxes
 from mmdet3d.core.points import BasePoints
-# ----------------- 物理修复开始 -----------------
-try:
-    # 尝试旧路径 (MMDet 2.x)
-    from mmdet.datasets.builder import PIPELINES
-except ImportError:
-    # 新路径 (MMDet 3.x)
-    try:
-        from mmdet.datasets.builder import PIPELINES
-    except ImportError:
-        # 如果都找不到，创建一个独立的注册表来保命
-        from mmcv.utils import Registry
-        PIPELINES = Registry('pipeline')
-# ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始 -----------------
 import torch
 import numpy as np
 
+from mmdet3d.compat import DataContainer, Registry
 try:
     from mmdet.datasets.pipelines import to_tensor
 except ImportError:

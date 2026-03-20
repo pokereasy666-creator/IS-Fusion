@@ -9,20 +9,9 @@ from PIL import Image
 from mmdet3d.core.bbox import box_np_ops, LiDARInstance3DBoxes
 from mmdet3d.datasets.pipelines import data_augment_utils
 # ----------------- 物理修复开始 -----------------
-try:
-    # 尝试旧路径 (MMDet 2.x)
-    from mmdet.datasets import PIPELINES
-except ImportError:
-    # 新路径 (MMDet 3.x)
-    try:
-        from mmdet.datasets.builder import PIPELINES
-    except ImportError:
-        # 如果都找不到，创建一个独立的注册表来保命
-        from mmcv.utils import Registry
-        PIPELINES = Registry('pipeline')
-# ----------------- 物理修复结束 -----------------
 from ..builder import OBJECTSAMPLERS
 
+from mmdet3d.compat import Registry
 class BatchSampler:
     """Class for sampling specific category of ground truths.
 

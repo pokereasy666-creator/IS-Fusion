@@ -1,20 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from mmcv.cnn import ConvModule
-# ----------------- 物理修复开始：BaseModule -----------------
-try:
-    from mmcv.runner import BaseModule, force_fp32, auto_fp16
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    from mmcv.runner import BaseModule
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-    def auto_fp16(apply_to=None):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
+
+from mmdet3d.compat import BaseModule, force_fp32, auto_fp16
 from torch.nn import functional as F
 
 from mmdet3d.core.bbox.structures import (get_proj_mat_by_coord_type,

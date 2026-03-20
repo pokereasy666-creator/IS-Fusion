@@ -1,28 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
-# ----------------- 物理修复：针对 mmdet3d.core 路径大混乱 -----------------
-try:
-    # 尝试最常见的几种旧路径
-    from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
-except ImportError:
-    try:
-        from mmdet3d.structures import bbox3d2result, merge_aug_bboxes_3d
-    except ImportError:
-        # 如果还是找不到，直接定义空函数保底，绕过加载时的错误
-        def bbox3d2result(*args, **kwargs): return None
-        def merge_aug_bboxes_3d(*args, **kwargs): return None
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmdet.models.DETECTORS 缺失 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMDet 3.x 注册表
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
+from mmdet3d.compat import DETECTORS
 from .single_stage import SingleStage3DDetector
 
 

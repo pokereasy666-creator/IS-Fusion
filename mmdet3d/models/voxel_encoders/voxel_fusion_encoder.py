@@ -1,18 +1,6 @@
 import torch
 from mmcv.cnn import build_norm_layer
 # ----------------- 物理修复：针对装饰器路径及参数兼容 -----------------
-try:
-    from mmcv.runner import force_fp32, auto_fp16
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x，定义万能捕获装饰器
-    def force_fp32(*args, **kwargs):
-        def decorator(func): return func
-        return decorator
-
-    def auto_fp16(*args, **kwargs):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn
 
 from mmdet3d.ops import DynamicScatter
@@ -20,6 +8,7 @@ from .. import builder
 from ..builder import VOXEL_ENCODERS
 from .utils import VFELayer, get_paddings_indicator
 
+from mmdet3d.compat import auto_fp16, force_fp32
 @VOXEL_ENCODERS.register_module()
 class DynamicFusionVFE(nn.Module):
     """Dynamic Voxel feature encoder used in DV-SECOND.

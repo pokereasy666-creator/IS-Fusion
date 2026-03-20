@@ -7,31 +7,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# ----------------- 物理修复开始：适配 MMCV / MMEngine 导入 -----------------
-from mmcv.cnn import build_activation_layer, build_conv_layer, build_norm_layer
+from mmcv.cnn import build_activation_layer, build_conv_layer, build_norm_layer, xavier_init
 
-try:
-    # 尝试旧版路径 (MMCV 1.x)
-    from mmcv.cnn import xavier_init
-    from mmcv.utils import to_2tuple
-    from mmcv.runner import BaseModule
-except ImportError:
-    # 新版路径 (MMEngine / MMCV 2.x)
-    from mmcv.cnn import xavier_init
-    from mmcv.runner import BaseModule
-    from mmcv.utils import to_2tuple
+from mmdet3d.compat import BaseModule, to_2tuple, TRANSFORMER_LAYER, TRANSFORMER_LAYER_SEQUENCE
 
-# ----------------- 物理修复结束 -----------------
-
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.cnn.bricks.registry import (TRANSFORMER_LAYER,
-                                          TRANSFORMER_LAYER_SEQUENCE)
-except ImportError:
-    # MMEngine 2.x 中，这些注册表已统一并入 MODELS
-    from mmcv.utils import Registry; TRANSFORMER_LAYER = Registry("transformer_layer")
-    from mmcv.utils import Registry; TRANSFORMER_LAYER_SEQUENCE = Registry("transformer_layer_sequence")
-# ----------------- 物理修复结束 -----------------
 from mmcv.cnn.bricks.transformer import (BaseTransformerLayer,
                                          TransformerLayerSequence,
                                          build_transformer_layer_sequence)
@@ -40,7 +19,7 @@ from torch.nn.init import normal_
 try:
     from mmdet.models.utils.builder import TRANSFORMER
 except ImportError:
-    from mmcv.utils import Registry; TRANSFORMER = Registry("transformer")
+    from mmdet3d.compat import Registry; TRANSFORMER = Registry("transformer")
 
 try:
     from mmcv.ops.multi_scale_deform_attn import MultiScaleDeformableAttention

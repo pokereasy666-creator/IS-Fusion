@@ -2,10 +2,10 @@
 import numpy as np
 import torch
 
-from mmdet.core.bbox.builder import BBOX_CODERS
 from .partial_bin_based_bbox_coder import PartialBinBasedBBoxCoder
 
 
+from mmdet3d.compat import BBOX_CODERS
 @BBOX_CODERS.register_module()
 class AnchorFreeBBoxCoder(PartialBinBasedBBoxCoder):
     """Anchor free bbox coder for 3D boxes.

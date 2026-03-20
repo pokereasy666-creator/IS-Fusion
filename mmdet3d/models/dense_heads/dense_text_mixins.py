@@ -4,7 +4,20 @@ from inspect import signature
 
 import torch
 
-from mmdet.core import bbox_mapping_back, merge_aug_proposals, multiclass_nms
+try:
+    from mmdet.core import bbox_mapping_back, merge_aug_proposals, multiclass_nms
+except ImportError:
+    try:
+        from mmdet.models.utils import merge_aug_proposals
+        from mmdet.structures.bbox import bbox_mapping_back
+        from mmdet.utils import multiclass_nms
+    except ImportError:
+        def bbox_mapping_back(*args, **kwargs):
+            raise NotImplementedError("bbox_mapping_back unavailable")
+        def merge_aug_proposals(*args, **kwargs):
+            raise NotImplementedError("merge_aug_proposals unavailable")
+        def multiclass_nms(*args, **kwargs):
+            raise NotImplementedError("multiclass_nms unavailable")
 
 if sys.version_info >= (3, 7):
     from mmdet.utils.contextmanagers import completed

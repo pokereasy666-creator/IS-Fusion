@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from mmdet.core.anchor import build_anchor_generator
+from mmdet3d.compat import build_anchor_generator
 from .anchor_3d_generator import (AlignedAnchor3DRangeGenerator,
                                   AlignedAnchor3DRangeGeneratorPerCls,
                                   Anchor3DRangeGenerator)

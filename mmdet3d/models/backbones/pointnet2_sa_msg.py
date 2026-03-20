@@ -2,20 +2,11 @@
 import torch
 from mmcv.cnn import ConvModule
 # ----------------- 修正后的代码 (注意缩进) -----------------
-try:
-    # 这一行前面必须有 4 个空格！
-    from mmcv.runner import auto_fp16
-except ImportError:
-    # MMEngine 移除了 mmcv.runner，定义一个空装饰器保持兼容
-    def auto_fp16(apply_to=None, out_fp32=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 代码结束 -----------------
 from torch import nn as nn
 
 from mmdet3d.ops import build_sa_module
 # ----------------- 物理修复开始 -----------------
+from mmdet3d.compat import auto_fp16
 try:
     from mmdet.models import BACKBONES
 except ImportError:

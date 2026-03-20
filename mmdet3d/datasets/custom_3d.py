@@ -7,23 +7,12 @@ from os import path as osp
 from torch.utils.data import Dataset
 
 # ----------------- 物理修复开始 -----------------
-try:
-    # 尝试旧路径 (MMDet 2.x)
-    from mmdet.datasets import DATASETS
-except ImportError:
-    # 新路径 (MMDet 3.x)
-    try:
-        from mmdet.datasets import DATASETS
-    except ImportError:
-        # 如果都找不到，创建一个独立的注册表来保命
-        from mmcv.utils import Registry
-        DATASETS = Registry('dataset')
-# ----------------- 物理修复结束 -----------------
 from ..core.bbox import get_box_type
 from .pipelines import Compose
 from .utils import extract_result_dict, get_loading_pipeline
 import pickle
 
+from mmdet3d.compat import Registry
 @DATASETS.register_module()
 class Custom3DDataset(Dataset):
     """Customized 3D dataset.

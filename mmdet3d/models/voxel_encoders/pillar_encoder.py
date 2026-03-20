@@ -2,15 +2,6 @@
 import torch
 from mmcv.cnn import build_norm_layer
 # ----------------- 物理修复：通用兼容性 force_fp32 装饰器 -----------------
-try:
-    from mmcv.runner import force_fp32
-except ImportError:
-    # 使用 *args 和 **kwargs 接收所有旧版参数 (如 out_fp16, apply_to 等)
-    def force_fp32(*args, **kwargs):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn
 
 from mmdet3d.ops import DynamicScatter
@@ -18,6 +9,7 @@ from ..builder import VOXEL_ENCODERS
 from .utils import PFNLayer, get_paddings_indicator
 
 
+from mmdet3d.compat import force_fp32
 @VOXEL_ENCODERS.register_module()
 class PillarFeatureNet(nn.Module):
     """Pillar Feature Net.

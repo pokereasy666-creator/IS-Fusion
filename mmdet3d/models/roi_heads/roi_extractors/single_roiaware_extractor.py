@@ -1,32 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 # ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    # 适配 MMEngine / MMCV 2.0+
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module # 终极保底
-# ----------------- 物理修复结束 -----------------
-
 from mmdet3d import ops
 # ----------------- 物理修复：针对 ROI_EXTRACTORS 注册表缺失 -----------------
-try:
-    from mmdet.models.builder import ROI_EXTRACTORS
-except ImportError:
-    # 适配 MMDet 3.x / MMEngine 注册表
-    try:
-        from mmdet.models import ROI_EXTRACTORS
-    except ImportError:
-        # 最后的保底手动创建
-        from mmcv.utils import Registry
-        ROI_EXTRACTORS = Registry('roi_extractor')
-# ----------------- 物理修复结束 -----------------
-
-
+from mmdet3d.compat import BaseModule, Registry
 @ROI_EXTRACTORS.register_module()
 class Single3DRoIAwareExtractor(BaseModule):
     """Point-wise roi-aware Extractor.

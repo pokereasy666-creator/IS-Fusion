@@ -3,16 +3,6 @@ import torch
 import torch.nn as nn
 from torch.utils.checkpoint import checkpoint
 # ----------------- 修正后的代码 (注意缩进！！！) -----------------
-try:
-    # 👇 这一行前面必须有 4 个空格！
-    from mmcv.runner import auto_fp16
-except ImportError:
-    # 👇 下面这些行也要缩进
-    def auto_fp16(apply_to=None, out_fp32=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 代码结束 -----------------
 from mmcv.cnn import build_norm_layer
 
 from mmdet3d.ops import flat2window_v2, window2flat_v2
@@ -21,6 +11,7 @@ from mmdet3d.ops import flat2window_v2, window2flat_v2
 import os
 import pickle as pkl
 
+from mmdet3d.compat import auto_fp16
 class WindowAttention(nn.Module):
 
     def __init__(self, d_model, nhead, dropout, batch_first=False, layer_id=None, layer_cfg=dict()):

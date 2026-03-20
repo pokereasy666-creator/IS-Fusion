@@ -1,17 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.cnn.bricks.registry import ATTENTION
-except ImportError:
-    # 适配 MMDet 3.x / MMCV 2.x
-    try:
-        from mmcv.cnn.bricks import ATTENTION
-    except ImportError:
-        # 终极保底：通常归属于 MODELS 或 TASK_UTILS 注册表
-        from mmdet.models import BACKBONES as ATTENTION
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始：分离导入 -----------------
-# 1. 独立导入 MultiheadAttention (大概率还在 transformer 里)
+from mmdet3d.compat import ATTENTION
 try:
     from mmcv.cnn.bricks.transformer import MultiheadAttention
 except ImportError:
@@ -28,11 +17,6 @@ except ImportError:
         from mmcv.utils import Registry; POSITIONAL_ENCODING = Registry("positional_encoding")
         
 # 3. 顺手独立导入 ATTENTION (以防下面报错)
-try:
-    from mmcv.cnn.bricks.registry import ATTENTION
-except ImportError:
-    from mmcv.utils import Registry; ATTENTION = Registry("attention")
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 
 

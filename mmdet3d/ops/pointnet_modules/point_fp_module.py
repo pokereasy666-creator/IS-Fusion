@@ -2,24 +2,13 @@
 import torch
 from mmcv.cnn import ConvModule
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import BaseModule, force_fp32
-except ImportError:
-    # 兼容 MMCV 2.x / MMEngine
-    from mmcv.runner import BaseModule
-    
-    # 定义假装饰器
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 from typing import List
 
 from mmdet3d.ops import three_interpolate, three_nn
 
 
+from mmdet3d.compat import BaseModule, force_fp32
 class PointFPModule(BaseModule):
     """Point feature propagation module used in PointNets.
 

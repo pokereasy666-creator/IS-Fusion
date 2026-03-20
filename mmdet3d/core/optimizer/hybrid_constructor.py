@@ -1,10 +1,18 @@
-from mmcv.runner.optimizer import OPTIMIZER_BUILDERS, OPTIMIZERS
-from mmcv.utils import build_from_cfg
+from mmdet3d.compat import build_from_cfg
+
+try:
+    from mmcv.runner.optimizer import OPTIMIZER_BUILDERS, OPTIMIZERS
+except ImportError:
+    try:
+        from mmengine.registry import OPTIM_WRAPPER_CONSTRUCTORS as OPTIMIZER_BUILDERS
+        from mmengine.registry import OPTIMIZERS
+    except ImportError:
+        from mmdet3d.compat import Registry
+        OPTIMIZER_BUILDERS = Registry('optimizer_builders')
+        OPTIMIZERS = Registry('optimizers')
 
 from mmdet3d.utils import get_root_logger
 from .hybrid_optimizer import HybridOptimizer
-
-
 @OPTIMIZER_BUILDERS.register_module()
 class HybridOptimizerConstructor(object):
     """Special constructor for hybrid optimizers.

@@ -2,16 +2,6 @@
 import torch
 from mmcv.cnn import ConvModule
 # ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x 时代
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module # 终极保底
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 from torch.nn import functional as F
 
@@ -21,35 +11,7 @@ from mmdet3d.models.builder import build_loss
 from mmdet3d.models.losses import chamfer_distance
 from mmdet3d.ops import build_sa_module
 # ----------------- 物理修复：针对 mmdet.core 组件迁移 -----------------
-try:
-    from mmdet.core import build_bbox_coder, multi_apply
-except ImportError:
-    # 尝试从新版路径导入 build_bbox_coder
-    try:
-        from mmdet.models.builder import build_bbox_coder
-    except ImportError:
-        try:
-            from mmdet.core.bbox.builder import BBOX_ASSIGNERS as TASK_UTILS
-            def build_bbox_coder(cfg, **default_args):
-                return TASK_UTILS.build(cfg, default_args=default_args)
-        except ImportError:
-            build_bbox_coder = None
-    
-    # 尝试多路径探测 multi_apply
-    try:
-        from mmdet.models.utils import multi_apply
-    except ImportError:
-        try:
-            from mmdet.core import multi_apply
-        except ImportError:
-            # 最后的保底定义
-            from functools import partial
-            def multi_apply(func, *args, **kwargs):
-                pfunc = partial(func, **kwargs) if kwargs else func
-                map_results = map(pfunc, *args)
-                return tuple(map(list, zip(*map_results)))
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmdet.models.HEADS 缺失 -----------------
+from mmdet3d.compat import BBOX_ASSIGNERS, BaseModule, build_bbox_coder, multi_apply
 try:
     from mmdet.models import HEADS
 except ImportError:

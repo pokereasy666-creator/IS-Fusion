@@ -1,20 +1,11 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 # ----------------- 修正后的代码 (注意缩进！！！) -----------------
-try:
-    # 👇 这一行前面必须有 4 个空格！
-    from mmcv.runner import auto_fp16
-except ImportError:
-    # 👇 下面这些行也要缩进
-    def auto_fp16(apply_to=None, out_fp32=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 代码结束 -----------------
 from torch import nn as nn
 
 from mmdet3d.ops import PointFPModule, build_sa_module
 # ----------------- 物理修复开始 -----------------
+from mmdet3d.compat import auto_fp16
 try:
     from mmdet.models import BACKBONES
 except ImportError:

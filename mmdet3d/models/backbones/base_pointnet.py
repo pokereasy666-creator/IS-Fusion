@@ -2,14 +2,7 @@
 import warnings
 from abc import ABCMeta
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    # MMEngine 中 BaseModule 移到了 mmengine.model
-    from mmcv.runner import BaseModule
-# ----------------- 物理修复结束 -----------------
-
-
+from mmdet3d.compat import BaseModule
 class BasePointNet(BaseModule, metaclass=ABCMeta):
     """Base class for PointNet."""
 

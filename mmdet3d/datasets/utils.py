@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import mmcv
+from mmdet3d.compat import DataContainer, Registry
 
 # yapf: disable
 from mmdet3d.datasets.pipelines import (Collect3D, DefaultFormatBundle3D,
@@ -11,29 +11,17 @@ from mmdet3d.datasets.pipelines import (Collect3D, DefaultFormatBundle3D,
                                         MultiScaleFlipAug3D,
                                         PointSegClassMapping)
 # yapf: enable
-# ----------------- 物理修复开始 -----------------
 try:
     from mmdet.datasets.builder import PIPELINES
 except ImportError:
-    # 适配 MMDetection 3.x 的新路径
-    try:
-        from mmdet.datasets.builder import PIPELINES
-    except ImportError:
-        # 万能保底：手动定义一个
-        from mmcv.utils import Registry
-        PIPELINES = Registry('pipeline')
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
+    PIPELINES = Registry('pipeline')
 try:
     from mmdet.datasets.pipelines import LoadImageFromFile
 except (ImportError, ModuleNotFoundError):
     try:
-        # MMDetection 3.x / MMCV 2.x 的标准路径
         from mmcv.transforms import LoadImageFromFile
     except ImportError:
-        # 备选路径
         from mmdet.datasets.transforms import LoadImageFromFile
-# ----------------- 物理修复结束 -----------------
 
 
 def is_loading_function(transform):
@@ -156,6 +144,6 @@ def extract_result_dict(results, key):
     data = results[key]
     if isinstance(data, (list, tuple)):
         data = data[0]
-    if isinstance(data, mmcv.parallel.DataContainer):
+    if isinstance(data, DataContainer):
         data = data._data
     return data

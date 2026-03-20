@@ -5,22 +5,7 @@ from torch import nn
 from mmcv.cnn import ConvModule, build_conv_layer
 
 # ----------------- 物理修复 V3：BaseModule 与 force_fp32 -----------------
-try:
-    from mmcv.runner import BaseModule, force_fp32
-except ImportError:
-    from mmcv.runner import BaseModule
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-
-# ----------------- 物理修复 V3：MMDet 3.x 核心组件 -----------------
-try:
-    from mmdet.core import build_bbox_coder, multi_apply
-except ImportError:
-    from mmdet.core import build_bbox_coder
-    from mmdet.models.utils import multi_apply
-
-# ----------------- 物理修复 V3：MMDet3D 注册表与 Loss -----------------
+from mmdet3d.compat import BaseModule, build_bbox_coder, force_fp32, multi_apply
 try:
     from mmdet3d.models.builder import HEADS, build_loss
 except ImportError:

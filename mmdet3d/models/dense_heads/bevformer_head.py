@@ -9,19 +9,32 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import Linear, bias_init_with_prob
-from mmcv.utils import TORCH_VERSION, digit_version
 
-from mmdet.core import (multi_apply, multi_apply, reduce_mean)
-from mmdet.models.utils.transformer import inverse_sigmoid
 try:
-    from mmdet.models import HEADS
+    from mmcv.utils import TORCH_VERSION, digit_version
 except ImportError:
-    from mmdet.models import HEADS
+    try:
+        from mmengine.utils import digit_version
+    except ImportError:
+        def digit_version(v):
+            return tuple(int(x) for x in v.split('+')[0].split('.')[:3])
+    import torch
+    TORCH_VERSION = torch.__version__
+
+from mmdet3d.compat import force_fp32, auto_fp16, multi_apply, HEADS, build_bbox_coder
+
+try:
+    from mmdet.core import reduce_mean
+except ImportError:
+    try:
+        from mmengine.dist import reduce_mean
+    except ImportError:
+        def reduce_mean(tensor):
+            return tensor.mean()
+from mmdet.models.utils.transformer import inverse_sigmoid
 from mmdet.models.dense_heads import DETRHead
-from mmdet3d.core.bbox.coders import build_bbox_coder
 from ...core.bbox.util import normalize_bbox
 from mmcv.cnn.bricks.transformer import build_positional_encoding
-from mmcv.runner import force_fp32, auto_fp16
 # from projects.mmdet3d_plugin.models.utils.bricks import run_time
 import numpy as np
 import mmcv

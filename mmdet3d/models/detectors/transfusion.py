@@ -1,36 +1,12 @@
 import mmcv
 import torch
 # ----------------- 物理修复：针对 mmcv.parallel 缺失 -----------------
-try:
-    from mmcv.parallel import DataContainer as DC
-except ImportError:
-    # 适配 MMCV 2.x/MMEngine
-    class DC:
-        def __init__(self, data, cpu_only=False, stack=False, pad_dims=None, padding_value=0):
-            self._data = data
-            self.cpu_only = cpu_only
-            self.stack = stack
-            self.pad_dims = pad_dims
-            self.padding_value = padding_value
-        @property
-        def data(self):
-            return self._data
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmcv.runner 缺失 -----------------
-try:
-    from mmcv.runner import force_fp32
-except ImportError:
-    # 适配 MMCV 2.x，定义空装饰器保底
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from os import path as osp
 from torch import nn as nn
 from torch.nn import functional as F
 
 # ----------------- 物理修复：针对 mmdet3d.core 组件迁移 -----------------
+from mmdet3d.compat import DataContainer, force_fp32, multi_apply
 try:
     from mmdet3d.core import (Box3DMode, Coord3DMode, bbox3d2result,
                               merge_aug_bboxes_3d, show_result)
@@ -55,20 +31,6 @@ except ImportError:
 # ----------------- 物理修复结束 -----------------
 from mmdet3d.ops import Voxelization
 # ----------------- 物理修复：针对 multi_apply 路径彻底消失 -----------------
-try:
-    from mmdet.models.utils import multi_apply
-except ImportError:
-    try:
-        from mmdet.core import multi_apply
-    except ImportError:
-        # 终极保底：如果哪里都找不到，手动定义一个简单的 multi_apply
-        from functools import partial
-        def multi_apply(func, *args, **kwargs):
-            pfunc = partial(func, **kwargs) if kwargs else func
-            map_results = map(pfunc, *args)
-            return tuple(map(list, zip(*map_results)))
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmdet.models.DETECTORS 缺失 -----------------
 try:
     from mmdet.models import DETECTORS
 except ImportError:

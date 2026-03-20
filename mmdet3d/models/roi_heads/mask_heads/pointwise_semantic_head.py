@@ -1,40 +1,13 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 # ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x 环境
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module # 终极保底
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 from torch.nn import functional as F
 
 from mmdet3d.core.bbox.structures import rotation_3d_in_axis
 from mmdet3d.models.builder import build_loss
 # ----------------- 物理修复：针对 multi_apply 缺失 -----------------
-try:
-    from mmdet.core import multi_apply
-except ImportError:
-    try:
-        # 适配 MMDet 3.x 常见位置
-        from mmdet.models.utils import multi_apply
-    except ImportError:
-        try:
-            from mmdet.core import multi_apply
-        except ImportError:
-            # 最后的物理保底：实现 multi_apply 的标准逻辑
-            from functools import partial
-            def multi_apply(func, *args, **kwargs):
-                pfunc = partial(func, **kwargs) if kwargs else func
-                map_results = map(pfunc, *args)
-                return tuple(map(list, zip(*map_results)))
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmdet.models.HEADS 缺失 -----------------
+from mmdet3d.compat import BaseModule, multi_apply
 try:
     from mmdet.models import HEADS
 except ImportError:

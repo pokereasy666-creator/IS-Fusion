@@ -5,21 +5,11 @@ import torch
 import torch.nn as nn
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 # ----------------- 物理修复：针对 BaseModule 路径迁移 -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module # 终极保底
-# ----------------- 物理修复结束 -----------------
-
 from ..builder import NECKS
 from ..utils import CSPLayer
 
 
+from mmdet3d.compat import BaseModule
 @NECKS.register_module(name='YOLOXPAFPN', force=True)
 class YOLOXPAFPN(BaseModule):
     """Path Aggregation Network used in YOLOX.

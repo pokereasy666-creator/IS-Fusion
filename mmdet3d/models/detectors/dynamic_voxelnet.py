@@ -1,29 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复开始：FP16 装饰器兼容 -----------------
-try:
-    from mmcv.runner import force_fp32, auto_fp16
-except ImportError:
-    # 适配 MMEngine：提供空装饰器绕过旧版混合精度检查
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-        
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import force_fp32, auto_fp16, DETECTORS
 from torch.nn import functional as F
-
-# ----------------- 物理修复开始：检测器注册表 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
 from .voxelnet import VoxelNet
 
 

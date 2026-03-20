@@ -2,21 +2,9 @@
 from mmcv.cnn import ConvModule
 from mmcv.cnn.bricks import build_conv_layer
 
-# ----------------- 物理修复开始：BaseModule -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    from mmcv.runner import BaseModule
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import BaseModule, HEADS
 
 from torch import nn as nn
-
-# ----------------- 物理修复开始：HEADS 注册表 -----------------
-try:
-    from mmdet.models.builder import HEADS
-except ImportError:
-    from mmdet.models import HEADS
-# ----------------- 物理修复结束 -----------------
 
 
 @HEADS.register_module()

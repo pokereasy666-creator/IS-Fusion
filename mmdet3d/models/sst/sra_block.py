@@ -1,12 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.utils.checkpoint import checkpoint
-try:
-    from mmcv.runner import auto_fp16
-except ImportError:
-    def auto_fp16(*args, **kwargs):
-        def decorator(func): return func
-        return decorator
 from mmcv.cnn import build_norm_layer
 
 from mmdet3d.ops import flat2window, window2flat, SRATensor, DebugSRATensor, spconv
@@ -15,6 +9,7 @@ from mmdet3d.ops import flat2window, window2flat, SRATensor, DebugSRATensor, spc
 import os
 import pickle as pkl
 
+from mmdet3d.compat import auto_fp16
 class WindowAttention(nn.Module):
 
     def __init__(self, d_model, nhead, dropout, batch_first=False, layer_id=None):

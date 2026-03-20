@@ -1,20 +1,12 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 # ----------------- 物理修复：针对 mmcv.runner.auto_fp16 缺失 -----------------
-try:
-    from mmcv.runner import auto_fp16
-except ImportError:
-    # 适配 MMCV 2.x，定义空装饰器保底
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn
 
 from ..builder import MIDDLE_ENCODERS
 
 
+from mmdet3d.compat import auto_fp16
 @MIDDLE_ENCODERS.register_module()
 class PointPillarsScatter(nn.Module):
     """Point Pillar's Scatter.

@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmdet3d.core.bbox import bbox3d2result
 # ----------------- 物理修复：针对 HEADS 和 mmcv.runner 迁移 -----------------
+from mmdet3d.compat import BaseModule, auto_fp16
 try:
     from mmdet.models import HEADS
 except ImportError:
@@ -9,18 +10,6 @@ except ImportError:
     except ImportError:
         from mmdet.models import HEADS
 
-try:
-    from mmcv.runner import BaseModule, auto_fp16
-except ImportError:
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from ..builder import build_head
 from .base_3droi_head import Base3DRoIHead
 

@@ -5,30 +5,14 @@ import numpy as np
 import tempfile
 import torch
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.utils import print_log
-except ImportError:
-    from mmcv.utils import print_log
-# ----------------- 物理修复结束 -----------------
 from os import path as osp
 
 # ----------------- 物理修复开始 -----------------
-try:
-    # 尝试旧路径 (MMDet 2.x)
-    from mmdet.datasets import DATASETS
-except ImportError:
-    # 针对 MMDet 3.x / MMEngine 的新路径
-    try:
-        from mmdet.datasets import DATASETS
-    except ImportError:
-        # 万能保底：手动定义一个 Registry 防止程序崩溃
-        from mmcv.utils import Registry
-        DATASETS = Registry('dataset')
-# ----------------- 物理修复结束 -----------------
 from ..core.bbox import Box3DMode, CameraInstance3DBoxes, points_cam2img
 from .nuscenes_mono_dataset import NuScenesMonoDataset
 
 
+from mmdet3d.compat import Registry, print_log
 @DATASETS.register_module()
 class KittiMonoDataset(NuScenesMonoDataset):
     """Monocular 3D detection on KITTI Dataset.

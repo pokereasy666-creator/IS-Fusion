@@ -7,10 +7,13 @@ import torch.nn.functional as F
 from mmcv.cnn import (ConvModule, DepthwiseSeparableConvModule,
                       bias_init_with_prob)
 from mmcv.ops.nms import batched_nms
-from mmcv.runner import force_fp32
 
-from mmdet.core import (MlvlPointGenerator, bbox_xyxy_to_cxcywh,
-                        build_assigner, build_sampler, multi_apply)
+from mmdet3d.compat import build_assigner, build_sampler, force_fp32, multi_apply
+try:
+    from mmdet.core import MlvlPointGenerator, bbox_xyxy_to_cxcywh
+except ImportError:
+    from mmdet.models.task_modules import MlvlPointGenerator
+    from mmdet.structures.bbox import bbox_xyxy_to_cxcywh
 from ..builder import HEADS, build_loss
 from .base_dense_head import BaseDenseHead
 from .dense_test_mixins import BBoxTestMixin

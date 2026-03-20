@@ -1,18 +1,13 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 # ----------------- 物理修复开始：is_tuple_of -----------------
-try:
-    from mmcv import is_tuple_of
-except ImportError:
-    # 适配 MMEngine
-    from mmcv.utils import is_tuple_of
-# ----------------- 物理修复结束 -----------------
 from mmcv.cnn import ConvModule
 from torch import nn as nn
 
 from mmdet3d.models.builder import build_loss
 
 
+from mmdet3d.compat import is_tuple_of
 class VoteModule(nn.Module):
     """Vote module.
 

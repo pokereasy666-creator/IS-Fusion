@@ -3,6 +3,7 @@ import torch
 from mmcv.cnn import build_norm_layer
 # ----------------- 物理修复：全局拦截 utils.py 内的 None 归一化 (终极异常捕获版) -----------------
 import torch.nn as nn
+from mmdet3d.compat import auto_fp16
 _orig_build_norm_layer = build_norm_layer
 
 def safe_build_norm_layer(cfg, num_features, postfix=''):
@@ -23,15 +24,6 @@ def safe_build_norm_layer(cfg, num_features, postfix=''):
 build_norm_layer = safe_build_norm_layer
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复：通用兼容性装饰器 -----------------
-try:
-    from mmcv.runner import auto_fp16
-except ImportError:
-    # 使用通配符接收所有参数 (如 out_fp16, out_fp32, apply_to 等)
-    def auto_fp16(*args, **kwargs):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn
 from torch.nn import functional as F
 

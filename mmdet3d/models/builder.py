@@ -1,52 +1,34 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-# ----------------- 物理修复开始：适配 MMCV / MMEngine -----------------
+from mmdet3d.compat import Registry
+
+# ── Registries ──
+# In MMDet 3.x all modules go through a unified MODELS registry.
+# We create local aliases so that existing @BACKBONES.register_module()
+# decorators keep working without changes.
 try:
-    # 尝试旧版路径 (MMCV 1.x)
-    from mmcv.utils import Registry
-    from mmcv.cnn import MODELS as MMCV_MODELS
+    from mmdet.registry import MODELS as MMDET_MODELS
 except ImportError:
-    # 新版路径 (MMEngine / MMCV 2.x)
-    from mmcv.utils import Registry
-    from mmcv.cnn import MODELS as MMCV_MODELS
-# ----------------- 物理修复结束 -----------------
+    from mmengine.registry import MODELS as MMDET_MODELS
 
-# ----------------- 物理修复开始：适配 MMDetection 3.x -----------------
 try:
-    # 尝试旧版路径 (MMDet 2.x)
-    from mmdet.models.builder import (BACKBONES, DETECTORS, HEADS, LOSSES, NECKS,
-                                      ROI_EXTRACTORS, SHARED_HEADS)
-    from mmseg.models.builder import SEGMENTORS
+    from mmseg.registry import MODELS as MMSEG_MODELS
 except ImportError:
-    # 新版路径 (MMDet 3.x / MMSeg 1.x)
-    # 在 3.x 架构中，所有模块统一注册在 MODELS 里
-    try:
-        from mmdet.models import MODELS
-    except ImportError:
-        # 最后的保底，直接用 MMCV 的
-        MODELS = MMCV_MODELS
+    MMSEG_MODELS = MMDET_MODELS
 
-    # 建立别名引用，防止后续函数报错
-    BACKBONES = MODELS
-    DETECTORS = MODELS
-    HEADS = MODELS
-    LOSSES = MODELS
-    NECKS = MODELS
-    ROI_EXTRACTORS = MODELS
-    SHARED_HEADS = MODELS
-    
-    try:
-        from mmseg.models import MODELS as SEG_MODELS
-        SEGMENTORS = SEG_MODELS
-    except ImportError:
-        # 如果没装 mmseg，用通用模型库代替
-        SEGMENTORS = MODELS
-# ----------------- 物理修复结束 -----------------
+MODELS = Registry('models', parent=MMDET_MODELS)
+VTRANSFORMS = Registry('vtransforms')
 
-MODELS = Registry('models', parent=MMCV_MODELS)
-VTRANSFORMS = Registry("vtransforms")
-
+# Aliases for backward compatibility with v1-style code
+BACKBONES = MMDET_MODELS
+DETECTORS = MMDET_MODELS
+HEADS = MMDET_MODELS
+LOSSES = MMDET_MODELS
+NECKS = MMDET_MODELS
+ROI_EXTRACTORS = MMDET_MODELS
+SHARED_HEADS = MMDET_MODELS
+SEGMENTORS = MMSEG_MODELS
 VOXEL_ENCODERS = MODELS
 MIDDLE_ENCODERS = MODELS
 FUSION_LAYERS = MODELS
@@ -115,11 +97,7 @@ def build_segmentor(cfg, train_cfg=None, test_cfg=None):
 
 
 def build_model(cfg, train_cfg=None, test_cfg=None):
-    """A function warpper for building 3D detector or segmentor according to
-    cfg.
-
-    Should be deprecated in the future.
-    """
+    """Build 3D detector or segmentor according to cfg."""
     if cfg.type in ['EncoderDecoder3D']:
         return build_segmentor(cfg, train_cfg=train_cfg, test_cfg=test_cfg)
     else:

@@ -3,17 +3,7 @@ import copy
 import torch
 import warnings
 from mmcv.cnn import ConvModule
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import BaseModule, auto_fp16
-except ImportError:
-    from mmcv.runner import BaseModule
-    # 定义一个假的 auto_fp16 装饰器，防止报错
-    def auto_fp16(apply_to=None, out_fp32=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import BaseModule, auto_fp16
 from torch import nn as nn
 
 # ----------------- 物理修复开始 -----------------

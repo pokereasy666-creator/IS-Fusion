@@ -10,13 +10,7 @@ import torch
 import torch.distributed as dist
 from mmcv.image import tensor2imgs
 # ----------------- 物理修复：针对分布式工具路径迁移 -----------------
-try:
-    from mmcv.runner import get_dist_info
-except ImportError:
-    # 适配 MMEngine 环境
-    from mmcv.runner import get_dist_info
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 encode_mask_results 路径迁移 -----------------
+from mmdet3d.compat import get_dist_info
 try:
     from mmdet.core import encode_mask_results
 except ImportError:

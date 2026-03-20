@@ -2,10 +2,13 @@
 import numpy as np
 import torch
 
-from mmdet.core.bbox import BaseBBoxCoder
-from mmdet.core.bbox.builder import BBOX_CODERS
+try:
+    from mmdet.core.bbox import BaseBBoxCoder
+except ImportError:
+    from mmdet.models.task_modules.coders import BaseBBoxCoder
 
 
+from mmdet3d.compat import BBOX_CODERS
 @BBOX_CODERS.register_module()
 class PartialBinBasedBBoxCoder(BaseBBoxCoder):
     """Partial bin based bbox coder.

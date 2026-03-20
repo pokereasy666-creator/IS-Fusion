@@ -1,25 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-# ----------------- 物理修复：针对 mmcv.runner 与 注册表缺失 -----------------
-try:
-    from mmcv.runner import force_fp32
-except ImportError:
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-        
+from mmdet3d.compat import force_fp32, DETECTORS
 from torch.nn import functional as F
-
-# ----------------- 物理修复：针对 mmdet.models.DETECTORS 缺失 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMDet 3.x 注册表
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
 from .mvx_two_stage import MVXTwoStageDetector
 
 

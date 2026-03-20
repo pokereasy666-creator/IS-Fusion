@@ -2,15 +2,10 @@
 import numpy as np
 import torch
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.utils import print_log
-except ImportError:
-    # 兼容 MMCV 2.x / MMEngine
-    from mmcv.utils import print_log
-# ----------------- 物理修复结束 -----------------
 from terminaltables import AsciiTable
 
 
+from mmdet3d.compat import print_log
 def average_precision(recalls, precisions, mode='area'):
     """Calculate average precision (for single or multiple scales).
 

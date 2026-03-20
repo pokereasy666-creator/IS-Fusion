@@ -3,26 +3,12 @@ import numpy as np
 import torch
 from torch import nn as nn
 
-# ----------------- 物理修复 V3：适配 mmcv 2.x / mmengine -----------------
-try:
-    from mmcv.runner import BaseModule, force_fp32
-except ImportError:
-    # 适配 MMEngine
-    from mmcv.runner import BaseModule
-    # 定义空装饰器以兼容旧代码
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
+from mmdet3d.compat import (BaseModule, force_fp32, PseudoSampler, HEADS,
+                            build_anchor_generator, build_assigner,
+                            build_bbox_coder, build_sampler, multi_apply,
+                            images_to_levels)
 
-# ----------------- 物理修复：核心组件导入路径适配 -----------------
-# 1. 修复 PseudoSampler
-try:
-    from mmdet3d.core import PseudoSampler
-except ImportError:
-    from mmdet.core.bbox.samplers import PseudoSampler
-
-# 2. 修复 box3d_multiclass_nms
+# box3d_multiclass_nms
 try:
     from mmdet3d.core import box3d_multiclass_nms
 except ImportError:
@@ -31,7 +17,7 @@ except ImportError:
     except ImportError:
         from mmdet3d.models.layers import box3d_multiclass_nms
 
-# 3. 修复 limit_period 和 xywhr2xyxyr
+# limit_period and xywhr2xyxyr
 try:
     from mmdet3d.core import limit_period, xywhr2xyxyr
 except ImportError:
@@ -39,24 +25,6 @@ except ImportError:
         from mmdet3d.core.bbox import limit_period, xywhr2xyxyr
     except ImportError:
         from mmdet3d.core.utils import limit_period, xywhr2xyxyr
-
-# 4. 修复 mmdet.core 组件
-try:
-    from mmdet.core import (build_anchor_generator, build_assigner,
-                            build_bbox_coder, build_sampler, multi_apply, 
-                            images_to_levels)
-except ImportError:
-    from mmdet.core import (build_anchor_generator, build_assigner,
-                                    build_bbox_coder, build_sampler)
-    from mmdet.models.utils import multi_apply, images_to_levels
-
-# 5. 修复 HEADS 注册表
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    from mmdet.models import HEADS
-
-# ----------------- 物理修复结束 -----------------
 
 from ..builder import build_loss
 from .train_mixins import AnchorTrainMixin

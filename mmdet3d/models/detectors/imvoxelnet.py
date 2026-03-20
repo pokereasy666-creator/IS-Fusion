@@ -1,34 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
-# ----------------- 物理修复：针对 build_anchor_generator 导入崩溃 -----------------
-try:
-    # 尝试最原始的路径
-    from mmdet3d.core import bbox3d2result, build_anchor_generator
-except ImportError:
-    # 如果找不到，直接定义保底函数，确保 detectors.__init__ 加载时不崩溃
-    def build_anchor_generator(*args, **kwargs): return None
-    
-    try:
-        from mmdet3d.core.bbox import bbox3d2result
-    except ImportError:
-        def bbox3d2result(*args, **kwargs): return None
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.core import bbox3d2result, build_anchor_generator
 from mmdet3d.models.fusion_layers.point_fusion import point_sample
-# ----------------- 物理修复：针对 mmdet.models 组件缺失 -----------------
-try:
-    from mmdet.models import DETECTORS, build_backbone, build_head, build_neck
-except ImportError:
-    # 适配 MMDet 3.x / MMEngine 路径
-    try:
-        from mmdet.models import DETECTORS
-        def build_backbone(cfg): return DETECTORS.build(cfg)
-        def build_neck(cfg):     return DETECTORS.build(cfg)
-        def build_head(cfg):     return DETECTORS.build(cfg)
-    except ImportError:
-        # 兼容旧版 builder 路径
-        from mmdet.models.builder import DETECTORS, build_backbone, build_head, build_neck
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import DETECTORS
+from mmdet.models import build_backbone, build_head, build_neck
 from mmdet.models.detectors import BaseDetector
 
 

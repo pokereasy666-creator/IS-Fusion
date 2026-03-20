@@ -3,6 +3,7 @@ import numpy as np
 import torch
 # ----------------- 物理修复开始：kaiming_init -----------------
 from mmcv.cnn import ConvModule, build_conv_layer
+from mmdet3d.compat import AssignResult, BaseModule, build_assigner, build_bbox_coder, build_sampler, force_fp32, multi_apply
 try:
     from mmcv.cnn import kaiming_init
 except ImportError:
@@ -10,15 +11,6 @@ except ImportError:
     from mmcv.cnn import kaiming_init
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
-try:
-    from mmcv.runner import BaseModule, force_fp32
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    from mmcv.runner import BaseModule
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
@@ -63,21 +55,6 @@ from mmdet3d.models.utils import clip_sigmoid
 from mmdet3d.models.fusion_layers import apply_3d_transformation
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
 # ----------------- 物理修复开始：mmdet.core 组件大迁移 -----------------
-try:
-    from mmdet.core import build_bbox_coder, multi_apply, build_assigner, build_sampler, AssignResult
-except ImportError:
-    # 适配 MMDet 3.x
-    from mmdet.core import build_bbox_coder, build_assigner, build_sampler
-    from mmdet.models.utils import multi_apply
-    try:
-        from mmdet.core.bbox.assigners import AssignResult
-    except ImportError:
-        # 有些 MMEngine 版本会把它整合到 structures 里
-        class AssignResult: pass # 终极保底：如果仅用于类型注解，空类即可防报错
-# ----------------- 物理修复结束 -----------------
-# from mmdet3d.ops.roiaware_pool3d import points_in_boxes_batch
-
-
 class PositionEmbeddingLearned(nn.Module):
     """
     Absolute pos embedding, learned.

@@ -5,16 +5,7 @@ from torch import nn
 from mmcv.cnn import ConvModule, build_conv_layer
 
 # ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
-try:
-    from mmcv.runner import BaseModule, force_fp32
-except ImportError:
-    from mmcv.runner import BaseModule
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
-
-# ----------------- 物理修复开始：mmdet3d.core 迁移 -----------------
+from mmdet3d.compat import BaseModule, build_bbox_coder, force_fp32, multi_apply
 try:
     from mmdet3d.core import (circle_nms, draw_heatmap_gaussian, gaussian_radius, xywhr2xyxyr)
 except ImportError:
@@ -59,13 +50,6 @@ except ImportError:
 # ----------------- 物理修复结束 -----------------
 
 # ----------------- 物理修复开始：MMDet 核心组件 -----------------
-try:
-    from mmdet.core import build_bbox_coder, multi_apply
-except ImportError:
-    from mmdet.core import build_bbox_coder
-    from mmdet.models.utils import multi_apply
-# ----------------- 物理修复结束 -----------------
-
 @HEADS.register_module()
 class CenterIoUHead(BaseModule):
     """CenterHead for CenterPoint.

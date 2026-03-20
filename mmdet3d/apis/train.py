@@ -1,5 +1,6 @@
 
 # --- GLOBAL RUNNER MOCK ---
+from mmdet3d.compat import HOOKS, MMDataParallel, MMDistributedDataParallel, build_from_cfg, collate
 def _mock_build_runner(*args, **kwargs):
     print("Using Custom Bypass Runner!")
     class CustomRunner:
@@ -78,7 +79,6 @@ if not dist.is_initialized():
 from functools import partial
 def _mock_build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1, dist=False, shuffle=True, seed=None, runner_type="EpochBasedRunner", persistent_workers=False, **kwargs):
     from torch.utils.data import DataLoader
-    from mmcv.parallel import collate
     collate_fn = partial(collate, samples_per_gpu=samples_per_gpu)
     sampler = None
     if dist:
@@ -107,101 +107,19 @@ import numpy as np
 import torch
 # ----------------- 物理修复：针对并行封装器路径迁移 -----------------
 try:
-    from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
-except ImportError:
-    try:
-        # 适配 MMEngine 环境
-        from mmcv.parallel import MMDistributedDataParallel
-        from mmcv.parallel import MMDataParallel
-    except ImportError:
-        # 极端物理保底：定义空类
-        class MMDataParallel: pass
-        class MMDistributedDataParallel: pass
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 Runner 和 HOOKS 迁移 -----------------
-try:
-    from mmcv.runner import (HOOKS, DistSamplerSeedHook, EpochBasedRunner,
-                             Fp16OptimizerHook, OptimizerHook, build_optimizer,
-                             build_runner)
-except ImportError:
-    # 适配 MMEngine 2.x 路径
-    try:
-        from mmcv.utils import Registry; HOOKS = Registry("hook")
-        from mmcv.runner import EpochBasedRunner
-        # 这里的 build 函数在新版中通常由核心 Registry 完成
-        def build_runner(cfg, default_args=None):
-            from mmcv.runner import EpochBasedRunner as Runner
-            return Runner.from_cfg(cfg)
-        def build_optimizer(model, cfg):
-            pass  # build_optim_wrapper not needed in mmcv 2.x
-            return build_optim_wrapper(model, cfg)
-        # 占位符防止缺失报错
-        DistSamplerSeedHook = None
-        Fp16OptimizerHook = None
-        OptimizerHook = None
-    except ImportError:
-        class EpochBasedRunner: pass
-        HOOKS = None
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 build_from_cfg 路径迁移 -----------------
-try:
-    from mmcv.utils import build_from_cfg
-except ImportError:
-    try:
-        from mmcv.utils import build_from_cfg
-    except ImportError:
-        # 最后的物理保底实现：手动模拟 build_from_cfg 逻辑
-        def build_from_cfg(cfg, registry, default_args=None):
-            if not isinstance(cfg, dict):
-                return cfg
-            return registry.build(cfg, default_args=default_args)
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 EvalHook 路径迁移 -----------------
-try:
     from mmdet.core import DistEvalHook, EvalHook
 except ImportError:
     try:
-        # 尝试从新版 mmdet 寻找
-        from mmdet.engine.hooks import DetEvalHook as EvalHook
-        from mmdet.engine.hooks import DetEvalHook as DistEvalHook 
+        from mmengine.hooks import EvalHook, DistEvalHook
     except ImportError:
-        # 物理保底：定义空类防止 import 挂掉
-        class EvalHook: pass
-        class DistEvalHook: pass
+        try:
+            from mmdet.engine.hooks import DetEvalHook as EvalHook
+            from mmdet.engine.hooks import DetEvalHook as DistEvalHook
+        except ImportError:
+            class EvalHook: pass
+            class DistEvalHook: pass
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复：针对 build_dataloader 迁移 -----------------
-try:
-    from mmdet.datasets import (build_dataloader, build_dataset,
-                                replace_ImageRootSiameseDataset)
-except ImportError:
-    try:
-        # 尝试从新版路径导入核心构建函数
-        from mmdet.datasets.builder import build_dataset
-        # 在 MMEngine 中，DataLoader 通常由 Runner 自动构建
-        # 这里为了兼容旧接口，提供一个逻辑映射
-        def _mock_build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1, **kwargs):
-            from torch.utils.data import DataLoader
-            from torch.utils.data.distributed import DistributedSampler as DefaultSampler
-            from functools import partial
-            from mmcv.parallel import collate
-            collate_fn = partial(collate, samples_per_gpu=samples_per_gpu)
-            filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['shuffle', 'dist', 'seed', 'collate_fn']}
-            return DataLoader(
-                dataset,
-                batch_size=samples_per_gpu,
-                num_workers=workers_per_gpu,
-                sampler=DefaultSampler(dataset, shuffle=kwargs.get('shuffle', False)),
-                collate_fn=collate_fn,
-                **filtered_kwargs
-            )
-        replace_ImageRootSiameseDataset = None
-    except ImportError:
-        # 终极保底
-        build_dataset = None
-        build_dataloader = None
-        replace_ImageRootSiameseDataset = None
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 get_root_logger 路径迁移 -----------------
 try:
     from mmdet.utils import get_root_logger
 except ImportError:

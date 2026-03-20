@@ -2,41 +2,9 @@
 import mmcv
 import numpy as np
 import torch
-# ----------------- 物理修复：针对 DataContainer 路径迁移 -----------------
-try:
-    from mmcv.parallel import DataContainer as DC
-except ImportError:
-    try:
-        # 适配 MMEngine 2.x 路径
-        from mmcv.parallel import DataContainer as DC
-    except ImportError:
-        try:
-            from mmcv.parallel import DataContainer as DC
-        except ImportError:
-            # 最后的保底：如果实在找不到，定义一个简单的类避免代码完全崩溃
-            class DC:
-                def __init__(self, data, **kwargs): self.data = data
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmcv.runner 装饰器迁移 -----------------
-try:
-    from mmcv.runner import auto_fp16
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x 
-    # MMEngine 中通常不再强制要求 auto_fp16 装饰器，这里提供一个空装饰器保底
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-
-# 如果后面有 BaseModule 报错，可以提前加上这个探测
-if 'BaseModule' not in globals():
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        BaseModule = nn.Module
-# ----------------- 物理修复结束 -----------------
 from os import path as osp
+
+from mmdet3d.compat import DataContainer as DC, auto_fp16, BaseModule, is_list_of
 
 from mmdet3d.core import show_seg_result
 from mmseg.models.segmentors import BaseSegmentor
@@ -129,7 +97,7 @@ class Base3DSegmentor(BaseSegmentor):
         for batch_id in range(len(result)):
             if isinstance(data['points'][0], DC):
                 points = data['points'][0]._data[0][batch_id].numpy()
-            elif mmcv.is_list_of(data['points'][0], torch.Tensor):
+            elif is_list_of(data['points'][0], torch.Tensor):
                 points = data['points'][0][batch_id]
             else:
                 ValueError(f"Unsupported data type {type(data['points'][0])} "
@@ -137,7 +105,7 @@ class Base3DSegmentor(BaseSegmentor):
             if isinstance(data['img_metas'][0], DC):
                 pts_filename = data['img_metas'][0]._data[0][batch_id][
                     'pts_filename']
-            elif mmcv.is_list_of(data['img_metas'][0], dict):
+            elif is_list_of(data['img_metas'][0], dict):
                 pts_filename = data['img_metas'][0][batch_id]['pts_filename']
             else:
                 ValueError(

@@ -6,6 +6,7 @@ import copy
 import numpy as np
 
 # --- Gaussian Heatmap Utils ---
+from mmdet3d.compat import AssignResult, BBOX_ASSIGNERS, PseudoSampler, build_assigner, build_bbox_coder, build_sampler, force_fp32, multi_apply
 def gaussian_radius(det_size, min_overlap=0.7):
     height, width = det_size
     a1, b1, c1 = 1, (height + width), width * height * (1 - min_overlap) / (1 + min_overlap)
@@ -47,39 +48,12 @@ from mmcv.cnn import ConvModule, build_conv_layer
 import torch
 # --- 强制补回 force_fp32 ---
 try:
-    from mmcv.runner import force_fp32
-except ImportError:
-    try:
-        from mmcv.runner import force_fp32
-    except ImportError:
-        def force_fp32(apply_to=None, out_fp16=False):
-            def decorator(func):
-                return func
-            return decorator
-# --------------------------
-
-
-
-
-
-try:
     from mmdet3d.core import xywhr2xyxyr, limit_period
 except ImportError:
     try:
         from mmdet3d.structures.bbox_3d import limit_period, xywhr2xyxyr
     except ImportError:
         from mmdet3d.models.utils import limit_period, xywhr2xyxyr
-
-try:
-    from mmdet.core.bbox.samplers import PseudoSampler
-except ImportError:
-    try:
-        from mmdet.core.bbox.samplers import PseudoSampler
-    except ImportError:
-        try:
-            from mmdet.core import PseudoSampler
-        except ImportError:
-            class PseudoSampler: pass
 
 try:
     from mmdet3d.core.bbox.structures import rotation_3d_in_axis
@@ -97,21 +71,6 @@ from mmdet3d.models.utils import clip_sigmoid
 from mmdet3d.models.fusion_layers import apply_3d_transformation
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
 
-try:
-    from mmdet.core import build_bbox_coder, multi_apply, build_assigner, build_sampler, AssignResult
-except ImportError:
-    from mmdet.models import MODELS
-    from mmdet.core.bbox.builder import BBOX_ASSIGNERS as TASK_UTILS
-    build_bbox_coder = MODELS.build
-    build_assigner = TASK_UTILS.build
-    build_sampler = TASK_UTILS.build
-    try:
-        from mmdet.models.utils.misc import multi_apply
-    except ImportError:
-        from mmdet.core import multi_apply
-    from mmdet.core.bbox.assigners import AssignResult
-
-# 强制注册 TransFusionBBoxCoder 防止 KeyError
 try:
     from mmdet3d.core.bbox.coders.transfusion_bbox_coder import TransFusionBBoxCoder
     if 'TransFusionBBoxCoder' not in MODELS:

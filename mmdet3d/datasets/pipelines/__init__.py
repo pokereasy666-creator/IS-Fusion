@@ -1,17 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-# ----------------- 物理修复开始 -----------------
+from mmdet3d.compat import build_from_cfg
+
 try:
-    # 首先尝试旧版路径 (MMDet 2.x)
     from mmdet.datasets.pipelines import Compose
 except (ImportError, ModuleNotFoundError):
-    try:
-        # 尝试 MMEngine 路径 (OpenMMLab 2.0 规范)
-        from mmcv.utils import build_from_cfg
-        # Compose will be imported from local pipelines
-    except (ImportError, ModuleNotFoundError):
-        # 最后的保底路径 (MMDet 3.x 变换)
-        from mmdet.datasets.transforms import Compose
-# ----------------- 物理修复结束 -----------------
+    from mmdet.datasets.transforms import Compose
 from .dbsampler import DataBaseSampler
 from .formating import Collect3D, DefaultFormatBundle, DefaultFormatBundle3D
 from .loading import (LoadAnnotations3D, LoadImageFromFileMono3D,

@@ -1,13 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from abc import ABCMeta, abstractmethod
 
-try:
-    try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    from mmcv.runner import BaseModule
-except ImportError:
-    from mmcv.runner import BaseModule
+from mmdet3d.compat import BaseModule
 
 
 class BaseDenseHead(BaseModule, metaclass=ABCMeta):

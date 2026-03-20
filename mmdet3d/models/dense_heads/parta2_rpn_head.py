@@ -4,20 +4,9 @@ from __future__ import division
 import numpy as np
 import torch
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import force_fp32, BaseModule
-except ImportError:
-    # 适配 MMEngine：BaseModule 移到了 mmengine.model
-    from mmcv.runner import BaseModule
-    # 定义空装饰器以保持兼容
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
-
 from mmdet3d.core import limit_period, xywhr2xyxyr
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu, nms_normal_gpu
+from mmdet3d.compat import BaseModule, force_fp32
 try:
     from mmdet.models import HEADS
 except ImportError:

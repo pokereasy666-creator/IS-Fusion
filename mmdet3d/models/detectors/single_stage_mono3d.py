@@ -2,23 +2,9 @@
 import mmcv
 import numpy as np
 import torch
-# ----------------- 物理修复：针对 mmcv.parallel 缺失 -----------------
-try:
-    from mmcv.parallel import DataContainer as DC
-except ImportError:
-    # 适配 MMCV 2.x
-    class DC:
-        def __init__(self, data, cpu_only=False, stack=False, pad_dims=None, padding_value=0):
-            self._data = data
-            self.cpu_only = cpu_only
-            self.stack = stack
-            self.pad_dims = pad_dims
-            self.padding_value = padding_value
-        @property
-        def data(self):
-            return self._data
-# ----------------- 物理修复结束 -----------------
 from os import path as osp
+
+from mmdet3d.compat import DataContainer as DC, bbox2result, is_list_of
 
 from mmdet3d.core import (CameraInstance3DBoxes, bbox3d2result,
                           show_multi_modality_result)
@@ -111,7 +97,7 @@ class SingleStageMono3DDetector(SingleStageDetector):
             *outs, img_metas, rescale=rescale)
 
         if self.bbox_head.pred_bbox2d:
-            from mmdet.core import bbox2result
+
             bbox2d_img = [
                 bbox2result(bboxes2d, labels, self.bbox_head.num_classes)
                 for bboxes, scores, labels, attrs, bboxes2d in bbox_outputs
@@ -182,7 +168,7 @@ class SingleStageMono3DDetector(SingleStageDetector):
         bbox_outputs = self.bbox_head.get_bboxes(
             *merged_outs, img_metas[0], rescale=rescale)
         if self.bbox_head.pred_bbox2d:
-            from mmdet.core import bbox2result
+
             bbox2d_img = [
                 bbox2result(bboxes2d, labels, self.bbox_head.num_classes)
                 for bboxes, scores, labels, attrs, bboxes2d in bbox_outputs
@@ -214,7 +200,7 @@ class SingleStageMono3DDetector(SingleStageDetector):
                 img_filename = data['img_metas'][0]._data[0][batch_id][
                     'filename']
                 cam2img = data['img_metas'][0]._data[0][batch_id]['cam2img']
-            elif mmcv.is_list_of(data['img_metas'][0], dict):
+            elif is_list_of(data['img_metas'][0], dict):
                 img_filename = data['img_metas'][0][batch_id]['filename']
                 cam2img = data['img_metas'][0][batch_id]['cam2img']
             else:

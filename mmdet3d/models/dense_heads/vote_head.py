@@ -5,18 +5,7 @@ from torch.nn import functional as F
 from torch import nn as nn
 
 # ----------------- 物理修复开始：BaseModule 与 force_fp32 -----------------
-try:
-    from mmcv.runner import BaseModule, force_fp32
-except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    from mmcv.runner import BaseModule
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
-
-# ----------------- 物理修复开始：MMDet3D 核心组件与 Loss -----------------
+from mmdet3d.compat import BaseModule, build_bbox_coder, force_fp32, multi_apply
 try:
     from mmdet3d.core.post_processing import aligned_3d_nms
 except ImportError:
@@ -36,13 +25,6 @@ from mmdet3d.ops import build_sa_module, furthest_point_sample
 # ----------------- 物理修复结束 -----------------
 
 # ----------------- 物理修复开始：MMDet 核心组件与 HEADS -----------------
-try:
-    from mmdet.core import build_bbox_coder, multi_apply
-except ImportError:
-    # 适配 MMDet 3.x
-    from mmdet.core import build_bbox_coder
-    from mmdet.models.utils import multi_apply
-
 try:
     from mmdet.models import HEADS
 except ImportError:

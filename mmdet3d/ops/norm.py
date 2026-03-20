@@ -1,6 +1,7 @@
 import torch
 
 # ----------------- 物理修复开始：兼容 MMCV 2.x -----------------
+from mmdet3d.compat import force_fp32
 try:
     from mmcv.cnn import NORM_LAYERS
 except ImportError:
@@ -14,16 +15,6 @@ except ImportError:
 # ----------------- 物理修复结束 -----------------
 
 # ----------------- 物理修复开始 (替换第 16 行) -----------------
-try:
-    from mmcv.runner import force_fp32
-except ImportError:
-    # 兼容 MMCV 2.x：定义假装饰器
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
-
 from torch import distributed as dist
 from torch import nn as nn
 from torch.autograd.function import Function

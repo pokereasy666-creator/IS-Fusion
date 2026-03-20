@@ -1,10 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
-from mmdet.core.bbox.builder import BBOX_SAMPLERS
 from . import RandomSampler, SamplingResult
 
 
+from mmdet3d.compat import BBOX_SAMPLERS
 @BBOX_SAMPLERS.register_module()
 class IoUNegPiecewiseSampler(RandomSampler):
     """IoU Piece-wise Sampling.

@@ -2,100 +2,14 @@
 import mmcv
 import torch
 import warnings
-# ----------------- 物理修复开始：DataContainer 替身 -----------------
-try:
-    from mmcv.parallel import DataContainer as DC
-except ImportError:
-    # 适配 MMCV 2.x：造一个拥有相同属性的假 DC 类
-    class DC:
-        def __init__(self, data, cpu_only=False, stack=False, pad_dims=None, padding_value=0):
-            self._data = data
-            self.cpu_only = cpu_only
-            self.stack = stack
-            self.pad_dims = pad_dims
-            self.padding_value = padding_value
-        @property
-        def data(self):
-            return self._data
-# ----------------- 物理修复结束 -----------------
-
-# ----------------- 物理修复开始：注册表适配 -----------------
-try:
-    from mmdet.models.builder import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models import DETECTORS
-    except ImportError:
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始：FP16 装饰器兼容 -----------------
-try:
-    from mmcv.runner import force_fp32, auto_fp16
-except ImportError:
-    # 适配 MMEngine：提供空装饰器绕过旧版混合精度检查
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-        
-    def auto_fp16(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import DETECTORS, DataContainer as DC, auto_fp16, bbox2result, force_fp32, multi_apply
 from os import path as osp
 from torch.nn import functional as F
 
-# ----------------- 物理修复开始：mmdet3d.core 组件大扫除 -----------------
-# 1. 独立导入 3D 框与坐标系模式
-try:
-    from mmdet3d.core import Box3DMode, Coord3DMode
-except ImportError:
-    try:
-        from mmdet3d.core.bbox import Box3DMode, Coord3DMode
-    except ImportError:
-        from mmdet3d.structures import Box3DMode, Coord3DMode
-
-# 2. 独立导入 测试后处理函数
-try:
-    from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
-except ImportError:
-    try:
-        from mmdet3d.core.post_processing import bbox3d2result, merge_aug_bboxes_3d
-    except ImportError:
-        # 保底：新版通常移除了这些函数，先用空函数绕过初始化
-        def bbox3d2result(*args, **kwargs): pass
-        def merge_aug_bboxes_3d(*args, **kwargs): pass
-
-# 3. 独立导入 可视化函数 (如果有用到)
-try:
-    from mmdet3d.core import show_result
-except ImportError:
-    try:
-        from mmdet3d.core.visualizer import show_result
-    except ImportError:
-        def show_result(*args, **kwargs): pass
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.core import (Box3DMode, Coord3DMode, bbox3d2result,
+                          merge_aug_bboxes_3d, show_result)
 from mmdet3d.ops import Voxelization
 # ----------------- 物理修复开始：mmdet.core 迁移 -----------------
-try:
-    from mmdet.core import multi_apply
-except ImportError:
-    # 适配 MMDet 3.x
-    try:
-        from mmdet.models.utils import multi_apply
-    except ImportError:
-        # 万一在极新的版本连 utils 里的也被去掉了，直接从 MMCV 或本地手写保底
-        from mmdet.core import multi_apply
-
-# 如果这行还导入了 bbox2result，请加上：
-try:
-    from mmdet.core import bbox2result
-except ImportError:
-    try:
-        from mmdet.core import bbox2result
-    except ImportError:
-        def bbox2result(*args, **kwargs): pass
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始：检测器注册表 -----------------
 try:
     from mmdet.models import DETECTORS
 except ImportError:

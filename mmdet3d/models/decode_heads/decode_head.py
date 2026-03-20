@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from abc import ABCMeta, abstractmethod
 # ----------------- 物理修复开始 -----------------
+from mmdet3d.compat import BaseModule, auto_fp16, force_fp32
 try:
     from mmcv.cnn import normal_init
 except ImportError:
@@ -8,23 +9,6 @@ except ImportError:
     from mmcv.cnn import normal_init
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import BaseModule, auto_fp16, force_fp32
-except ImportError:
-    # MMEngine 中 BaseModule 移到了 mmengine.model
-    from mmcv.runner import BaseModule
-    
-    # auto_fp16 和 force_fp32 在新版中机制改变，定义空装饰器以保持代码兼容
-    def auto_fp16(apply_to=None, out_fp32=False):
-        def decorator(func):
-            return func
-        return decorator
-
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func):
-            return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 
 from mmseg.models.builder import build_loss

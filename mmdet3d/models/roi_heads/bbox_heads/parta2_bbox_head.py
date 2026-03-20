@@ -2,6 +2,7 @@
 import numpy as np
 import torch
 # ----------------- 物理修复：针对 normal_init 路径迁移 -----------------
+from mmdet3d.compat import BBOX_ASSIGNERS, BaseModule, build_bbox_coder, multi_apply
 try:
     from mmcv.cnn import ConvModule, normal_init
 except ImportError:
@@ -21,17 +22,6 @@ except ImportError:
                     nn.init.constant_(module.bias, bias)
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复：针对 BaseModule 再次报错 -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    try:
-        from mmcv.runner import BaseModule
-    except ImportError:
-        import torch.nn as nn
-        if 'BaseModule' not in globals():
-            BaseModule = nn.Module
-# ----------------- 物理修复结束 -----------------
-
 from torch import nn as nn
 
 from mmdet3d.core.bbox.structures import (LiDARInstance3DBoxes,
@@ -41,34 +31,6 @@ from mmdet3d.ops import make_sparse_convmodule
 from mmdet3d.ops import spconv as spconv
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu, nms_normal_gpu
 # ----------------- 物理修复：针对 mmdet.core 组件再次消失 -----------------
-try:
-    from mmdet.core import build_bbox_coder, multi_apply
-except ImportError:
-    # 适配 build_bbox_coder
-    try:
-        from mmdet.models.builder import build_bbox_coder
-    except ImportError:
-        try:
-            from mmdet.core.bbox.builder import BBOX_ASSIGNERS as TASK_UTILS
-            def build_bbox_coder(cfg, **default_args):
-                return TASK_UTILS.build(cfg, default_args=default_args)
-        except ImportError:
-            build_bbox_coder = None
-            
-    # 适配 multi_apply
-    try:
-        from mmdet.models.utils import multi_apply
-    except ImportError:
-        try:
-            from mmdet.core import multi_apply
-        except ImportError:
-            from functools import partial
-            def multi_apply(func, *args, **kwargs):
-                pfunc = partial(func, **kwargs) if kwargs else func
-                map_results = map(pfunc, *args)
-                return tuple(map(list, zip(*map_results)))
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复：针对 mmdet.models.HEADS 缺失 -----------------
 try:
     from mmdet.models import HEADS
 except ImportError:

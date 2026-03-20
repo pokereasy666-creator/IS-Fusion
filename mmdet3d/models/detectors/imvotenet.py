@@ -3,31 +3,9 @@ import numpy as np
 import torch
 import warnings
 
-# ----------------- 物理修复：针对 mmdet3d.core 后处理函数迁移 -----------------
-try:
-    from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
-except ImportError:
-    try:
-        from mmdet3d.core.bbox import bbox3d2result, merge_aug_bboxes_3d
-    except ImportError:
-        try:
-            from mmdet3d.core.post_processing import bbox3d2result, merge_aug_bboxes_3d
-        except ImportError:
-            # 万能保底定义
-            def bbox3d2result(*args, **kwargs): return None
-            def merge_aug_bboxes_3d(*args, **kwargs): return None
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
 from mmdet3d.models.utils import MLP
-# ----------------- 物理修复：针对 mmdet.models.DETECTORS 缺失 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMDet 3.x 注册表
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.compat import DETECTORS
 from .. import builder
 from .base import Base3DDetector
 

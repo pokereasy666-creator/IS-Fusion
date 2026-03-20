@@ -1,4 +1,12 @@
-from mmcv.runner.optimizer import OPTIMIZERS
+try:
+    from mmcv.runner.optimizer import OPTIMIZERS
+except ImportError:
+    try:
+        from mmengine.registry import OPTIMIZERS
+    except ImportError:
+        from mmdet3d.compat import Registry
+        OPTIMIZERS = Registry('optimizers')
+
 from torch.optim import Optimizer
 
 

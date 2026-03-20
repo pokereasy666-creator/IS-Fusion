@@ -1,12 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmcv.cnn import ConvModule
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    from mmcv.runner import BaseModule
 from torch import nn as nn
 
 
+from mmdet3d.compat import BaseModule
 class MLP(BaseModule):
     """A simple MLP module.
 

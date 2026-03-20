@@ -2,25 +2,15 @@
 import torch
 
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmdet.core.bbox import bbox_overlaps
-except ImportError:
-    # 适配 MMDet 3.x
-    try:
-        from mmdet.structures.bbox import bbox_overlaps
-    except ImportError:
-        # 万一极少数旧版本残留
-        from mmdet.evaluation.functional import bbox_overlaps
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始：IOU_CALCULATORS -----------------
+from mmdet3d.compat import bbox_overlaps
 try:
     from mmdet.core.bbox.iou_calculators.builder import IOU_CALCULATORS
 except ImportError:
-    # 适配 MMDet 3.x
     try:
-        from mmdet.core.bbox.iou_calculators import IOU_CALCULATORS
+        from mmdet.models.task_modules.builder import IOU_CALCULATORS
     except ImportError:
-        from mmdet.core.bbox.iou_calculators import IOU_CALCULATORS
+        from mmdet3d.compat import Registry
+        IOU_CALCULATORS = Registry('iou_calculators')
 # ----------------- 物理修复结束 -----------------
 from ..structures import get_box_type
 

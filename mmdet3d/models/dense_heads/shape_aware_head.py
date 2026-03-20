@@ -5,17 +5,11 @@ import warnings
 from mmcv.cnn import ConvModule
 
 # ----------------- 物理修复开始：BaseModule -----------------
-try:
-    from mmcv.runner import BaseModule
-except ImportError:
-    # 适配 MMEngine
-    from mmcv.runner import BaseModule
-# ----------------- 物理修复结束 -----------------
-
 from torch import nn as nn
 
 # ----------------- 物理修复开始：核心组件导入路径适配 -----------------
 # 1. 修复 box3d_multiclass_nms, limit_period, xywhr2xyxyr
+from mmdet3d.compat import BaseModule, multi_apply
 try:
     from mmdet3d.core import box3d_multiclass_nms, limit_period, xywhr2xyxyr
 except ImportError:
@@ -28,12 +22,6 @@ except ImportError:
         from mmdet3d.models.utils import limit_period
 
 # 2. 修复 multi_apply
-try:
-    from mmdet.core import multi_apply
-except ImportError:
-    from mmdet.models.utils import multi_apply
-
-# 3. 修复 HEADS 注册表
 try:
     from mmdet.models import HEADS
 except ImportError:

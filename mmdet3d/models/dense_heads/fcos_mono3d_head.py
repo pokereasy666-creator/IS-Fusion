@@ -3,18 +3,11 @@ import numpy as np
 import torch
 from mmcv.cnn import Scale
 # ----------------- 物理修复开始 -----------------
-try:
-    from mmcv.runner import force_fp32, BaseModule
-except ImportError:
-    from mmcv.runner import BaseModule
-    def force_fp32(apply_to=None, out_fp16=False):
-        def decorator(func): return func
-        return decorator
-# ----------------- 物理修复结束 -----------------
 from torch import nn as nn
 
 # ----------------- 物理修复开始 -----------------
 # 1. 修复 box3d_multiclass_nms
+from mmdet3d.compat import BaseModule, force_fp32, multi_apply
 try:
     from mmdet3d.core import box3d_multiclass_nms
 except ImportError:
@@ -36,13 +29,6 @@ except ImportError:
             # 终极保底：适配 MMDet3D 1.x 最新版
             from mmdet3d.structures import xywhr2xyxyr
             from mmdet3d.models.utils import limit_period
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始 -----------------
-try:
-    from mmdet.core import multi_apply
-except ImportError:
-    # 适配 MMDet 3.x：multi_apply 移到了 mmdet.models.utils
-    from mmdet.models.utils import multi_apply
 # ----------------- 物理修复结束 -----------------
 # ----------------- 物理修复开始 -----------------
 try:

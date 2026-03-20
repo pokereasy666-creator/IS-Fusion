@@ -1,13 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 # ----------------- 物理修复开始 -----------------
-try:
-    # 尝试从旧位置导入 (MMCV 1.x)
-    from mmcv.utils import Registry, build_from_cfg
-except ImportError:
-    # 如果失败，从新位置导入 (MMCV 2.x / MMEngine)
-    from mmcv.utils import Registry, build_from_cfg
-# ----------------- 物理修复结束 -----------------
-
+from mmdet3d.compat import Registry, build_from_cfg
 SA_MODULES = Registry('point_sa_module')
 
 

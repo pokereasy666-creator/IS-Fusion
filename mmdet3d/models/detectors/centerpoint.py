@@ -1,32 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
-# ----------------- 物理修复开始：后处理工具函数 -----------------
-try:
-    from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
-except ImportError:
-    # 适配 MMDet3D 1.x / OpenMMLab 2.0
-    try:
-        from mmdet3d.core.bbox import bbox3d2result, merge_aug_bboxes_3d
-    except ImportError:
-        try:
-            from mmdet3d.core.post_processing import bbox3d2result, merge_aug_bboxes_3d
-        except ImportError:
-            # 终极保底：如果你的环境已经新到彻底移除了它们（改用 Det3DDataSample）
-            # 我们先造个空壳绕过初始化报错，等真正跑测试时如果用到我们再修
-            def bbox3d2result(*args, **kwargs): pass
-            def merge_aug_bboxes_3d(*args, **kwargs): pass
-# ----------------- 物理修复结束 -----------------
-# ----------------- 物理修复开始：检测器注册表 -----------------
-try:
-    from mmdet.models import DETECTORS
-except ImportError:
-    try:
-        from mmdet.models.builder import DETECTORS
-    except ImportError:
-        # 适配 MMEngine 最新注册表
-        from mmdet.models import DETECTORS
-# ----------------- 物理修复结束 -----------------
+from mmdet3d.core import bbox3d2result, merge_aug_bboxes_3d
+from mmdet3d.compat import DETECTORS
 from .mvx_two_stage import MVXTwoStageDetector
 
 

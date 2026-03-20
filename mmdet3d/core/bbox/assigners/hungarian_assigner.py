@@ -1,38 +1,9 @@
 # ----------------- 物理修复：跨时代导包兼容 -----------------
-try:
-    # 新纪元 (MMDet 3.x / MMEngine)：统筹进 TASK_UTILS
-    from mmdet.core.bbox.builder import BBOX_ASSIGNERS
-    from mmdet.core.bbox.builder import MATCH_COST
-    
-    # 获取新版的基础类
-    try:
-        from mmdet.core.bbox.assigners import AssignResult, BaseAssigner
-    except ImportError:
-        # 终极保底：手捏空基类和数据结构
-        class BaseAssigner: pass
-        class AssignResult:
-            def __init__(self, num_gts, gt_inds, max_overlaps, labels):
-                self.num_gts = num_gts; self.gt_inds = gt_inds
-                self.max_overlaps = max_overlaps; self.labels = labels
-
-    # 新版统一使用 registry.build，包装成旧版的函数名
-    def build_match_cost(cfg):
-        return BBOX_ASSIGNERS.build(cfg)
-    def build_iou_calculator(cfg):
-        return BBOX_ASSIGNERS.build(cfg)
-
-except ImportError:
-    # 旧石器时代 (MMDet 2.x) 的后路保留
-    from mmdet.core.bbox.builder import BBOX_ASSIGNERS
-    from mmdet.core.bbox.assigners import AssignResult, BaseAssigner
-    from mmdet.core.bbox.match_costs import build_match_cost
-    from mmdet.core.bbox.match_costs.builder import MATCH_COST
-    from mmdet.core.bbox.iou_calculators import build_iou_calculator
-# ----------------- 物理修复结束 -----------------
 from ...bbox.util import normalize_bbox
 
 import torch
 
+from mmdet3d.compat import AssignResult, BBOX_ASSIGNERS, MATCH_COST
 try:
     from scipy.optimize import linear_sum_assignment
 except ImportError:
