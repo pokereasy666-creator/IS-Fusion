@@ -126,10 +126,10 @@ MMDetection3D 分别用 `MMDistributedDataParallel` and `MMDataParallel` 实现�
 
 所有的输出（日志文件和模型权重文件）都会被保存到工作目录下，通过配置文件里的 `work_dir` 指定。
 
-默认我们每过一个周期都在验证数据集上评测模型，你可以通过在训练配置里添加间隔参数来改变评测的时间间隔：
+默认我们每过一个周期都在验证数据集上评测模型，你可以通过在训练配置里修改 `val_interval` 参数来改变评测的时间间隔：
 
 ```python
-evaluation = dict(interval=12)  # 每12个周期评估一次模型
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=36, val_interval=12)  # 每12个周期评估一次模型
 ```
 
 **重要**：配置文件中的默认学习率对应8块显卡，配置文件名里有具体的批量大小，比如'2x8'表示一共8块显卡，每块显卡2个样本。
@@ -153,11 +153,11 @@ python tools/train.py ${CONFIG_FILE} [optional arguments]
 
 - `--no-validate`（**不推荐**）：默认情况下，代码在训练阶段每 k（默认值是1，可以像[这里](https://github.com/open-mmlab/mmdetection3d/blob/master/configs/fcos3d/fcos3d_r101_caffe_fpn_gn-head_dcn_2x8_1x_nus-mono3d.py#L75)一样修改）个周期做一次评测，如果要取消评测，使用 `--no-validate`。
 - `--work-dir ${WORK_DIR}`：覆盖配置文件中的指定工作目录。
-- `--resume-from ${CHECKPOINT_FILE}`：从之前的模型权重文件中恢复。
-- `--options 'Key=value'`：覆盖使用的配置中的一些设定。
+- `--resume`：从工作目录中最新的检查点恢复训练。
+- `--cfg-options 'Key=value'`：覆盖使用的配置中的一些设定。
 
-`resume-from` 和 `load-from` 的不同点：
-- `resume-from` 加载模型权重和优化器状态，同时周期数也从特定的模型权重文件中继承，通常用于恢复偶然中断的训练过程。
+`resume` 和 `load-from` 的不同点：
+- `resume` 加载模型权重和优化器状态，同时周期数也从检查点中继承，通常用于恢复偶然中断的训练过程。
 - `load-from` 仅加载模型权重，训练周期从0开始，通常用于微调。
 
 ### 使用多个机器进行训练
@@ -191,25 +191,25 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 PORT=29501 ./tools/dist_train.sh ${CONFIG_FILE} 4
 
 如果你使用 Slurm 启动训练任务，有两种方式指定端口：
 
-1. 通过 `--options` 设置端口，这是更推荐的，因为它不改变原来的配置
+1. 通过 `--cfg-options` 设置端口，这是更推荐的，因为它不改变原来的配置
 
    ```shell
-   CUDA_VISIBLE_DEVICES=0,1,2,3 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config1.py ${WORK_DIR} --options 'dist_params.port=29500'
-   CUDA_VISIBLE_DEVICES=4,5,6,7 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config2.py ${WORK_DIR} --options 'dist_params.port=29501'
+   CUDA_VISIBLE_DEVICES=0,1,2,3 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config1.py ${WORK_DIR} --cfg-options 'env_cfg.dist_cfg.port=29500'
+   CUDA_VISIBLE_DEVICES=4,5,6,7 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config2.py ${WORK_DIR} --cfg-options 'env_cfg.dist_cfg.port=29501'
    ```
 
-2. 修改配置文件（通常在配置文件的倒数第6行）来设置不同的通信端口
+2. 修改配置文件来设置不同的通信端口
 
    在 `config1.py` 中，
 
    ```python
-   dist_params = dict(backend='nccl', port=29500)
+   env_cfg = dict(dist_cfg=dict(backend='nccl', port=29500))
    ```
 
    在 `config2.py` 中，
 
    ```python
-   dist_params = dict(backend='nccl', port=29501)
+   env_cfg = dict(dist_cfg=dict(backend='nccl', port=29501))
    ```
 
    然后，你可以使用 `config1.py` and `config2.py` 启动两个任务

@@ -49,7 +49,7 @@ If you find this project is helpful for you, please cite our paper:
 
 ### Installation
 
-This project is based on torch 1.10.1, mmdet 2.14.0, mmcv 1.4.0 and mmdet3d 0.16.0. Please install mmdet3d following [getting_started.md](docs/getting_started.md). 
+This project is based on OpenMMLab v2: mmengine>=0.7.0, mmcv>=2.0.0, mmdet>=3.0.0, and mmdet3d (dev). Please install dependencies following [getting_started.md](docs/getting_started.md).
 In addition, please install TorchEx with `cd mmdet3d/ops/TorchEx` and `pip install -v .`.
 
 ### Dataset Preparation

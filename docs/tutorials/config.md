@@ -381,7 +381,6 @@ evaluation = dict(pipeline=[  # Pipeline is passed by eval_pipeline created befo
         with_label=False),
     dict(type='Collect3D', keys=['points'])
 ])
-lr = 0.008  # Learning rate of optimizers
 optim_wrapper = dict(  # Config used to build optimizer wrapper, refer to https://mmengine.readthedocs.io/en/latest/tutorials/optim_wrapper.html for more details
     optimizer=dict(  # Config used to build optimizer, support all the optimizers in PyTorch
         type='Adam',  # Type of optimizers
@@ -405,15 +404,13 @@ visualizer = dict(  # Config of the visualizer
     vis_backends=[
         dict(type='LocalVisBackend'),
         dict(type='TensorboardVisBackend')])  # The visualizer backends used to record the training process.
-train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=36)  # Training loop that runs the workflow in total max_epochs
-dist_params = dict(backend='nccl')  # Parameters to setup distributed training, the port can also be set.
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=36, val_interval=1)  # Training loop config
+env_cfg = dict(
+    dist_cfg=dict(backend='nccl'))  # Parameters to setup distributed training, the port can also be set.
 log_level = 'INFO'  # The level of logging.
-find_unused_parameters = True  # Whether to find unused parameters
 work_dir = None  # Directory to save the model checkpoints and logs for the current experiments.
-load_from = None # load models as a pre-trained model from a given path. This will not resume training.
-resume_from = None  # Resume checkpoints from a given path, the training will be resumed from the epoch when the checkpoint's is saved. The training state such as the epoch number and optimizer state will be restored.
-workflow = [('train', 1)]  # Workflow for runner. [('train', 1)] means there is only one workflow and the workflow named 'train' is executed once. The workflow trains the model by 36 epochs according to the max_epochs.
-gpu_ids = range(0, 1)  # ids of gpus
+load_from = None  # load models as a pre-trained model from a given path. This will not resume training.
+resume = False  # Whether to resume from a checkpoint. If True, will resume from the latest checkpoint in work_dir.
 ```
 
 ## FAQ

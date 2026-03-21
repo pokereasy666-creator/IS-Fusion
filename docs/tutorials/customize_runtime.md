@@ -162,30 +162,23 @@ By default we use step learning rate with 1x schedule. In OpenMMLab v2, learning
     ]
     ```
 
-## Customize workflow
+## Customize training loop
 
-Workflow is a list of (phase, epochs) to specify the running order and epochs.
-By default it is set to be
-
-```python
-workflow = [('train', 1)]
-```
-
-which means running 1 epoch for training.
-Sometimes user may want to check some metrics (e.g. loss, accuracy) about the model on the validate set.
-In such case, we can set the workflow as
+In OpenMMLab v2, the training loop is configured via `train_cfg`, `val_cfg`, and `test_cfg`. By default, an epoch-based training loop is used:
 
 ```python
-[('train', 1), ('val', 1)]
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=12, val_interval=1)
+val_cfg = dict()
+test_cfg = dict()
 ```
 
-so that 1 epoch for training and 1 epoch for validation will be run iteratively.
+`val_interval` controls how often validation is run (every N training epochs). If you don't need validation, you can omit `val_cfg`.
 
-**Note**:
+For iteration-based training, use:
 
-1. The parameters of model will not be updated during val epoch.
-2. Keyword `max_epochs` in `runner` in the config only controls the number of training epochs and will not affect the validation workflow.
-3. Workflows `[('train', 1), ('val', 1)]` and `[('train', 1)]` will not change the behavior of `EvalHook` because `EvalHook` is called by `after_train_epoch` and validation workflow only affect hooks that are called through `after_val_epoch`. Therefore, the only difference between `[('train', 1), ('val', 1)]` and `[('train', 1)]` is that the runner will calculate losses on validation set after each training epoch.
+```python
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=90000, val_interval=5000)
+```
 
 ## Customize hooks
 
@@ -214,20 +207,20 @@ class MyHook(Hook):
     def after_run(self, runner):
         pass
 
-    def before_epoch(self, runner):
+    def before_train_epoch(self, runner):
         pass
 
-    def after_epoch(self, runner):
+    def after_train_epoch(self, runner):
         pass
 
-    def before_iter(self, runner):
+    def before_train_iter(self, runner, batch_idx, data_batch=None):
         pass
 
-    def after_iter(self, runner):
+    def after_train_iter(self, runner, batch_idx, data_batch=None, outputs=None):
         pass
 ```
 
-Depending on the functionality of the hook, the users need to specify what the hook will do at each stage of the training in `before_run`, `after_run`, `before_epoch`, `after_epoch`, `before_iter`, and `after_iter`.
+Depending on the functionality of the hook, the users need to specify what the hook will do at each stage of the training in `before_run`, `after_run`, `before_train_epoch`, `after_train_epoch`, `before_train_iter`, and `after_train_iter`.
 
 #### 2. Register the new hook
 

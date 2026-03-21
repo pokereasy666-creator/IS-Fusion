@@ -1,15 +1,14 @@
 # Unified environment requirements for IS-Fusion + PointMamba (Mamba encoder)
 #
-# Base environment: CUDA 11.7, PyTorch 1.13.1
+# Base environment: CUDA 11.8+, PyTorch 2.0+
 #
 # Install order:
-#   1. Install PyTorch first:
-#      pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1+cu117 \
-#          --extra-index-url https://download.pytorch.org/whl/cu117
+#   1. Install PyTorch first (example for CUDA 11.8):
+#      pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 #   2. pip install -r requirements_mamba.txt
 #   3. Build CUDA extensions:
 #      pip install -e /path/to/PointMamba/mamba/   (mamba_ssm)
-#      cd IS-Fusion && python setup.py develop
+#      cd IS-Fusion && pip install -v -e .
 #
 # ---- Shared / Aligned Dependencies ----
 numpy>=1.22.0,<2.0.0
