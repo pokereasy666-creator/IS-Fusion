@@ -1,7 +1,7 @@
 # Prerequisites
 
 - Linux or macOS (Windows is not currently officially supported)
-- Python 3.8+
+- Python 3.9+
 - PyTorch 2.0+
 - CUDA 11.8+
 - GCC 5+
@@ -21,7 +21,7 @@ The required versions of MMCV, MMDetection and MMSegmentation for different vers
 **a. Create a conda virtual environment and activate it.**
 
 ```shell
-conda create -n open-mmlab python=3.8 -y
+conda create -n open-mmlab python=3.9 -y
 conda activate open-mmlab
 ```
 
@@ -135,7 +135,7 @@ docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/mmdetection3d/data mmdete
 Here is a full script for setting up MMdetection3D with conda.
 
 ```shell
-conda create -n open-mmlab python=3.8 -y
+conda create -n open-mmlab python=3.9 -y
 conda activate open-mmlab
 
 # install PyTorch with CUDA 11.8 (adjust for your CUDA version)

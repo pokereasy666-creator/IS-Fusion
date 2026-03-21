@@ -1,7 +1,7 @@
 # 依赖
 
 - Linux or macOS (Windows is not currently officially supported)
-- Python 3.8+
+- Python 3.9+
 - PyTorch 2.0+
 - CUDA 11.8+
 - GCC 5+
@@ -18,7 +18,7 @@
 **a. 使用 conda 新建虚拟环境，并进入该虚拟环境。**
 
 ```shell
-conda create -n open-mmlab python=3.8 -y
+conda create -n open-mmlab python=3.9 -y
 conda activate open-mmlab
 ```
 
@@ -120,7 +120,7 @@ docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/mmdetection3d/data mmdete
 以下是一个基于 conda 安装 MMdetection3D 的脚本
 
 ```shell
-conda create -n open-mmlab python=3.8 -y
+conda create -n open-mmlab python=3.9 -y
 conda activate open-mmlab
 
 # 安装 PyTorch（以 CUDA 11.8 为例，请根据你的 CUDA 版本调整）
