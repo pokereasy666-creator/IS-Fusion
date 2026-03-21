@@ -353,13 +353,13 @@ test_pipeline = [
         ])
 ]
 
-data = dict(
-    samples_per_gpu=1,
-    workers_per_gpu=4,
-    train=dict(
+train_dataloader = dict(
+    batch_size=1,
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(type='DefaultSampler', shuffle=True),
+    dataset=dict(
         type='CBGSDataset',
-        # type='SimpleDataset',
-        # times=1,
         dataset=dict(
             type=dataset_type,
             data_root=data_root,
@@ -369,12 +369,17 @@ data = dict(
             modality=input_modality,
             test_mode=False,
             use_valid_flag=False,
-            # we use box_type_3d='LiDAR' in kitti and nuscenes dataset
-            # and box_type_3d='Depth' in sunrgbd and scannet dataset.
             box_type_3d='LiDAR',
             img_num=6,
-            load_interval=1)),
-    val=dict(
+            load_interval=1)))
+
+val_dataloader = dict(
+    batch_size=1,
+    num_workers=4,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
         type=dataset_type,
         data_root=data_root,
         ann_file=data_root + 'nuscenes_infos_val.pkl',
@@ -383,8 +388,15 @@ data = dict(
         modality=input_modality,
         test_mode=True,
         img_num=6,
-        box_type_3d='LiDAR'),
-    test=dict(
+        box_type_3d='LiDAR'))
+
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=4,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
         type=dataset_type,
         data_root=data_root,
         ann_file=data_root + 'nuscenes_infos_val.pkl',
@@ -409,6 +421,8 @@ param_scheduler = [dict(type='CosineAnnealingLR', by_epoch=True)]
 train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=total_epochs, val_interval=total_epochs//2)
 val_cfg = dict()
 val_evaluator = dict(type='NuScenesMetric')
+test_cfg = dict()
+test_evaluator = dict(type='NuScenesMetric')
 
 # runtime settings
 custom_hooks = [dict(type='EmptyCacheHook', after_iter=True, priority='HIGH')]

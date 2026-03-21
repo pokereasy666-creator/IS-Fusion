@@ -47,6 +47,46 @@ def parse_args():
     return args
 
 
+def _build_compat_dataloader(data_cfg, workers, batch_size, shuffle, test_mode=False):
+    """Build a v2-style dataloader dict from legacy data.train/val/test config."""
+    ds_cfg = data_cfg.copy()
+    ds_cfg.pop('samples_per_gpu', None)
+    if test_mode:
+        ds_cfg['test_mode'] = True
+    return dict(
+        batch_size=batch_size,
+        num_workers=workers,
+        persistent_workers=True if workers > 0 else False,
+        drop_last=False if test_mode else True,
+        sampler=dict(type='DefaultSampler', shuffle=shuffle),
+        dataset=ds_cfg)
+
+
+def _migrate_legacy_data_config(cfg):
+    """Convert legacy cfg.data to train_dataloader/val_dataloader/test_dataloader."""
+    if not cfg.get('data'):
+        return
+    batch_size = cfg.data.get('samples_per_gpu', 1)
+    workers = cfg.data.get('workers_per_gpu', 4)
+    if not cfg.get('train_dataloader') and cfg.data.get('train'):
+        cfg.train_dataloader = _build_compat_dataloader(
+            cfg.data.train, workers, batch_size, shuffle=True)
+    if not cfg.get('val_dataloader') and cfg.data.get('val'):
+        cfg.val_dataloader = _build_compat_dataloader(
+            cfg.data.val, workers, batch_size, shuffle=False, test_mode=True)
+    if not cfg.get('test_dataloader') and cfg.data.get('test'):
+        cfg.test_dataloader = _build_compat_dataloader(
+            cfg.data.test, workers, batch_size, shuffle=False, test_mode=True)
+    if not cfg.get('val_evaluator'):
+        cfg.val_evaluator = dict(type='NuScenesMetric')
+    if not cfg.get('test_evaluator'):
+        cfg.test_evaluator = dict(type='NuScenesMetric')
+    if not cfg.get('val_cfg'):
+        cfg.val_cfg = dict()
+    if not cfg.get('test_cfg'):
+        cfg.test_cfg = dict()
+
+
 def main():
     args = parse_args()
     cfg = Config.fromfile(args.config)
@@ -108,6 +148,9 @@ def main():
                     f'deterministic: {args.deterministic}')
         set_random_seed(args.seed, deterministic=args.deterministic)
         cfg.seed = args.seed
+
+    # Migrate legacy data config if present
+    _migrate_legacy_data_config(cfg)
 
     # Build the runner from config and launch training
     runner = Runner.from_cfg(cfg)
