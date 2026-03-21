@@ -17,7 +17,8 @@ model = dict(
 
 data = dict(samples_per_gpu=1, workers_per_gpu=1)
 # learning policy
-lr_config = dict(step=[16, 19])
-runner = dict(max_epochs=20)
+param_scheduler = [
+    dict(type='MultiStepLR', milestones=[16, 19], gamma=0.1, by_epoch=True)]
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=20, val_interval=1)
 
 load_from = 'http://download.openmmlab.com/mmdetection/v2.0/htc/htc_x101_64x4d_fpn_dconv_c3-c5_mstrain_400_1400_16x1_20e_coco/htc_x101_64x4d_fpn_dconv_c3-c5_mstrain_400_1400_16x1_20e_coco_20200312-946fd751.pth'  # noqa

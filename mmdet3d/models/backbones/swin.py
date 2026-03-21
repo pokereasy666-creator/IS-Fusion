@@ -8,7 +8,11 @@ import torch.nn.functional as F
 import torch.utils.checkpoint as cp
 from mmcv.cnn import build_norm_layer
 from mmcv.cnn import constant_init, trunc_normal_init
-from mmcv.cnn.bricks.transformer import FFN, build_dropout
+try:
+    from mmcv.cnn.bricks.transformer import FFN, build_dropout
+except ImportError:
+    from mmengine.model import FFN
+    from mmcv.cnn.bricks.drop import build_dropout
 from mmengine.model import BaseModule, ModuleList
 from mmengine.runner import load_checkpoint
 from mmengine.utils import to_2tuple

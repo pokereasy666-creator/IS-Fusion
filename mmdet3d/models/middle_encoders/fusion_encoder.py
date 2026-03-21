@@ -12,7 +12,10 @@ import cv2 as cv
 import math
 import mmcv
 import random
-from mmcv.utils import ext_loader
+try:
+    from mmengine.utils.dl_utils import ext_loader
+except ImportError:
+    from mmcv.utils import ext_loader
 from ...models import builder
 from ...models.builder import FUSION_LAYERS
 from mmdet3d.compat import ATTENTION, BaseModule, FEEDFORWARD_NETWORK, ModuleList, Sequential, auto_fp16, build_from_cfg, force_fp32, to_2tuple

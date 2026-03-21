@@ -12,8 +12,11 @@ except ImportError:
     try:
         from mmcv.cnn.bricks.registry import POSITIONAL_ENCODING
     except ImportError:
-        # 适配 MMEngine / MMCV 2.x 统一注册表体系
-        from mmcv.utils import Registry; POSITIONAL_ENCODING = Registry("positional_encoding")
+        try:
+            from mmengine.registry import Registry
+        except ImportError:
+            from mmcv.utils import Registry
+        POSITIONAL_ENCODING = Registry("positional_encoding")
         
 # 3. 顺手独立导入 ATTENTION (以防下面报错)
 from torch import nn as nn

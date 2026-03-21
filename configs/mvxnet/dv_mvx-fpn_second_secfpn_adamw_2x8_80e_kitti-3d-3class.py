@@ -241,9 +241,9 @@ data = dict(
         box_type_3d='LiDAR'))
 
 # Training settings
-optimizer = dict(weight_decay=0.01)
-# max_norm=10 is better for SECOND
-optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+optim_wrapper = dict(
+    optimizer=dict(weight_decay=0.01),
+    clip_grad=dict(max_norm=35, norm_type=2))
 
 evaluation = dict(interval=1, pipeline=eval_pipeline)
 

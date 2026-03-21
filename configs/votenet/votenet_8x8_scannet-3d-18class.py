@@ -32,5 +32,5 @@ model = dict(
                         [0.47535285, 0.49249494, 0.5802117]])))
 
 # yapf:disable
-log_config = dict(interval=30)
+default_hooks = dict(logger=dict(type='LoggerHook', interval=30))
 # yapf:enable

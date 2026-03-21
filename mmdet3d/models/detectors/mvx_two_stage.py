@@ -2,7 +2,10 @@
 import mmcv
 import torch
 import warnings
-from mmcv.utils import DataContainer as DC
+try:
+    from mmengine.structures import BaseDataElement as DC
+except ImportError:
+    from mmcv.utils import DataContainer as DC
 from os import path as osp
 from torch.nn import functional as F
 

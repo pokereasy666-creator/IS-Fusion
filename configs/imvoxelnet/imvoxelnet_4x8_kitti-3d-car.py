@@ -136,25 +136,29 @@ data = dict(
         classes=class_names,
         test_mode=True))
 
-optimizer = dict(
-    type='AdamW',
-    lr=0.0001,
-    weight_decay=0.0001,
-    paramwise_cfg=dict(
-        custom_keys={'backbone': dict(lr_mult=0.1, decay_mult=1.0)}))
-optimizer_config = dict(grad_clip=dict(max_norm=35., norm_type=2))
-lr_config = dict(policy='step', step=[8, 11])
-total_epochs = 12
+optim_wrapper = dict(
+    optimizer=dict(
+        type='AdamW',
+        lr=0.0001,
+        weight_decay=0.0001,
+        paramwise_cfg=dict(
+            custom_keys={'backbone': dict(lr_mult=0.1, decay_mult=1.0)})),
+    clip_grad=dict(max_norm=35., norm_type=2))
 
-checkpoint_config = dict(interval=1, max_keep_ckpts=1)
-log_config = dict(
-    interval=50,
-    hooks=[dict(type='TextLoggerHook'),
-           dict(type='TensorboardLoggerHook')])
+param_scheduler = [
+    dict(type='MultiStepLR', milestones=[8, 11], gamma=0.1, by_epoch=True)]
+
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=12, val_interval=1)
+
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1),
+    logger=dict(type='LoggerHook', interval=50))
+visualizer = dict(
+    type='Visualizer',
+    vis_backends=[dict(type='TensorboardVisBackend')])
 evaluation = dict(interval=1)
 dist_params = dict(backend='nccl')
 find_unused_parameters = True  # only 1 of 4 FPN outputs is used
 log_level = 'INFO'
 load_from = None
 resume_from = None
-workflow = [('train', 1)]

@@ -22,4 +22,5 @@ model = dict(
         batch_size=24))
 
 # runtime settings
-checkpoint_config = dict(interval=2)
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=2))

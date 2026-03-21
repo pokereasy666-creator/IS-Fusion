@@ -105,17 +105,18 @@ model = dict(
 
 # optimizer
 lr = 0.002  # max learning rate
-optimizer = dict(type='AdamW', lr=lr, weight_decay=0)
-optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
-lr_config = dict(policy='step', warmup=None, step=[45, 60])
-# runtime settings
-runner = dict(type='EpochBasedRunner', max_epochs=80)
+optim_wrapper = dict(
+    optimizer=dict(type='AdamW', lr=lr, weight_decay=0),
+    clip_grad=dict(max_norm=35, norm_type=2))
 
-# yapf:disable
-log_config = dict(
-    interval=30,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='TensorboardLoggerHook')
-    ])
-# yapf:enable
+param_scheduler = [
+    dict(type='MultiStepLR', milestones=[45, 60], gamma=0.1, by_epoch=True)]
+
+# runtime settings
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=80, val_interval=1)
+
+default_hooks = dict(
+    logger=dict(type='LoggerHook', interval=30))
+visualizer = dict(
+    type='Visualizer',
+    vis_backends=[dict(type='TensorboardVisBackend')])

@@ -22,6 +22,7 @@ model = dict(
         batch_size=24))
 
 # runtime settings
-checkpoint_config = dict(interval=2)
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=2))
 # PointNet2-MSG needs longer training time than PointNet2-SSG
-runner = dict(type='EpochBasedRunner', max_epochs=80)
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=80, val_interval=1)

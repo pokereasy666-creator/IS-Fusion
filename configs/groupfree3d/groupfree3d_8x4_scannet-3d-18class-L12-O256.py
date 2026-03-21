@@ -177,23 +177,29 @@ data = dict(
 
 # optimizer
 lr = 0.006
-optimizer = dict(
-    lr=lr,
-    weight_decay=0.0005,
-    paramwise_cfg=dict(
-        custom_keys={
-            'bbox_head.decoder_layers': dict(lr_mult=0.1, decay_mult=1.0),
-            'bbox_head.decoder_self_posembeds': dict(
-                lr_mult=0.1, decay_mult=1.0),
-            'bbox_head.decoder_cross_posembeds': dict(
-                lr_mult=0.1, decay_mult=1.0),
-            'bbox_head.decoder_query_proj': dict(lr_mult=0.1, decay_mult=1.0),
-            'bbox_head.decoder_key_proj': dict(lr_mult=0.1, decay_mult=1.0)
-        }))
+optim_wrapper = dict(
+    optimizer=dict(
+        lr=lr,
+        weight_decay=0.0005,
+        paramwise_cfg=dict(
+            custom_keys={
+                'bbox_head.decoder_layers': dict(lr_mult=0.1, decay_mult=1.0),
+                'bbox_head.decoder_self_posembeds': dict(
+                    lr_mult=0.1, decay_mult=1.0),
+                'bbox_head.decoder_cross_posembeds': dict(
+                    lr_mult=0.1, decay_mult=1.0),
+                'bbox_head.decoder_query_proj': dict(
+                    lr_mult=0.1, decay_mult=1.0),
+                'bbox_head.decoder_key_proj': dict(
+                    lr_mult=0.1, decay_mult=1.0)
+            })),
+    clip_grad=dict(max_norm=0.1, norm_type=2))
 
-optimizer_config = dict(grad_clip=dict(max_norm=0.1, norm_type=2))
-lr_config = dict(policy='step', warmup=None, step=[56, 68])
+param_scheduler = [
+    dict(type='MultiStepLR', milestones=[56, 68], gamma=0.1, by_epoch=True)]
 
 # runtime settings
-runner = dict(type='EpochBasedRunner', max_epochs=80)
-checkpoint_config = dict(interval=1, max_keep_ckpts=10)
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=80, val_interval=1)
+default_hooks = dict(
+    checkpoint=dict(
+        type='CheckpointHook', interval=1, max_keep_ckpts=10))

@@ -60,5 +60,5 @@ model = dict(
 data = dict(samples_per_gpu=3, workers_per_gpu=2)
 
 # yapf:disable
-log_config = dict(interval=30)
+default_hooks = dict(logger=dict(type='LoggerHook', interval=30))
 # yapf:enable

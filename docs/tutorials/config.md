@@ -382,24 +382,30 @@ evaluation = dict(pipeline=[  # Pipeline is passed by eval_pipeline created befo
     dict(type='Collect3D', keys=['points'])
 ])
 lr = 0.008  # Learning rate of optimizers
-optimizer = dict(  # Config used to build optimizer, support all the optimizers in PyTorch whose arguments are also the same as those in PyTorch
-    type='Adam',  # Type of optimizers, refer to https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/optimizer/default_constructor.py#L12 for more details
-    lr=0.008)  # Learning rate of optimizers, see detail usages of the parameters in the documentaion of PyTorch
-optimizer_config = dict(  # Config used to build the optimizer hook, refer to https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/optimizer.py#L22 for implementation details.
-    grad_clip=dict(  # Config used to grad_clip
-    max_norm=10,  # max norm of the gradients
-    norm_type=2))  # Type of the used p-norm. Can be 'inf' for infinity norm.
-lr_config = dict(  # Learning rate scheduler config used to register LrUpdater hook
-    policy='step',  # The policy of scheduler, also support CosineAnnealing, Cyclic, etc. Refer to details of supported LrUpdater from https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/lr_updater.py#L9.
-    warmup=None,  # The warmup policy, also support `exp` and `constant`.
-    step=[24, 32])  # Steps to decay the learning rate
-checkpoint_config = dict(  # Config of set the checkpoint hook, Refer to https://github.com/open-mmlab/mmcv/blob/master/mmcv/runner/hooks/checkpoint.py for implementation.
-    interval=1)  # The save interval is 1
-log_config = dict(  # config of register logger hook
-    interval=50,  # Interval to print the log
-    hooks=[dict(type='TextLoggerHook'),
-           dict(type='TensorboardLoggerHook')])  # The logger used to record the training process.
-runner = dict(type='EpochBasedRunner', max_epochs=36) # Runner that runs the `workflow` in total `max_epochs`
+optim_wrapper = dict(  # Config used to build optimizer wrapper, refer to https://mmengine.readthedocs.io/en/latest/tutorials/optim_wrapper.html for more details
+    optimizer=dict(  # Config used to build optimizer, support all the optimizers in PyTorch
+        type='Adam',  # Type of optimizers
+        lr=0.008),  # Learning rate of optimizers, see detail usages of the parameters in the documentation of PyTorch
+    clip_grad=dict(  # Config used to grad_clip
+        max_norm=10,  # max norm of the gradients
+        norm_type=2))  # Type of the used p-norm. Can be 'inf' for infinity norm.
+param_scheduler = [dict(  # Learning rate scheduler config, refer to https://mmengine.readthedocs.io/en/latest/tutorials/param_scheduler.html for more details
+    type='MultiStepLR',  # The type of scheduler, also support CosineAnnealingLR, PolyLR, etc.
+    milestones=[24, 32],  # Steps to decay the learning rate
+    gamma=0.1)]  # Decay factor for the learning rate
+default_hooks = dict(  # Config of default hooks
+    checkpoint=dict(  # Config of the checkpoint hook
+        type='CheckpointHook',
+        interval=1),  # The save interval is 1
+    logger=dict(  # Config of the logger hook
+        type='LoggerHook',
+        interval=50))  # Interval to print the log
+visualizer = dict(  # Config of the visualizer
+    type='Det3DLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+        dict(type='TensorboardVisBackend')])  # The visualizer backends used to record the training process.
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=36)  # Training loop that runs the workflow in total max_epochs
 dist_params = dict(backend='nccl')  # Parameters to setup distributed training, the port can also be set.
 log_level = 'INFO'  # The level of logging.
 find_unused_parameters = True  # Whether to find unused parameters

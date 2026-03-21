@@ -65,6 +65,7 @@ train_pipeline = [
 ]
 
 data = dict(train=dict(pipeline=train_pipeline))
-lr_config = dict(step=[28, 34])
-runner = dict(max_epochs=36)
+param_scheduler = [
+    dict(type='MultiStepLR', milestones=[28, 34], gamma=0.1, by_epoch=True)]
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=36, val_interval=1)
 evaluation = dict(interval=36)

@@ -10,21 +10,9 @@
 
 The required versions of MMCV, MMDetection and MMSegmentation for different versions of MMDetection3D are as below. Please install the correct version of MMCV, MMDetection and MMSegmentation to avoid installation issues.
 
-| MMDetection3D version | MMDetection version | MMSegmentation version |    MMCV version     |
-|:-------------------:|:-------------------:|:-------------------:|:-------------------:|
-| master              | mmdet>=2.14.0, <=3.0.0| mmseg>=0.14.1, <=1.0.0 | mmcv-full>=1.3.8, <=1.4|
-| 0.16.0              | mmdet>=2.14.0, <=3.0.0| mmseg>=0.14.1, <=1.0.0 | mmcv-full>=1.3.8, <=1.4|
-| 0.15.0              | mmdet>=2.14.0, <=3.0.0| mmseg>=0.14.1, <=1.0.0 | mmcv-full>=1.3.8, <=1.4|
-| 0.14.0              | mmdet>=2.10.0, <=2.11.0| mmseg==0.14.0 | mmcv-full>=1.3.1, <=1.4|
-| 0.13.0              | mmdet>=2.10.0, <=2.11.0| Not required  | mmcv-full>=1.2.4, <=1.4|
-| 0.12.0              | mmdet>=2.5.0, <=2.11.0 | Not required  | mmcv-full>=1.2.4, <=1.4|
-| 0.11.0              | mmdet>=2.5.0, <=2.11.0 | Not required  | mmcv-full>=1.2.4, <=1.4|
-| 0.10.0              | mmdet>=2.5.0, <=2.11.0 | Not required  | mmcv-full>=1.2.4, <=1.4|
-| 0.9.0               | mmdet>=2.5.0, <=2.11.0 | Not required  | mmcv-full>=1.2.4, <=1.4|
-| 0.8.0               | mmdet>=2.5.0, <=2.11.0 | Not required  | mmcv-full>=1.1.5, <=1.4|
-| 0.7.0               | mmdet>=2.5.0, <=2.11.0 | Not required  | mmcv-full>=1.1.5, <=1.4|
-| 0.6.0               | mmdet>=2.4.0, <=2.11.0 | Not required  | mmcv-full>=1.1.3, <=1.2|
-| 0.5.0               | 2.3.0                  | Not required  | mmcv-full==1.0.5|
+| MMDetection3D version | MMDetection version | MMSegmentation version |    MMCV version     |  MMEngine version   |
+|:-------------------:|:-------------------:|:-------------------:|:-------------------:|:-------------------:|
+| master              | mmdet>=3.0.0, <3.4.0| mmseg>=1.0.0, <1.3.0 | mmcv>=2.0.0, <2.2.0| mmengine>=0.7.0, <1.0.0|
 
 # Installation
 
@@ -63,41 +51,20 @@ conda install pytorch=1.3.1 cudatoolkit=9.2 torchvision=0.4.2 -c pytorch
 If you build PyTorch from source instead of installing the prebuilt pacakge,
 you can use more CUDA versions such as 9.0.
 
-**c. Install [MMCV](https://mmcv.readthedocs.io/en/latest/).**
-*mmcv-full* is necessary since MMDetection3D relies on MMDetection, CUDA ops in *mmcv-full* are required.
-
-`e.g.` The pre-build *mmcv-full* could be installed by running: (available versions could be found [here](https://mmcv.readthedocs.io/en/latest/#install-with-pip))
+**c. Install [MMEngine](https://github.com/open-mmlab/mmengine) and [MMCV](https://mmcv.readthedocs.io/en/latest/).**
+*mmcv* (v2) is necessary since MMDetection3D relies on MMDetection. Note: in OpenMMLab v2, the package name changed from *mmcv-full* to *mmcv*.
 
 ```shell
-pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
+pip install mmengine
+pip install mmcv>=2.0.0 -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
 ```
 
-Please replace `{cu_version}` and `{torch_version}` in the url to your desired one. For example, to install the latest `mmcv-full` with `CUDA 11` and `PyTorch 1.7.0`, use the following command:
-
-```shell
-pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html
-```
-
-See [here](https://github.com/open-mmlab/mmcv#install-with-pip) for different versions of MMCV compatible to different PyTorch and CUDA versions.
-Optionally, you could also build the full version from source:
-
-```shell
-git clone https://github.com/open-mmlab/mmcv.git
-cd mmcv
-MMCV_WITH_OPS=1 pip install -e .  # package mmcv-full will be installed after this step
-cd ..
-```
-
-Or directly run
-
-```shell
-pip install mmcv-full
-```
+Please replace `{cu_version}` and `{torch_version}` in the url to your desired one. See [here](https://mmcv.readthedocs.io/en/latest/get_started/installation.html) for different versions of MMCV compatible to different PyTorch and CUDA versions.
 
 **d. Install [MMDetection](https://github.com/open-mmlab/mmdetection).**
 
 ```shell
-pip install mmdet==2.14.0
+pip install mmdet>=3.0.0
 ```
 
 Optionally, you could also build MMDetection from source in case you want to modify the code:
@@ -105,15 +72,14 @@ Optionally, you could also build MMDetection from source in case you want to mod
 ```shell
 git clone https://github.com/open-mmlab/mmdetection.git
 cd mmdetection
-git checkout v2.14.0  # switch to v2.14.0 branch
-pip install -r requirements/build.txt
+git checkout v3.0.0  # switch to v3.0.0 branch
 pip install -v -e .  # or "python setup.py develop"
 ```
 
 **e. Install [MMSegmentation](https://github.com/open-mmlab/mmsegmentation).**
 
 ```shell
-pip install mmsegmentation==0.14.1
+pip install mmsegmentation>=1.0.0
 ```
 
 Optionally, you could also build MMSegmentation from source in case you want to modify the code:
@@ -121,7 +87,7 @@ Optionally, you could also build MMSegmentation from source in case you want to 
 ```shell
 git clone https://github.com/open-mmlab/mmsegmentation.git
 cd mmsegmentation
-git checkout v0.14.1  # switch to v0.14.1 branch
+git checkout v1.0.0  # switch to v1.0.0 branch
 pip install -e .  # or "python setup.py develop"
 ```
 
@@ -186,14 +152,15 @@ conda activate open-mmlab
 # install latest PyTorch prebuilt with the default prebuilt CUDA version (usually the latest)
 conda install -c pytorch pytorch torchvision -y
 
-# install mmcv
-pip install mmcv-full
+# install mmengine and mmcv
+pip install mmengine
+pip install mmcv>=2.0.0
 
 # install mmdetection
-pip install git+https://github.com/open-mmlab/mmdetection.git
+pip install mmdet>=3.0.0
 
 # install mmsegmentation
-pip install git+https://github.com/open-mmlab/mmsegmentation.git
+pip install mmsegmentation>=1.0.0
 
 # install mmdetection3d
 git clone https://github.com/open-mmlab/mmdetection3d.git
