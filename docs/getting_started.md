@@ -1,11 +1,11 @@
 # Prerequisites
 
 - Linux or macOS (Windows is not currently officially supported)
-- Python 3.6+
-- PyTorch 1.3+
-- CUDA 9.2+ (If you build PyTorch from source, CUDA 9.0 is also compatible)
+- Python 3.8+
+- PyTorch 2.0+
+- CUDA 11.8+
 - GCC 5+
-- [MMCV](https://mmcv.readthedocs.io/en/latest/#installation)
+- [MMEngine](https://github.com/open-mmlab/mmengine) and [MMCV](https://mmcv.readthedocs.io/en/latest/#installation)
 
 
 The required versions of MMCV, MMDetection and MMSegmentation for different versions of MMDetection3D are as below. Please install the correct version of MMCV, MMDetection and MMSegmentation to avoid installation issues.
@@ -21,35 +21,25 @@ The required versions of MMCV, MMDetection and MMSegmentation for different vers
 **a. Create a conda virtual environment and activate it.**
 
 ```shell
-conda create -n open-mmlab python=3.7 -y
+conda create -n open-mmlab python=3.8 -y
 conda activate open-mmlab
 ```
 
 **b. Install PyTorch and torchvision following the [official instructions](https://pytorch.org/).**
 
 ```shell
-conda install pytorch torchvision -c pytorch
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
 ```
 
 Note: Make sure that your compilation CUDA version and runtime CUDA version match.
 You can check the supported CUDA version for precompiled packages on the [PyTorch website](https://pytorch.org/).
 
-`E.g. 1` If you have CUDA 10.1 installed under `/usr/local/cuda` and would like to install
-PyTorch 1.5, you need to install the prebuilt PyTorch with CUDA 10.1.
+`E.g.` If you have CUDA 11.8 installed under `/usr/local/cuda` and would like to install
+PyTorch 2.0, you need to install the prebuilt PyTorch with CUDA 11.8.
 
-```python
-conda install pytorch==1.5.0 cudatoolkit=10.1 torchvision==0.6.0 -c pytorch
+```shell
+pip install torch==2.0.0 torchvision==0.15.0 --index-url https://download.pytorch.org/whl/cu118
 ```
-
-`E.g. 2` If you have CUDA 9.2 installed under `/usr/local/cuda` and would like to install
-PyTorch 1.3.1., you need to install the prebuilt PyTorch with CUDA 9.2.
-
-```python
-conda install pytorch=1.3.1 cudatoolkit=9.2 torchvision=0.4.2 -c pytorch
-```
-
-If you build PyTorch from source instead of installing the prebuilt pacakge,
-you can use more CUDA versions such as 9.0.
 
 **c. Install [MMEngine](https://github.com/open-mmlab/mmengine) and [MMCV](https://mmcv.readthedocs.io/en/latest/).**
 *mmcv* (v2) is necessary since MMDetection3D relies on MMDetection. Note: in OpenMMLab v2, the package name changed from *mmcv-full* to *mmcv*.
@@ -131,7 +121,6 @@ you can install it before installing MMCV.
 We provide a [Dockerfile](https://github.com/open-mmlab/mmdetection3d/blob/master/docker/Dockerfile) to build an image.
 
 ```shell
-# build an image with PyTorch 1.6, CUDA 10.1
 docker build -t mmdetection3d docker/
 ```
 
@@ -146,11 +135,11 @@ docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/mmdetection3d/data mmdete
 Here is a full script for setting up MMdetection3D with conda.
 
 ```shell
-conda create -n open-mmlab python=3.7 -y
+conda create -n open-mmlab python=3.8 -y
 conda activate open-mmlab
 
-# install latest PyTorch prebuilt with the default prebuilt CUDA version (usually the latest)
-conda install -c pytorch pytorch torchvision -y
+# install PyTorch with CUDA 11.8 (adjust for your CUDA version)
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
 
 # install mmengine and mmcv
 pip install mmengine

@@ -128,10 +128,10 @@ which uses `MMDistributedDataParallel` and `MMDataParallel` respectively.
 All outputs (log files and checkpoints) will be saved to the working directory,
 which is specified by `work_dir` in the config file.
 
-By default we evaluate the model on the validation set after each epoch, you can change the evaluation interval by adding the interval argument in the training config.
+By default we evaluate the model on the validation set after each epoch, you can change the evaluation interval by modifying `val_interval` in the training config.
 
 ```python
-evaluation = dict(interval=12)  # This evaluate the model per 12 epoch.
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=36, val_interval=12)  # This evaluate the model per 12 epoch.
 ```
 
 **Important**: The default learning rate in config files is for 8 GPUs and the exact batch size is marked by the config's file name, e.g. '2x8' means 2 samples per GPU using 8 GPUs.
@@ -155,11 +155,11 @@ Optional arguments are:
 
 - `--no-validate` (**not suggested**): By default, the codebase will perform evaluation at every k (default value is 1, which can be modified like [this](https://github.com/open-mmlab/mmdetection3d/blob/master/configs/fcos3d/fcos3d_r101_caffe_fpn_gn-head_dcn_2x8_1x_nus-mono3d.py#L75)) epochs during the training. To disable this behavior, use `--no-validate`.
 - `--work-dir ${WORK_DIR}`: Override the working directory specified in the config file.
-- `--resume-from ${CHECKPOINT_FILE}`: Resume from a previous checkpoint file.
-- `--options 'Key=value'`: Overide some settings in the used config.
+- `--resume`: Resume training from the latest checkpoint in the working directory.
+- `--cfg-options 'Key=value'`: Override some settings in the used config.
 
-Difference between `resume-from` and `load-from`:
-- `resume-from` loads both the model weights and optimizer status, and the epoch is also inherited from the specified checkpoint. It is usually used for resuming the training process that is interrupted accidentally.
+Difference between `resume` and `load-from`:
+- `resume` loads both the model weights and optimizer status, and the epoch is also inherited from the checkpoint. It is usually used for resuming the training process that is interrupted accidentally.
 - `load-from` only loads the model weights and the training epoch starts from 0. It is usually used for finetuning.
 
 ### Train with multiple machines
@@ -196,25 +196,25 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 PORT=29501 ./tools/dist_train.sh ${CONFIG_FILE} 4
 
 If you use launch training jobs with Slurm, there are two ways to specify the ports.
 
-1. Set the port through `--options`. This is more recommended since it does not change the original configs.
+1. Set the port through `--cfg-options`. This is more recommended since it does not change the original configs.
 
    ```shell
-   CUDA_VISIBLE_DEVICES=0,1,2,3 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config1.py ${WORK_DIR} --options 'dist_params.port=29500'
-   CUDA_VISIBLE_DEVICES=4,5,6,7 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config2.py ${WORK_DIR} --options 'dist_params.port=29501'
+   CUDA_VISIBLE_DEVICES=0,1,2,3 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config1.py ${WORK_DIR} --cfg-options 'env_cfg.dist_cfg.port=29500'
+   CUDA_VISIBLE_DEVICES=4,5,6,7 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config2.py ${WORK_DIR} --cfg-options 'env_cfg.dist_cfg.port=29501'
    ```
 
-2. Modify the config files (usually the 6th line from the bottom in config files) to set different communication ports.
+2. Modify the config files to set different communication ports.
 
    In `config1.py`,
 
    ```python
-   dist_params = dict(backend='nccl', port=29500)
+   env_cfg = dict(dist_cfg=dict(backend='nccl', port=29500))
    ```
 
    In `config2.py`,
 
    ```python
-   dist_params = dict(backend='nccl', port=29501)
+   env_cfg = dict(dist_cfg=dict(backend='nccl', port=29501))
    ```
 
    Then you can launch two jobs with `config1.py` and `config2.py`.
