@@ -9,6 +9,7 @@ from mmengine.config import Config, DictAction
 from mmengine.dist import init_dist
 from mmengine.runner import Runner
 
+from mmdet3d import register_all_modules
 from mmdet3d.utils import collect_env, get_root_logger
 
 
@@ -76,7 +77,16 @@ def _migrate_legacy_data_config(cfg):
 
 def main():
     args = parse_args()
+
+    # Register all mmdet3d modules (models, datasets, metrics, hooks, etc.)
+    register_all_modules()
+
     cfg = Config.fromfile(args.config)
+
+    # Handle custom_imports from config
+    if cfg.get('custom_imports', None):
+        from mmengine.utils import import_modules_from_strings
+        import_modules_from_strings(**cfg['custom_imports'])
 
     # Enable TF32 for Ampere GPUs
     torch.backends.cuda.matmul.allow_tf32 = True

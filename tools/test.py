@@ -8,6 +8,8 @@ from mmengine.config import Config, DictAction
 from mmengine.dist import get_dist_info, init_dist
 from mmengine.runner import Runner
 
+from mmdet3d import register_all_modules
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -57,10 +59,19 @@ def _build_compat_test_dataloader(cfg, batch_size):
 def main():
     args = parse_args()
 
+    # Register all mmdet3d modules (models, datasets, metrics, hooks, etc.)
+    register_all_modules()
+
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')
 
     cfg = Config.fromfile(args.config)
+
+    # Handle custom_imports from config
+    if cfg.get('custom_imports', None):
+        from mmengine.utils import import_modules_from_strings
+        import_modules_from_strings(**cfg['custom_imports'])
+
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
 
