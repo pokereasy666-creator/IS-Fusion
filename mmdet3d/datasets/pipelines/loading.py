@@ -6,17 +6,18 @@ import os.path as osp
 from PIL import Image
 from typing import Any, Dict, Tuple
 
-# [兼容性修复] 使用与 transforms_3d.py 相同的共享注册表
 from mmdet3d.core.points import BasePoints, get_points_type
-
-# [兼容性修复] 尝试导入基类
 from mmdet3d.compat import Registry
+
 try:
-    # MMDet 2.x
+    from mmdet.datasets.builder import PIPELINES
+except ImportError:
+    PIPELINES = Registry('pipeline')
+
+try:
     from mmdet.datasets.pipelines import LoadAnnotations, LoadImageFromFile
 except ImportError:
     try:
-        # MMDet 3.x
         from mmdet.datasets.transforms import LoadAnnotations, LoadImageFromFile
     except ImportError:
         try:
