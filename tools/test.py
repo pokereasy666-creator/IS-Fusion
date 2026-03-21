@@ -15,31 +15,7 @@ def parse_args():
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
     parser.add_argument('--out', help='output result file in pickle format')
-    parser.add_argument(
-        '--fuse-conv-bn',
-        action='store_true',
-        help='Whether to fuse conv and bn')
-    parser.add_argument(
-        '--format-only',
-        action='store_true',
-        help='Format the output results without perform evaluation')
-    parser.add_argument('--result_dir', help='directory where results are saved')
     parser.add_argument('--bs', type=int, default=1, help='batch size')
-    parser.add_argument(
-        '--eval',
-        type=str,
-        nargs='+',
-        help='evaluation metrics')
-    parser.add_argument('--show', action='store_true', help='show results')
-    parser.add_argument('--show_bev', action='store_true', help='show bev results')
-    parser.add_argument('--show_dir', help='directory where results will be saved')
-    parser.add_argument(
-        '--gpu-collect',
-        action='store_true',
-        help='whether to use gpu to collect results')
-    parser.add_argument(
-        '--tmpdir',
-        help='tmp directory used for collecting results from multiple workers')
     parser.add_argument('--seed', type=int, default=0, help='random seed')
     parser.add_argument(
         '--deterministic',
@@ -50,11 +26,6 @@ def parse_args():
         nargs='+',
         action=DictAction,
         help='override some settings in the used config')
-    parser.add_argument(
-        '--eval-options',
-        nargs='+',
-        action=DictAction,
-        help='custom options for evaluation')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
@@ -85,15 +56,6 @@ def _build_compat_test_dataloader(cfg, batch_size):
 
 def main():
     args = parse_args()
-
-    assert args.out or args.eval or args.format_only or args.show \
-        or args.show_dir, \
-        ('Please specify at least one operation (save/eval/format/show the '
-         'results) with the argument "--out", "--eval", "--format-only", '
-         '"--show" or "--show-dir"')
-
-    if args.eval and args.format_only:
-        raise ValueError('--eval and --format_only cannot be both specified')
 
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')

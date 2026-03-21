@@ -3,17 +3,13 @@ import argparse
 import os
 import os.path as osp
 import time
-import warnings
 
 import torch
 from mmengine.config import Config, DictAction
-from mmengine.dist import get_dist_info, init_dist
+from mmengine.dist import init_dist
 from mmengine.runner import Runner
 
-from mmdet import __version__ as mmdet_version
-from mmdet3d import __version__ as mmdet3d_version
 from mmdet3d.utils import collect_env, get_root_logger
-from mmseg import __version__ as mmseg_version
 
 
 def parse_args():
@@ -24,13 +20,6 @@ def parse_args():
                         help='extra tag for this experiment')
     parser.add_argument('--resume-from',
                         help='the checkpoint file to resume from')
-    parser.add_argument('--no-validate', action='store_true',
-                        help='whether not to evaluate during training')
-    group_gpus = parser.add_mutually_exclusive_group()
-    group_gpus.add_argument('--gpus', type=int,
-                            help='number of gpus to use')
-    group_gpus.add_argument('--gpu-ids', type=int, nargs='+',
-                            help='ids of gpus to use')
     parser.add_argument('--seed', type=int, default=0, help='random seed')
     parser.add_argument('--deterministic', action='store_true',
                         help='whether to set deterministic options for CUDNN')
@@ -39,8 +28,6 @@ def parse_args():
     parser.add_argument('--launcher', choices=['none', 'pytorch', 'slurm', 'mpi'],
                         default='none', help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
-    parser.add_argument('--autoscale-lr', action='store_true',
-                        help='automatically scale lr with the number of gpus')
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
