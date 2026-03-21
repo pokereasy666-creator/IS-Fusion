@@ -80,7 +80,7 @@ class MVXTwoStageDetector(Base3DDetector):
         self.fusion_encoder = None
         fusion_encoder = kwargs.get('fusion_encoder', None)
         if fusion_encoder is not None:
-            self.fusion_encoder = builder.build_middle_encoder(fusion_encoder)
+            self.fusion_encoder = builder.build_fusion_layer(fusion_encoder)
 
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg

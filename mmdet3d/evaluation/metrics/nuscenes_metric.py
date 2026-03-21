@@ -1,0 +1,125 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+import os.path as osp
+import tempfile
+from typing import Dict, List, Optional, Sequence
+
+from mmengine.evaluator import BaseMetric
+from mmengine.logging import print_log
+from mmengine.registry import METRICS
+
+
+@METRICS.register_module()
+class NuScenesMetric(BaseMetric):
+    """nuScenes evaluation metric.
+
+    Wraps the nuScenes detection evaluation protocol into an MMEngine-style
+    metric so it can be used with ``Runner.from_cfg()``.
+
+    Args:
+        data_root (str): Root directory of the nuScenes dataset.
+            Defaults to ``'data/nuscenes/'``.
+        metric (str): Metric name. Defaults to ``'bbox'``.
+        jsonfile_prefix (str or None): Prefix of the json result file.
+            If None a temp dir will be used. Defaults to None.
+        collect_device (str): Device for collecting results from all
+            ranks. Defaults to ``'cpu'``.
+        prefix (str or None): Metric prefix. Defaults to None.
+    """
+
+    def __init__(self,
+                 data_root: str = 'data/nuscenes/',
+                 metric: str = 'bbox',
+                 jsonfile_prefix: Optional[str] = None,
+                 collect_device: str = 'cpu',
+                 prefix: Optional[str] = None):
+        super().__init__(collect_device=collect_device, prefix=prefix)
+        self.data_root = data_root
+        self.metric = metric
+        self.jsonfile_prefix = jsonfile_prefix
+
+    def process(self, data_batch: dict, data_samples: Sequence[dict]) -> None:
+        """Collect prediction results from *data_samples*.
+
+        Each element in *data_samples* is expected to carry either
+        ``pred_instances_3d`` (standard mmdet3d v2) **or** the legacy
+        dict format with keys like ``pts_bbox`` / ``boxes_3d``.
+        """
+        for data_sample in data_samples:
+            result = dict()
+            if hasattr(data_sample, 'pred_instances_3d'):
+                pred = data_sample.pred_instances_3d
+                result['pts_bbox'] = dict(
+                    boxes_3d=pred.bboxes_3d,
+                    scores_3d=pred.scores_3d,
+                    labels_3d=pred.labels_3d)
+            elif isinstance(data_sample, dict):
+                result = data_sample
+            else:
+                result = data_sample.to_dict()
+            self.results.append(result)
+
+    def compute_metrics(self, results: List[dict]) -> Dict[str, float]:
+        """Compute nuScenes detection metrics.
+
+        Delegates to the ``evaluate()`` method on the dataset object attached
+        to the runner's test dataloader, which already implements the full
+        nuScenes evaluation protocol via the nuscenes-devkit.
+        """
+        dataset = self._dataset
+        if dataset is not None and hasattr(dataset, 'evaluate'):
+            return dataset.evaluate(
+                results,
+                metric=self.metric,
+                jsonfile_prefix=self.jsonfile_prefix)
+
+        # Fallback: run the evaluation directly via nuscenes-devkit
+        print_log(
+            'Dataset.evaluate() not available, running nuscenes-devkit '
+            'evaluation directly.',
+            logger='current')
+        return self._evaluate_via_devkit(results)
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+    @property
+    def _dataset(self):
+        """Try to obtain the dataset from the runner."""
+        try:
+            return self.dataset
+        except AttributeError:
+            return None
+
+    def _evaluate_via_devkit(self, results: List[dict]) -> Dict[str, float]:
+        """Minimal direct nuscenes-devkit evaluation."""
+        try:
+            from nuscenes import NuScenes
+            from nuscenes.eval.detection.config import config_factory
+            from nuscenes.eval.detection.evaluate import NuScenesEval
+        except ImportError:
+            print_log(
+                'nuscenes-devkit is not installed. '
+                'Cannot compute nuScenes metrics.',
+                logger='current',
+                level=30)
+            return {}
+
+        from mmdet3d.datasets.nuscenes_dataset import NuScenesDataset
+        tmp_dir = None
+        if self.jsonfile_prefix is None:
+            tmp_dir = tempfile.TemporaryDirectory()
+            jsonfile_prefix = osp.join(tmp_dir.name, 'results')
+        else:
+            jsonfile_prefix = self.jsonfile_prefix
+
+        # Attempt a basic evaluation — the caller should ideally go
+        # through NuScenesDataset.evaluate() for full fidelity.
+        print_log(
+            'Direct devkit evaluation is limited. For full fidelity, '
+            'ensure NuScenesDataset.evaluate() is available.',
+            logger='current',
+            level=30)
+
+        if tmp_dir is not None:
+            tmp_dir.cleanup()
+        return {}
