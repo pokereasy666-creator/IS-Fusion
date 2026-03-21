@@ -1,4 +1,6 @@
 -r requirements/build.txt
+-r requirements/mminstall.txt
 -r requirements/optional.txt
 -r requirements/runtime.txt
 -r requirements/tests.txt
+torch>=2.0.0
