@@ -66,4 +66,4 @@ model = dict(
         batch_size=12))
 
 # runtime settings
-runner = dict(max_epochs=200)
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=200, val_interval=1)

@@ -23,7 +23,7 @@ optimizer = dict(type='Adam', lr=0.0003, weight_decay=0.0001)
 接下来，应该在目录下某个文件中实现新的优化器，比如 `mmdet3d/core/optimizer/my_optimizer.py`：
 
 ```python
-from mmcv.runner.optimizer import OPTIMIZERS
+from mmengine.registry import OPTIMIZERS
 from torch.optim import Optimizer
 
 
@@ -88,17 +88,15 @@ optimizer = dict(type='MyOptimizer', a=a_value, b=b_value, c=c_value)
 用户可以通过自定义优化器的构造器来对那些细粒度的参数进行调优。
 
 ```python
-from mmcv.utils import build_from_cfg
-
-from mmcv.runner.optimizer import OPTIMIZER_BUILDERS, OPTIMIZERS
-from mmdet.utils import get_root_logger
+from mmengine.registry import OPTIM_WRAPPER_CONSTRUCTORS, OPTIMIZERS
+from mmengine.optim import DefaultOptimWrapperConstructor
 from .my_optimizer import MyOptimizer
 
 
-@OPTIMIZER_BUILDERS.register_module()
-class MyOptimizerConstructor(object):
+@OPTIM_WRAPPER_CONSTRUCTORS.register_module()
+class MyOptimizerConstructor(DefaultOptimWrapperConstructor):
 
-    def __init__(self, optimizer_cfg, paramwise_cfg=None):
+    def __init__(self, optim_wrapper_cfg, paramwise_cfg=None):
 
     def __call__(self, model):
 
@@ -106,7 +104,7 @@ class MyOptimizerConstructor(object):
 
 ```
 
-默认优化器构造器在[这里](https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/optimizer/default_constructor.py#L11)实现。这部分代码也可以用作新优化器构造器的模版。
+默认优化器封装构造器在 [MMEngine](https://github.com/open-mmlab/mmengine/blob/main/mmengine/optim/optimizer/default_constructor.py) 中实现。这部分代码也可以用作新优化器构造器的模版。
 
 ### 额外的设置
 
@@ -114,82 +112,67 @@ class MyOptimizerConstructor(object):
 
 - __使用梯度裁剪 (gradient clip) 来稳定训练过程__：
 
-    一些模型依赖梯度裁剪技术来裁剪训练中的梯度，以稳定训练过程。举例如下：
+    一些模型依赖梯度裁剪技术来裁剪训练中的梯度，以稳定训练过程。在 v2 中，梯度裁剪配置在 `optim_wrapper` 中指定：
 
     ```python
-    optimizer_config = dict(
-        _delete_=True, grad_clip=dict(max_norm=35, norm_type=2))
+    optim_wrapper = dict(
+        optimizer=dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001),
+        clip_grad=dict(max_norm=35, norm_type=2))
     ```
 
-    如果您的配置继承了一个已经设置了 `optimizer_config` 的基础配置，那么您可能需要 `_delete_=True` 字段来覆盖基础配置中无用的设置。详见配置文件的[说明文档](https://mmdetection.readthedocs.io/en/latest/tutorials/config.html)。
+    如果您的配置继承了一个已经设置了 `optim_wrapper` 的基础配置，那么您可能需要 `_delete_=True` 字段来覆盖基础配置中无用的设置。详见配置文件的[说明文档](https://mmdetection.readthedocs.io/en/latest/tutorials/config.html)。
 
-- __使用动量规划器 (momentum scheduler) 来加速模型收敛__：
+- __使用参数调度器 (param scheduler) 来加速模型收敛__：
 
-    我们支持用动量规划器来根据学习率更改模型的动量，这样可以使模型更快地收敛。
-    动量规划器通常和学习率规划器一起使用，比如说，如下配置文件在 3D 检测中被用于加速模型收敛。
-    更多细节详见 [CyclicLrUpdater](https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/lr_updater.py#L358) 和 [CyclicMomentumUpdater](https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/momentum_updater.py#L225) 的实现。
+    在 v2 中，学习率和动量调度统一使用 `param_scheduler` 配置。比如说，如下配置文件在 3D 检测中被用于加速模型收敛。
+    更多细节详见 [MMEngine ParamScheduler](https://mmengine.readthedocs.io/en/latest/tutorials/param_scheduler.html) 的文档。
 
     ```python
-    lr_config = dict(
-        policy='cyclic',
-        target_ratio=(10, 1e-4),
-        cyclic_times=1,
-        step_ratio_up=0.4,
-    )
-    momentum_config = dict(
-        policy='cyclic',
-        target_ratio=(0.85 / 0.95, 1),
-        cyclic_times=1,
-        step_ratio_up=0.4,
-    )
+    param_scheduler = [
+        dict(
+            type='CosineAnnealingLR',
+            T_max=8,
+            eta_min=0,
+            by_epoch=True),
+        dict(
+            type='CosineAnnealingMomentum',
+            T_max=8,
+            eta_min=0.85 / 0.95,
+            by_epoch=True),
+    ]
     ```
 
 ## 自定义训练规程
 
-默认情况，我们使用阶梯式学习率衰减的 1 倍训练规程。这会调用 `MMCV` 中的 [`StepLRHook`](https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/lr_updater.py#L167)。
-我们在[这里](https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/lr_updater.py)支持很多其他学习率规划方案，比如`余弦退火`和`多项式衰减`规程。下面是一些样例：
+默认情况，我们使用阶梯式学习率衰减的 1 倍训练规程。在 v2 中，学习率调度使用 `param_scheduler` 配置。
+我们在 [MMEngine](https://mmengine.readthedocs.io/en/latest/tutorials/param_scheduler.html) 中支持很多学习率规划方案，比如`余弦退火`和`多项式衰减`规程。下面是一些样例：
 
 - 多项式衰减规程:
 
     ```python
-    lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
+    param_scheduler = [
+        dict(type='PolyLR', power=0.9, eta_min=1e-4, by_epoch=False)]
     ```
 
 - 余弦退火规程:
 
     ```python
-    lr_config = dict(
-        policy='CosineAnnealing',
-        warmup='linear',
-        warmup_iters=1000,
-        warmup_ratio=1.0 / 10,
-        min_lr_ratio=1e-5)
+    param_scheduler = [
+        dict(type='LinearLR', start_factor=0.1, by_epoch=False, begin=0, end=1000),
+        dict(type='CosineAnnealingLR', eta_min_ratio=1e-5, by_epoch=True)]
     ```
 
-## 自定义工作流
+## 自定义训练循环
 
-工作流是一个（阶段，epoch 数）的列表，用于指定不同阶段运行顺序和运行的 epoch 数。
-默认情况它被设置为：
-
-```python
-workflow = [('train', 1)]
-```
-
-这意味着，工作流包括训练 1 个 epoch。
-有时候用户可能想要检查一些模型在验证集上的评估指标（比如损失、准确率）。
-在这种情况中，我们可以将工作流设置如下：
+在 v2 中，训练循环通过 `train_cfg`、`val_cfg` 和 `test_cfg` 配置。默认情况下使用基于 epoch 的训练循环：
 
 ```python
-[('train', 1), ('val', 1)]
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=12, val_interval=1)
+val_cfg = dict()
+test_cfg = dict()
 ```
 
-这样，就是交替地运行 1 个 epoch 进行训练，1 个 epoch 进行验证。
-
-**请注意**:
-
-1. 模型参数在验证期间不会被更新。
-2. 配置文件中，`runner` 里的 `max_epochs` 字段只控制训练 epoch 的数量，而不会影响验证工作流。
-3. `[('train', 1), ('val', 1)]` 和 `[('train', 1)]` 工作流不会改变 `EvalHook` 的行为，这是因为 `EvalHook` 被 `after_train_epoch` 调用，且验证工作流只会影响通过 `after_val_epoch` 调用的钩子。因此，`[('train', 1), ('val', 1)]` 和 `[('train', 1)]` 的唯一区别就是执行器 (runner) 会在每个训练 epoch 之后在验证集上计算损失。
+`val_interval` 控制验证的频率。如果不需要验证，可以省略 `val_cfg`。
 
 ## 自定义钩子
 
@@ -202,7 +185,8 @@ workflow = [('train', 1)]
 这里我们给出一个，在 mmdet3d 中创建并使用新钩子的例子。
 
 ```python
-from mmcv.runner import HOOKS, Hook
+from mmengine.hooks import Hook
+from mmengine.registry import HOOKS
 
 
 @HOOKS.register_module()
@@ -217,20 +201,20 @@ class MyHook(Hook):
     def after_run(self, runner):
         pass
 
-    def before_epoch(self, runner):
+    def before_train_epoch(self, runner):
         pass
 
-    def after_epoch(self, runner):
+    def after_train_epoch(self, runner):
         pass
 
-    def before_iter(self, runner):
+    def before_train_iter(self, runner, batch_idx, data_batch=None):
         pass
 
-    def after_iter(self, runner):
+    def after_train_iter(self, runner, batch_idx, data_batch=None, outputs=None):
         pass
 ```
 
-取决于钩子的功能，用户需要指定钩子在每个训练阶段时的行为，具体包括如下阶段：`before_run`，`after_run`，`before_epoch`，`after_epoch`，`before_iter`，和 `after_iter`。
+取决于钩子的功能，用户需要指定钩子在每个训练阶段时的行为，具体包括如下阶段：`before_run`，`after_run`，`before_train_epoch`，`after_train_epoch`，`before_train_iter`，和 `after_train_iter`。
 
 #### 2. 注册新钩子
 
@@ -283,48 +267,40 @@ custom_hooks = [
 
 ### 更改默认的运行时钩子
 
-有一些常用的钩子并没有通过 `custom_hooks` 注册，它们是：
+在 v2 中，默认钩子统一在 `default_hooks` 中配置：
 
-- 日志配置 (log_config)
-- 检查点配置 (checkpoint_config)
-- 评估 (evaluation)
-- 学习率配置 (lr_config)
-- 优化器配置 (optimizer_config)
-- 动量配置 (momentum_config)
-
-在这些钩子中，只有日志钩子拥有 `VERY_LOW` 的优先级，其他钩子的优先级均为 `NORMAL`。
-上述教程已经涉及了如何更改 `optimizer_config`，`momentum_config`，和 `lr_config`。
-下面我们展示如何在 `log_config`，`checkpoint_config`，和 `evaluation` 上做文章。
+```python
+default_hooks = dict(
+    timer=dict(type='IterTimerHook'),
+    logger=dict(type='LoggerHook', interval=50),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    checkpoint=dict(type='CheckpointHook', interval=1),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+)
+```
 
 #### 检查点配置
 
-MMCV 执行器会使用 `checkpoint_config` 来初始化 [`CheckpointHook`](https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/checkpoint.py#L9)。
+用户可以设置 `max_keep_ckpts` 来保存一定少量的检查点，或者用 `save_optimizer` 来决定是否保存优化器的状态。更多参数的细节详见 [MMEngine 文档](https://mmengine.readthedocs.io/en/latest/api/generated/mmengine.hooks.CheckpointHook.html)。
 
 ```python
-checkpoint_config = dict(interval=1)
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=3))
 ```
-
-用户可以设置 `max_keep_ckpts` 来保存一定少量的检查点，或者用 `save_optimizer` 来决定是否保存优化器的状态。更多参数的细节详见[这里](https://mmcv.readthedocs.io/en/latest/api.html#mmcv.runner.CheckpointHook)。
 
 #### 日志配置
 
-`log_config` 将多个日志钩子封装在一起，并允许设置日志记录间隔。现在 MMCV 支持 `WandbLoggerHook`，`MlflowLoggerHook`，和 `TensorboardLoggerHook`。
-更详细的使用方法请移步 [MMCV 文档](https://mmcv.readthedocs.io/en/latest/api.html#mmcv.runner.LoggerHook)。
+日志后端通过 `visualizer` 和 `vis_backends` 配置。现在 MMEngine 支持 `TensorboardVisBackend`，`WandbVisBackend` 等。
 
 ```python
-log_config = dict(
-    interval=50,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='TensorboardLoggerHook')
-    ])
+vis_backends = [dict(type='TensorboardVisBackend')]
+visualizer = dict(type='Det3DLocalVisualizer', vis_backends=vis_backends)
 ```
 
 #### 评估配置
 
-`evaluation` 的配置会被用于初始化 [`EvalHook`](https://github.com/open-mmlab/mmdetection/blob/v2.13.0/mmdet/core/evaluation/eval_hooks.py#L9)。
-除了 `interval` 字段，其他参数，比如 `metric`，会被传递给 `dataset.evaluate()`。
+在 v2 中，评估器通过 `val_evaluator` 配置：
 
 ```python
-evaluation = dict(interval=1, metric='bbox')
+val_evaluator = dict(type='NuScenesMetric')
 ```

@@ -382,33 +382,30 @@ evaluation = dict(pipeline=[  # 流水线，这里传入的就是上面创建的
         with_label=False),
     dict(type='Collect3D', keys=['points'])
 ])
-lr = 0.008  # 优化器的学习率
-optimizer = dict(  # 构建优化器所使用的配置，我们支持所有 PyTorch 中支持的优化器，并且拥有相同的参数名称
-    type='Adam',  # 优化器类型，更多细节请参考 https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/optimizer/default_constructor.py#L12
-    lr=0.008)  # 优化器的学习率，用户可以在 PyTorch 文档中查看这些参数的详细使用方法
-optimizer_config = dict(  # 构建优化器钩子的配置，更多实现细节可参考 https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/optimizer.py#L22
-    grad_clip=dict(  # 梯度裁剪的配置
-    max_norm=10,  # 梯度的最大模长
-    norm_type=2))  # 所使用的 p-范数的类型，可以设置成 'inf' 则指代无穷范数
-lr_config = dict(  # 学习率策略配置，用于注册学习率更新的钩子
-    policy='step',  # 学习率调整的策略，支持 CosineAnnealing、Cyclic 等，更多支持的种类请参考 https://github.com/open-mmlab/mmcv/blob/v1.3.7/mmcv/runner/hooks/lr_updater.py#L9
-    warmup=None,  # Warmup 策略，同时也支持 `exp` 和 `constant`
-    step=[24, 32])  # 学习率衰减的步数
-checkpoint_config = dict(  # 设置保存模型权重钩子的配置，具体实现请参考 https://github.com/open-mmlab/mmcv/blob/master/mmcv/runner/hooks/checkpoint.py
-    interval=1)  # 保存模型权重的间隔是 1 轮
-log_config = dict(  # 用于注册输出记录信息钩子的配置
-    interval=50,  # 输出记录信息的间隔
-    hooks=[dict(type='TextLoggerHook'),
-           dict(type='TensorboardLoggerHook')])  # 用于记录训练过程的信息记录机制
-runner = dict(type='EpochBasedRunner', max_epochs=36) # 程序运行器，将会运行 `workflow` `max_epochs` 次
-dist_params = dict(backend='nccl')  # 设置分布式训练的配置，通讯端口值也可被设置
+optim_wrapper = dict(  # 构建优化器封装所使用的配置
+    optimizer=dict(  # 优化器配置，我们支持所有 PyTorch 中支持的优化器
+        type='Adam',  # 优化器类型
+        lr=0.008),  # 优化器的学习率
+    clip_grad=dict(  # 梯度裁剪的配置
+        max_norm=10,  # 梯度的最大模长
+        norm_type=2))  # 所使用的 p-范数的类型
+param_scheduler = [  # 学习率调度器配置
+    dict(
+        type='MultiStepLR',  # 学习率调整的策略
+        milestones=[24, 32],  # 学习率衰减的步数
+        gamma=0.1,
+        by_epoch=True)]
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=36, val_interval=1)  # 训练循环配置
+default_hooks = dict(  # 默认钩子配置
+    checkpoint=dict(type='CheckpointHook', interval=1),  # 保存模型权重的间隔是 1 轮
+    logger=dict(type='LoggerHook', interval=50))  # 输出记录信息的间隔
+vis_backends = [dict(type='TensorboardVisBackend')]  # 可视化后端
+visualizer = dict(type='Det3DLocalVisualizer', vis_backends=vis_backends)
+env_cfg = dict(
+    dist_cfg=dict(backend='nccl'))  # 设置分布式训练的配置
 log_level = 'INFO'  # 输出记录信息的等级
-find_unused_parameters = True  # 是否查找模型中未使用的参数
-work_dir = None  # 当前实验存储模型权重和输出信息的路径
-load_from = None # 从指定路径读取一个预训练的模型权重，这将不会继续 (resume) 训练
-resume_from = None  # 从一个指定路径读入模型权重并继续训练，这意味着训练轮数、优化器状态等都将被读取
-workflow = [('train', 1)]  # 要运行的工作流。[('train', 1)] 意味着只有一个名为 'train' 的工作流，它只会被执行一次。这一工作流依据 `max_epochs` 的值将会训练模型 36 轮。
-gpu_ids = range(0, 1)  # 所使用的 GPU 编号
+load_from = None  # 从指定路径读取一个预训练的模型权重，这将不会继续 (resume) 训练
+resume = False  # 是否从上次中断处继续训练
 ```
 
 ## 常问问题 (FAQ)

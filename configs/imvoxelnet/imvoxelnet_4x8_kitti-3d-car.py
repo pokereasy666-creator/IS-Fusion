@@ -157,8 +157,9 @@ visualizer = dict(
     type='Visualizer',
     vis_backends=[dict(type='TensorboardVisBackend')])
 evaluation = dict(interval=1)
-dist_params = dict(backend='nccl')
+env_cfg = dict(
+    dist_cfg=dict(backend='nccl'))
 find_unused_parameters = True  # only 1 of 4 FPN outputs is used
 log_level = 'INFO'
 load_from = None
-resume_from = None
+resume = False
