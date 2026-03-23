@@ -5,6 +5,31 @@ This module re-exports commonly used symbols from mmengine / mmdet / mmseg
 so that mmdet3d code has a single import source for shared utilities.
 """
 
+# ── Legacy AMP decorators (removed in mmcv v2) ──
+# force_fp32 / auto_fp16 are no-ops: mmengine handles AMP via its own runner.
+import functools
+
+
+def force_fp32(apply_to=None, out_fp16=False):
+    """No-op replacement for mmcv.runner.force_fp32."""
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def auto_fp16(apply_to=None, out_fp32=False):
+    """No-op replacement for mmcv.runner.auto_fp16."""
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
 # ── Registry ──
 from mmengine.registry import Registry
 
