@@ -30,6 +30,22 @@ def auto_fp16(apply_to=None, out_fp32=False):
     return decorator
 
 
+# ── DataContainer shim (removed in mmcv v2) ──
+try:
+    from mmcv.parallel import DataContainer
+except ImportError:
+    class DataContainer:
+        """Minimal stand-in for mmcv.parallel.DataContainer."""
+
+        def __init__(self, data, stack=False, pad_dims=None, cpu_only=False,
+                     padding_value=0):
+            self.data = data
+            self.stack = stack
+            self.pad_dims = pad_dims
+            self.cpu_only = cpu_only
+            self.padding_value = padding_value
+
+
 # ── Registry ──
 from mmengine.registry import Registry
 
