@@ -4,7 +4,10 @@ from mmdet3d.compat import build_from_cfg
 try:
     from mmdet.datasets.pipelines import Compose
 except (ImportError, ModuleNotFoundError):
-    from mmdet.datasets.transforms import Compose
+    try:
+        from mmengine.dataset import Compose
+    except ImportError:
+        from mmdet.datasets.transforms import Compose
 from .dbsampler import DataBaseSampler
 from .formating import Collect3D, DefaultFormatBundle, DefaultFormatBundle3D
 from .loading import (LoadAnnotations3D, LoadImageFromFileMono3D,
