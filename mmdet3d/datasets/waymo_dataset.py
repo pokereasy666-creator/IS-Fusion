@@ -7,7 +7,7 @@ import torch
 from mmdet3d.compat import print_log
 from os import path as osp
 
-from mmdet.datasets import DATASETS
+from mmdet3d.registry import DATASETS
 from ..core.bbox import Box3DMode, points_cam2img
 from .kitti_dataset import KittiDataset
 from ..core.bbox import (Box3DMode, CameraInstance3DBoxes, Coord3DMode,

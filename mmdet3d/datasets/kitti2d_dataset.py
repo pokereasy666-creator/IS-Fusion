@@ -2,7 +2,7 @@
 import mmcv
 import numpy as np
 
-from mmdet.datasets import DATASETS
+from mmdet3d.registry import DATASETS
 from mmdet.datasets.custom import CustomDataset
 
 
