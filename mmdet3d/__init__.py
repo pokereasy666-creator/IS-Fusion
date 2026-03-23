@@ -42,6 +42,9 @@ assert (mmseg_version >= digit_version(mmseg_minimum_version)
     f'MMSEG=={mmseg.__version__} is used but incompatible. ' \
     f'Please install mmseg>={mmseg_minimum_version}, <={mmseg_maximum_version}.'
 
+# Apply v2 compatibility shims (must come before other mmdet3d imports)
+from mmdet3d import compat  # noqa: F401
+
 # Initialize registries
 from mmdet3d import registry  # noqa: F401
 

@@ -78,6 +78,13 @@ def get_root_logger(log_file=None, log_level='INFO', name='mmdet3d'):
 # ── File I/O ──
 from mmengine.fileio import load as fileio_load, dump as fileio_dump
 
+# Monkey-patch mmcv so existing ``mmcv.load`` / ``mmcv.dump`` calls still work.
+import mmcv as _mmcv
+if not hasattr(_mmcv, 'load'):
+    _mmcv.load = fileio_load
+if not hasattr(_mmcv, 'dump'):
+    _mmcv.dump = fileio_dump
+
 # ── Distributed utilities ──
 from mmengine.dist import get_dist_info, init_dist
 
