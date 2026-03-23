@@ -3,6 +3,8 @@ from ...bbox.util import normalize_bbox
 import torch
 
 from mmdet3d.compat import AssignResult, BBOX_ASSIGNERS, MATCH_COST
+from mmdet.models.task_modules.assigners import BaseAssigner
+from mmdet.models.task_modules.builder import build_iou_calculator
 try:
     from scipy.optimize import linear_sum_assignment
 except ImportError:
