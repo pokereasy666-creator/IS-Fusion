@@ -4,8 +4,7 @@ from mmdet3d.compat import BaseModule, auto_fp16, force_fp32
 try:
     from mmcv.cnn import normal_init
 except ImportError:
-    # MMEngine 中初始化函数移到了 mmengine.model
-    from mmcv.cnn import normal_init
+    from mmengine.model.weight_init import normal_init
 from torch import nn as nn
 
 from mmseg.models.builder import build_loss

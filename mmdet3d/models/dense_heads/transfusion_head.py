@@ -6,8 +6,7 @@ from mmdet3d.compat import AssignResult, BaseModule, build_assigner, build_bbox_
 try:
     from mmcv.cnn import kaiming_init
 except ImportError:
-    # 适配 MMEngine / MMCV 2.x
-    from mmcv.cnn import kaiming_init
+    from mmengine.model.weight_init import kaiming_init
 from torch import nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter

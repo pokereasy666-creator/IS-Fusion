@@ -7,7 +7,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from mmcv.cnn import build_activation_layer, build_conv_layer, build_norm_layer, xavier_init
+from mmcv.cnn import build_activation_layer, build_conv_layer, build_norm_layer
+try:
+    from mmcv.cnn import xavier_init
+except ImportError:
+    from mmengine.model.weight_init import xavier_init
 
 from mmdet3d.compat import BaseModule, to_2tuple, TRANSFORMER_LAYER, TRANSFORMER_LAYER_SEQUENCE
 

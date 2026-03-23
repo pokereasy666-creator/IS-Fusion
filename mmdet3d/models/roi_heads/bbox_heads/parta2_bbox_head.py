@@ -2,23 +2,11 @@
 import numpy as np
 import torch
 from mmdet3d.compat import BBOX_ASSIGNERS, BaseModule, build_bbox_coder, multi_apply
+from mmcv.cnn import ConvModule
 try:
-    from mmcv.cnn import ConvModule, normal_init
+    from mmcv.cnn import normal_init
 except ImportError:
-    from mmcv.cnn import ConvModule
-    try:
-        from mmcv.cnn import normal_init
-    except ImportError:
-        try:
-            from mmdet.models.utils import normal_init
-        except ImportError:
-            # 最后的保底：手动实现一个简单的正态初始化逻辑
-            def normal_init(module, mean=0, std=1, bias=0):
-                import torch.nn as nn
-                if hasattr(module, 'weight') and module.weight is not None:
-                    nn.init.normal_(module.weight, mean, std)
-                if hasattr(module, 'bias') and module.bias is not None:
-                    nn.init.constant_(module.bias, bias)
+    from mmengine.model.weight_init import normal_init
 from torch import nn as nn
 
 from mmdet3d.core.bbox.structures import (LiDARInstance3DBoxes,

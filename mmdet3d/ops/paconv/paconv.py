@@ -4,11 +4,9 @@ import torch
 from mmcv.cnn import ConvModule, build_activation_layer, build_norm_layer
 
 try:
-    # 尝试从旧位置导入 (MMCV 1.x)
     from mmcv.cnn import constant_init, kaiming_init
 except ImportError:
-    # 如果失败，从新位置导入 (MMCV 2.x / MMEngine)
-    from mmcv.cnn import constant_init, kaiming_init
+    from mmengine.model.weight_init import constant_init, kaiming_init
 
 from torch import nn as nn
 from torch.nn import functional as F

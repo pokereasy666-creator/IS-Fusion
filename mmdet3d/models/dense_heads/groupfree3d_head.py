@@ -8,7 +8,7 @@ from mmcv.cnn import ConvModule
 try:
     from mmcv.cnn import xavier_init
 except ImportError:
-    from mmcv.cnn import xavier_init
+    from mmengine.model.weight_init import xavier_init
 from mmcv.cnn.bricks.transformer import (build_positional_encoding,
                                          build_transformer_layer)
 from torch import nn as nn
