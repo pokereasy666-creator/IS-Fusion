@@ -11,7 +11,10 @@ except ImportError:
 try:
     from mmdet.datasets.pipelines import Compose
 except (ImportError, ModuleNotFoundError):
-    from mmdet.datasets.transforms import Compose
+    try:
+        from mmengine.dataset import Compose
+    except ImportError:
+        from mmdet.datasets.transforms import Compose
 
 
 @PIPELINES.register_module()
