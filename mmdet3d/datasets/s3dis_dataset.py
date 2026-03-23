@@ -302,7 +302,6 @@ class _S3DISSegDataset(Custom3DSegDataset):
 
 
 @DATASETS.register_module()
-@DATASETS.register_module()
 class S3DISSegDataset(_S3DISSegDataset):
     r"""S3DIS Dataset for Semantic Segmentation Task.
 

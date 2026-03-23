@@ -249,7 +249,6 @@ class ScanNetDataset(Custom3DDataset):
 
 
 @DATASETS.register_module()
-@DATASETS.register_module()
 class ScanNetSegDataset(Custom3DSegDataset):
     r"""ScanNet Dataset for Semantic Segmentation Task.
 
