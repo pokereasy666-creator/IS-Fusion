@@ -58,7 +58,14 @@ from mmdet.models.task_modules.builder import (
     build_assigner,
     build_sampler,
 )
-from mmdet.models.task_modules.prior_generators import build_anchor_generator
+try:
+    from mmdet.models.task_modules.prior_generators import build_anchor_generator
+except ImportError:
+    from mmengine.registry import build_from_cfg
+    from mmdet.registry import TASK_UTILS as _TASK_UTILS
+
+    def build_anchor_generator(cfg, default_args=None):
+        return build_from_cfg(cfg, _TASK_UTILS, default_args)
 from mmdet.models.task_modules.assigners import AssignResult
 from mmdet.models.task_modules.samplers import PseudoSampler
 from mmdet.structures.bbox import bbox_overlaps
