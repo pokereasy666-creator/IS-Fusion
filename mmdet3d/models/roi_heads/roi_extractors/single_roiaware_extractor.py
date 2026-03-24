@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from mmdet3d import ops
-from mmdet3d.compat import BaseModule, Registry
+from mmdet3d.compat import BaseModule, ROI_EXTRACTORS
 @ROI_EXTRACTORS.register_module()
 class Single3DRoIAwareExtractor(BaseModule):
     """Point-wise roi-aware Extractor.

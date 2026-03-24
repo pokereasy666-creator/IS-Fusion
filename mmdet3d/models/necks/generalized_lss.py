@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import ConvModule
-from mmdet3d.compat import BaseModule, Registry, auto_fp16
+from mmdet3d.compat import BaseModule, NECKS, auto_fp16
 __all__ = ["GeneralizedLSSFPN"]
 
 
