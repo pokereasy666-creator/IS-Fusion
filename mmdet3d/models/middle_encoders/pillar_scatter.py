@@ -2,6 +2,7 @@
 import torch
 from torch import nn
 
+from mmdet3d.compat import auto_fp16
 from ..builder import MIDDLE_ENCODERS
 @MIDDLE_ENCODERS.register_module()
 class PointPillarsScatter(nn.Module):
