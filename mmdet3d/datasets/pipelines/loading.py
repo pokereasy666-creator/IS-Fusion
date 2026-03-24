@@ -756,6 +756,14 @@ class LoadAnnotations3D(LoadAnnotations):
         results['pts_seg_fields'].append('pts_semantic_mask')
         return results
 
+    def _load_bboxes(self, results):
+        """Load 2D bboxes from ann_info (mmdet3d v1.x format)."""
+        results['gt_bboxes'] = results['ann_info']['bboxes']
+
+    def _load_labels(self, results):
+        """Load 2D labels from ann_info (mmdet3d v1.x format)."""
+        results['gt_labels'] = results['ann_info']['labels']
+
     def __call__(self, results):
         # 调用父类 (LoadAnnotations) 加载 2D 信息 (如 with_bbox=True)
         results = super().__call__(results)
