@@ -3,8 +3,7 @@ import torch
 
 from mmdet3d.core import bbox3d2result, build_anchor_generator
 from mmdet3d.models.fusion_layers.point_fusion import point_sample
-from mmdet3d.compat import DETECTORS
-from mmdet.models import build_backbone, build_head, build_neck
+from mmdet3d.compat import DETECTORS, MODELS
 from mmdet.models.detectors import BaseDetector
 
 
@@ -24,12 +23,12 @@ class ImVoxelNet(BaseDetector):
                  pretrained=None,
                  init_cfg=None):
         super().__init__(init_cfg=init_cfg)
-        self.backbone = build_backbone(backbone)
-        self.neck = build_neck(neck)
-        self.neck_3d = build_neck(neck_3d)
+        self.backbone = MODELS.build(backbone)
+        self.neck = MODELS.build(neck)
+        self.neck_3d = MODELS.build(neck_3d)
         bbox_head.update(train_cfg=train_cfg)
         bbox_head.update(test_cfg=test_cfg)
-        self.bbox_head = build_head(bbox_head)
+        self.bbox_head = MODELS.build(bbox_head)
         self.n_voxels = n_voxels
         self.anchor_generator = build_anchor_generator(anchor_generator)
         self.train_cfg = train_cfg
