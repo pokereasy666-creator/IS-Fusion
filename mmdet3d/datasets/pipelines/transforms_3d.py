@@ -1,16 +1,13 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 import warnings
-from mmdet3d.compat import is_tuple_of, build_from_cfg, Registry
+from mmdet3d.compat import is_tuple_of, build_from_cfg
 
 from mmdet3d.core import VoxelGenerator
 from mmdet3d.core.bbox import (CameraInstance3DBoxes, DepthInstance3DBoxes,
                                LiDARInstance3DBoxes, box_np_ops)
 
-try:
-    from mmdet.datasets.builder import PIPELINES
-except ImportError:
-    PIPELINES = Registry('pipeline')
+from mmdet3d.datasets.builder import PIPELINES
 
 try:
     from mmdet.datasets.pipelines import RandomFlip

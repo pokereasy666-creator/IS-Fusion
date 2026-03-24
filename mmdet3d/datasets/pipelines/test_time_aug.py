@@ -1,12 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from mmdet3d.compat import Registry, build_from_cfg, is_list_of
+from mmdet3d.compat import is_list_of
 import warnings
 from copy import deepcopy
 
-try:
-    from mmdet.datasets.builder import PIPELINES
-except ImportError:
-    PIPELINES = Registry('pipeline')
+from mmdet3d.datasets.builder import PIPELINES
 
 try:
     from mmdet.datasets.pipelines import Compose

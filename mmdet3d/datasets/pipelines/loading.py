@@ -7,12 +7,7 @@ from PIL import Image
 from typing import Any, Dict, Tuple
 
 from mmdet3d.core.points import BasePoints, get_points_type
-from mmdet3d.compat import Registry
-
-try:
-    from mmdet.datasets.builder import PIPELINES
-except ImportError:
-    PIPELINES = Registry('pipeline')
+from mmdet3d.datasets.builder import PIPELINES
 
 try:
     from mmdet.datasets.pipelines import LoadAnnotations, LoadImageFromFile
