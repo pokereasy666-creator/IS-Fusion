@@ -94,6 +94,9 @@ from mmengine.runner import Runner, load_checkpoint
 # ── Optimizer ──
 from mmengine.optim import build_optim_wrapper
 
+# ── Build helpers ──
+from mmengine.registry import build_from_cfg
+
 # ── Misc utilities ──
 from mmengine.utils import to_2tuple, is_tuple_of, is_list_of
 from mmengine.utils import ProgressBar, track_iter_progress
@@ -120,6 +123,7 @@ from mmdet.structures.bbox import bbox_overlaps
 
 # ── Legacy transformer registries (removed in mmcv v2) ──
 ATTENTION = Registry('attention')
+FEEDFORWARD_NETWORK = Registry('feedforward_network')
 TRANSFORMER_LAYER = Registry('transformer_layer')
 TRANSFORMER_LAYER_SEQUENCE = Registry('transformer_layer_sequence')
 
