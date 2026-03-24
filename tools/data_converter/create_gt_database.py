@@ -3,6 +3,7 @@ import numpy as np
 import pickle
 from mmengine.utils import track_iter_progress
 from mmcv.ops import roi_align
+import os
 from os import path as osp
 from pycocotools import mask as maskUtils
 from pycocotools.coco import COCO
@@ -282,7 +283,7 @@ def create_groundtruth_database(dataset_class_name,
     if db_info_save_path is None:
         db_info_save_path = osp.join(data_path,
                                      f'{info_prefix}_dbinfos_train.pkl')
-    mmcv.mkdir_or_exist(database_save_path)
+    os.makedirs(database_save_path, exist_ok=True)
     all_db_infos = dict()
     if with_mask:
         coco = COCO(osp.join(data_path, mask_anno_path))
