@@ -20,10 +20,7 @@ except ImportError:
         from mmdet3d.models.utils import limit_period
 
 # 2. 修复 multi_apply
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 
 from ..builder import build_head
 from .anchor3d_head import Anchor3DHead

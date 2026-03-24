@@ -27,15 +27,11 @@ except ImportError:
             # 终极保底：适配 MMDet3D 1.x 最新版
             from mmdet3d.structures import xywhr2xyxyr
             from mmdet3d.models.utils import limit_period
-try:
-    from mmdet.models.builder import HEADS, build_loss
-except ImportError:
-    from mmdet.models import HEADS
-    from mmdet.models import MODELS
-    
-    # 手动封装 build_loss 以适配 MMDet 3.x
-    def build_loss(cfg):
-        return MODELS.build(cfg)
+from mmdet3d.compat import HEADS, MODELS
+
+
+def build_loss(cfg):
+    return MODELS.build(cfg)
 from .anchor_free_mono3d_head import AnchorFreeMono3DHead
 
 INF = 1e8

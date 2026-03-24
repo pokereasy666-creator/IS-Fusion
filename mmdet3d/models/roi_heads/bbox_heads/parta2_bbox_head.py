@@ -15,14 +15,7 @@ from mmdet3d.models.builder import build_loss
 from mmdet3d.ops import make_sparse_convmodule
 from mmdet3d.ops import spconv as spconv
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu, nms_normal_gpu
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    try:
-        from mmdet.models.builder import HEADS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 
 @HEADS.register_module()
 class PartA2BboxHead(BaseModule):

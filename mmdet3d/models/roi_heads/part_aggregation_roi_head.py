@@ -4,14 +4,7 @@ from torch.nn import functional as F
 
 from mmdet3d.core.bbox import bbox3d2result, bbox3d2roi
 from mmdet3d.compat import AssignResult, BBOX_ASSIGNERS, build_assigner, build_sampler
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    try:
-        from mmdet.models.builder import HEADS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表路径
-        from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 from ..builder import build_head, build_roi_extractor
 from .base_3droi_head import Base3DRoIHead
 

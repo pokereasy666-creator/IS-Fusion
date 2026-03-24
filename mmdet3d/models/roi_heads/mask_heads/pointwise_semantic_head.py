@@ -6,14 +6,7 @@ from torch.nn import functional as F
 from mmdet3d.core.bbox.structures import rotation_3d_in_axis
 from mmdet3d.models.builder import build_loss
 from mmdet3d.compat import BaseModule, multi_apply
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    try:
-        from mmdet.models.builder import HEADS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表路径
-        from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 
 
 @HEADS.register_module()

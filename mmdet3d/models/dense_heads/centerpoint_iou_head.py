@@ -33,17 +33,12 @@ except ImportError:
 from mmdet3d.models.utils import clip_sigmoid
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
 
-try:
-    from mmdet3d.models import builder
-    from mmdet3d.models.builder import HEADS, build_loss
-except ImportError:
-    from mmdet.models import HEADS
-    from mmdet3d.registry import MODELS
-    def build_loss(cfg): return MODELS.build(cfg)
-    
-    # 构建一个兼容替身，防止后续的 builder 调用报错
-    class builder:
-        build_head = MODELS.build
+from mmdet3d.compat import HEADS, MODELS
+from mmdet3d.models import builder
+
+
+def build_loss(cfg):
+    return MODELS.build(cfg)
 
 @HEADS.register_module()
 class CenterIoUHead(BaseModule):

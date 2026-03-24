@@ -22,10 +22,7 @@ from mmdet3d.models.losses import chamfer_distance
 from mmdet3d.models.model_utils import VoteModule
 from mmdet3d.ops import build_sa_module, furthest_point_sample
 
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 from .base_conv_bbox_head import BaseConvBboxHead
 
 

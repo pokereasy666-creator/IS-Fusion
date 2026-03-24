@@ -27,10 +27,7 @@ except ImportError:
 
 from mmdet3d.ops import Points_Sampler, gather_points
 
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 
 from .base_conv_bbox_head import BaseConvBboxHead
 

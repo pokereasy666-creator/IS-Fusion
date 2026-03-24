@@ -8,14 +8,7 @@ from mmdet3d.models.builder import build_loss
 from mmdet3d.models.model_utils import VoteModule
 from mmdet3d.ops import build_sa_module, furthest_point_sample
 from mmdet3d.compat import BaseModule, multi_apply
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    try:
-        from mmdet.models.builder import HEADS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表路径
-        from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 
 
 @HEADS.register_module()

@@ -10,14 +10,7 @@ from mmdet3d.models.builder import build_loss
 from mmdet3d.models.losses import chamfer_distance
 from mmdet3d.ops import build_sa_module
 from mmdet3d.compat import BBOX_ASSIGNERS, BaseModule, build_bbox_coder, multi_apply
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    try:
-        from mmdet.models.builder import HEADS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表
-        from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 
 
 @HEADS.register_module()

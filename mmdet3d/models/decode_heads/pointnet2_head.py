@@ -3,11 +3,7 @@ from mmcv.cnn.bricks import ConvModule
 from torch import nn as nn
 
 from mmdet3d.ops import PointFPModule
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    # 适配 MMDet 3.x：HEADS 注册表已合并入 MODELS
-    from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 from .decode_head import Base3DDecodeHead
 
 

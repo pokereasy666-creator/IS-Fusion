@@ -1,13 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmdet3d.core.bbox import bbox3d2result
 from mmdet3d.compat import BaseModule, auto_fp16
-try:
-    from mmdet.models import HEADS
-except ImportError:
-    try:
-        from mmdet.models.builder import HEADS
-    except ImportError:
-        from mmdet.models import HEADS
+from mmdet3d.compat import HEADS
 
 from ..builder import build_head
 from .base_3droi_head import Base3DRoIHead
