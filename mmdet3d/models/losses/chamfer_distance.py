@@ -3,11 +3,7 @@ import torch
 from torch import nn as nn
 from torch.nn.functional import l1_loss, mse_loss, smooth_l1_loss
 
-try:
-    from mmdet.models.builder import LOSSES
-except ImportError:
-    # 适配 MMDet 3.x：使用 MMEngine 统一注册表体系
-    from mmdet.models import LOSSES
+from mmdet3d.compat import LOSSES
 
 
 def chamfer_distance(src,

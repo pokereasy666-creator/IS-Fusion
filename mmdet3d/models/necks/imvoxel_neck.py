@@ -2,14 +2,7 @@
 from mmcv.cnn import ConvModule
 from torch import nn
 
-try:
-    from mmdet.models import NECKS
-except ImportError:
-    try:
-        from mmdet.models.builder import NECKS
-    except ImportError:
-        # 适配 MMDet 3.x / MMEngine 注册表系统
-        from mmdet.models import NECKS
+from mmdet3d.compat import NECKS
 
 
 @NECKS.register_module()
