@@ -7,7 +7,9 @@ except ImportError:
     from mmengine.model.weight_init import normal_init
 from torch import nn as nn
 
-from mmseg.models.builder import build_loss
+from mmdet3d.compat import MODELS
+def build_loss(cfg):
+    return MODELS.build(cfg)
 
 
 class Base3DDecodeHead(BaseModule, metaclass=ABCMeta):
