@@ -8,12 +8,13 @@ from mmengine.registry import Registry, TRANSFORMS as MMENGINE_TRANSFORMS
 from mmdet.registry import (
     MODELS as MMDET_MODELS,
     TASK_UTILS,
-    DATASETS,
+    DATASETS as MMDET_DATASETS,
 )
 from mmseg.registry import MODELS as MMSEG_MODELS
 
 # ── Local registries with parent chain ──
 MODELS = Registry('models', parent=MMDET_MODELS)
+DATASETS = Registry('datasets', parent=MMDET_DATASETS, scope='mmdet3d')
 TRANSFORMS = Registry('transforms', parent=MMENGINE_TRANSFORMS, scope='mmdet3d')
 OBJECTSAMPLERS = Registry('object_samplers')
 VTRANSFORMS = Registry('vtransforms')
