@@ -118,6 +118,10 @@ from mmdet.models.task_modules.assigners import AssignResult
 from mmdet.models.task_modules.samplers import PseudoSampler
 from mmdet.structures.bbox import bbox_overlaps
 
+# ── Legacy transformer registries (removed in mmcv v2) ──
+TRANSFORMER_LAYER = Registry('transformer_layer')
+TRANSFORMER_LAYER_SEQUENCE = Registry('transformer_layer_sequence')
+
 # ── Convenience re-exports from mmdet3d.registry ──
 from mmdet3d.registry import (
     MODELS,
