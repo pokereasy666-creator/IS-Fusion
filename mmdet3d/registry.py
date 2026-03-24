@@ -4,7 +4,7 @@
 All registries are defined here. Model files should import registries from
 this module rather than from mmdet or mmengine directly.
 """
-from mmengine.registry import Registry
+from mmengine.registry import Registry, TRANSFORMS as MMENGINE_TRANSFORMS
 from mmdet.registry import (
     MODELS as MMDET_MODELS,
     TASK_UTILS,
@@ -14,7 +14,7 @@ from mmseg.registry import MODELS as MMSEG_MODELS
 
 # ── Local registries with parent chain ──
 MODELS = Registry('models', parent=MMDET_MODELS)
-TRANSFORMS = Registry('transforms')
+TRANSFORMS = Registry('transforms', parent=MMENGINE_TRANSFORMS, scope='mmdet3d')
 OBJECTSAMPLERS = Registry('object_samplers')
 VTRANSFORMS = Registry('vtransforms')
 
