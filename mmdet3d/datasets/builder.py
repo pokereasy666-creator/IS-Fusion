@@ -18,7 +18,7 @@ PIPELINES = TRANSFORMS
 
 def build_dataset(cfg, default_args=None):
     from torch.utils.data import ConcatDataset
-    from mmdet.datasets.dataset_wrappers import RepeatDataset, ClassBalancedDataset
+    from mmengine.dataset import RepeatDataset, ClassBalancedDataset
 
     if isinstance(cfg, (list, tuple)):
         dataset = ConcatDataset([build_dataset(c, default_args) for c in cfg])
