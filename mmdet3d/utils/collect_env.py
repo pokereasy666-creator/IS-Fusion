@@ -2,7 +2,10 @@
 import mmdet
 import mmdet3d
 import mmseg
-from mmengine.utils import collect_env as collect_base_env
+try:
+    from mmengine.utils import collect_env as collect_base_env
+except ImportError:
+    from mmengine.utils.dl_utils import collect_env as collect_base_env
 from mmengine.utils import get_git_hash
 
 
