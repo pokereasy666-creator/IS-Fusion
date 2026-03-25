@@ -16,6 +16,7 @@ model = dict(
 
     # Replace SparseEncoder with MambaMiddleEncoder
     pts_middle_encoder=dict(
+        _delete_=True,
         type='MambaMiddleEncoder',
         in_channels=5,
         output_channels=512,
