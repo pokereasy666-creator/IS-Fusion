@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
+from torch.utils.checkpoint import checkpoint
 
 # Import Mamba directly from the module file, bypassing mamba_ssm.__init__
 # which has fragile dependencies (transformers, CUDA extensions).
@@ -202,9 +203,15 @@ class MixerModel(nn.Module):
         hidden_states = input_ids + pos
 
         for layer in self.layers:
-            hidden_states = layer(
-                hidden_states, inference_params=inference_params
-            )
+            if self.training:
+                hidden_states = checkpoint(
+                    layer, hidden_states, None, inference_params,
+                    use_reentrant=False,
+                )
+            else:
+                hidden_states = layer(
+                    hidden_states, inference_params=inference_params
+                )
             hidden_states = self.drop_out(hidden_states)
 
         hidden_states = self.norm_f(hidden_states.to(dtype=self.norm_f.weight.dtype))
