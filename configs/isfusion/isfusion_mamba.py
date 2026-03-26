@@ -10,13 +10,6 @@ out_size_factor = 8
 voxel_shape = int((point_cloud_range[3] - point_cloud_range[0]) // voxel_size[0])
 bev_size = voxel_shape // out_size_factor
 
-# Explicitly override optim_wrapper to ensure no paramwise_cfg leaks from base
-optim_wrapper = dict(
-    _delete_=True,
-    type='OptimWrapper',
-    optimizer=dict(type='AdamW', lr=0.00000625, weight_decay=0.01),
-    clip_grad=dict(max_norm=0.01, norm_type=2))
-
 model = dict(
     # Remove the voxel encoder — MambaMiddleEncoder handles raw points directly
     pts_voxel_encoder=None,
