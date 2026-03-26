@@ -194,19 +194,12 @@ def get_inner_win_inds_deprecated(win_inds):
 
     return inner_inds_reorder
 
-try:
-    import ingroup_indices
-except ImportError:
-    ingroup_indices = None
+import ingroup_indices
 from torch.autograd import Function
 class IngroupIndicesFunction(Function):
 
     @staticmethod
     def forward(ctx, group_inds):
-        if ingroup_indices is None:
-            raise ImportError(
-                'ingroup_indices CUDA extension is not compiled. '
-                'Please compile it with `python setup.py develop`.')
 
         out_inds = torch.zeros_like(group_inds) - 1
 
