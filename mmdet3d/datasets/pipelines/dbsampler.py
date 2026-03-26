@@ -2,9 +2,11 @@
 import copy
 import cv2
 import mmcv
+import mmengine
 import numpy as np
 import os
 from PIL import Image
+from mmengine.registry import build_from_cfg
 
 from mmdet3d.core.bbox import box_np_ops, LiDARInstance3DBoxes
 from mmdet3d.datasets.pipelines import data_augment_utils
@@ -117,9 +119,9 @@ class DataBaseSampler(object):
         if painting:
             points_loader.update(painting='gt_aug')
 
-        self.points_loader = mmcv.build_from_cfg(points_loader, PIPELINES)
+        self.points_loader = build_from_cfg(points_loader, PIPELINES)
 
-        db_infos = mmcv.load(info_path)
+        db_infos = mmengine.load(info_path)
 
         # filter database infos
         from mmdet3d.utils import get_root_logger
@@ -373,9 +375,9 @@ class MMDataBaseSampler(DataBaseSampler):
         self.check_2D_collision = check_2D_collision
         self.collision_thr = collision_thr
         self.collision_in_classes = collision_in_classes
-        self.img_loader = mmcv.build_from_cfg(img_loader, PIPELINES)
+        self.img_loader = build_from_cfg(img_loader, PIPELINES)
         self.mixup = mixup
-        # self.mask_loader = mmcv.build_from_cfg(mask_loader, PIPELINES)
+        # self.mask_loader = build_from_cfg(mask_loader, PIPELINES)
 
     def sample_all(self, gt_bboxes_3d, gt_names, gt_bboxes_2d=None, img=None, img_filename=None):
         sampled_num_dict = {}
@@ -693,10 +695,10 @@ class MMDataBaseSamplerV2(DataBaseSampler):
         self.check_2D_collision = check_2D_collision
         self.collision_thr = collision_thr
         self.collision_in_classes = collision_in_classes
-        self.img_loader = mmcv.build_from_cfg(img_loader, PIPELINES)
+        self.img_loader = build_from_cfg(img_loader, PIPELINES)
         self.mixup = mixup
         self.img_num = img_num
-        # self.mask_loader = mmcv.build_from_cfg(mask_loader, PIPELINES)
+        # self.mask_loader = build_from_cfg(mask_loader, PIPELINES)
 
     def sample_all(self, gt_bboxes_3d, gt_labels, gt_bboxes_2d=None, img=None, img_filename=None):
         sampled_num_dict = {}
