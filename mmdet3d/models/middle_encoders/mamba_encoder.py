@@ -120,6 +120,7 @@ class MambaMiddleEncoder(nn.Module):
         self.blocks = MixerModel(
             d_model=trans_dim,
             n_layer=depth,
+            ssm_cfg=dict(use_fast_path=False),
             rms_norm=rms_norm,
             drop_out=drop_out,
             drop_path=dpr,
