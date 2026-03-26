@@ -17,6 +17,9 @@ class CBGSDataset(object):
     """
 
     def __init__(self, dataset):
+        if isinstance(dataset, dict):
+            from .builder import build_dataset
+            dataset = build_dataset(dataset)
         self.dataset = dataset
         self.CLASSES = dataset.CLASSES
         self.cat2id = {name: i for i, name in enumerate(self.CLASSES)}
