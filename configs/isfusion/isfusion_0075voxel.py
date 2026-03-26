@@ -410,10 +410,11 @@ test_dataloader = dict(
 
 optim_wrapper = dict(
     type='OptimWrapper',
-    optimizer=dict(type='AdamW', lr=0.00000625, weight_decay=0.01, paramwise_cfg=dict(
+    optimizer=dict(type='AdamW', lr=0.00000625, weight_decay=0.01),
+    paramwise_cfg=dict(
         custom_keys={
             'img_backbone': dict(lr_mult=0.1),
-        })),
+        }),
     clip_grad=dict(max_norm=0.01, norm_type=2))  # scaled for 1gpu * 1sample_per_gpu (original: 0.0001 for 8gpu * 2sample_per_gpu)
 
 param_scheduler = [dict(type='CosineAnnealingLR', by_epoch=True)]
