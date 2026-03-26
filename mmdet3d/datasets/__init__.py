@@ -2,6 +2,7 @@
 from .builder import DATASETS, build_dataset, build_dataloader
 from .custom_3d import Custom3DDataset
 from .custom_3d_seg import Custom3DSegDataset
+from .dataset_wrappers import CBGSDataset
 from .kitti_dataset import KittiDataset
 from .kitti_mono_dataset import KittiMonoDataset
 from .lyft_dataset import LyftDataset
