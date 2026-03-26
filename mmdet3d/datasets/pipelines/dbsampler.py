@@ -511,7 +511,8 @@ class MMDataBaseSampler(DataBaseSampler):
                         info['path']) if self.data_root else info['path']
                     img_file_path = pcd_file_path + '.png'
                     patch_results = dict(
-                        img_prefix=None, img_info=dict(filename=img_file_path))
+                        img_prefix=None, img_info=dict(filename=img_file_path),
+                        img_path=img_file_path)
                     s_patch = self.img_loader(patch_results)['img']
                     img = self.paste_obj(
                         img,
@@ -841,7 +842,8 @@ class MMDataBaseSamplerV2(DataBaseSampler):
                         info['path']) if self.data_root else info['path']
                     img_file_path = pcd_file_path + '.png'
                     patch_results = dict(
-                        img_prefix=None, img_info=dict(filename=img_file_path))
+                        img_prefix=None, img_info=dict(filename=img_file_path),
+                        img_path=img_file_path)
                     s_patch = self.img_loader(patch_results)['img']
                     img[camera_idx] = self.paste_obj_v2(
                         img[camera_idx],
