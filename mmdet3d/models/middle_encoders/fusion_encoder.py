@@ -1031,7 +1031,7 @@ class ISFusionEncoder(BaseModule):
 
             def _unwrap_dc(val, device):
                 """Unwrap mmcv DataContainer to a plain tensor."""
-                while hasattr(val, 'data'):
+                while hasattr(val, 'data') and not isinstance(val, torch.Tensor):
                     val = val.data
                 if isinstance(val, list):
                     val = torch.tensor(val, device=device, dtype=torch.float32)
