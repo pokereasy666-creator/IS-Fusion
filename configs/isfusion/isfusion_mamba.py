@@ -31,3 +31,11 @@ model = dict(
         rms_norm=False,
     ),
 )
+
+# Increase batch size to use more GPU memory (6.8GB -> ~20GB target on 24GB A30)
+train_dataloader = dict(batch_size=3)
+
+# Scale learning rate linearly with batch size (base: 6.25e-6 for bs=1)
+optim_wrapper = dict(
+    optimizer=dict(lr=6.25e-6 * 3),
+)
