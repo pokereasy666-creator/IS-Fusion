@@ -1029,22 +1029,21 @@ class ISFusionEncoder(BaseModule):
                     res = res.to(cur_coords.device).float()
                 return res
 
-            cur_img_aug_matrix = _get_item(img_aug_matrix, b)
-            cur_lidar2img = _get_item(lidar2img, b)
-            cur_lidar_aug_matrix = _get_item(lidar_aug_matrix, b)
-            
-            # 安全解包 lidar2image
-            val = lidar2image
-            while isinstance(val, list) and len(val) == 1: val = val[0]
-            if hasattr(val, 'data'): val = val.data
-            while isinstance(val, list) and len(val) == 1: val = val[0]
-            if hasattr(val, 'data'): val = val.data
-            
-            if isinstance(val, list) or isinstance(val, torch.Tensor):
-                cur_lidar2image = val[b]
-            else:
-                cur_lidar2image = val
-    
+            def _unwrap_dc(val, device):
+                """Unwrap mmcv DataContainer to a plain tensor."""
+                while hasattr(val, 'data'):
+                    val = val.data
+                if isinstance(val, list):
+                    val = torch.tensor(val, device=device, dtype=torch.float32)
+                elif not isinstance(val, torch.Tensor):
+                    val = torch.tensor(val, device=device, dtype=torch.float32)
+                return val.to(device).float()
+
+            cur_img_aug_matrix = _unwrap_dc(_get_item(img_aug_matrix, b), cur_coords.device)
+            cur_lidar2img = _unwrap_dc(_get_item(lidar2img, b), cur_coords.device)
+            cur_lidar_aug_matrix = _unwrap_dc(_get_item(lidar_aug_matrix, b), cur_coords.device)
+            cur_lidar2image = _unwrap_dc(_get_item(lidar2image, b), cur_coords.device)
+
 
             # inverse aug for pseudo points
             if cur_lidar_aug_matrix.dim() < 2: cur_lidar_aug_matrix = torch.eye(4, device=cur_coords.device)
