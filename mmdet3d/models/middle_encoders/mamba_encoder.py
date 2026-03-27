@@ -20,27 +20,23 @@ from .pointmamba_utils import (
 
 
 class PillarEncoder(nn.Module):
-    """Per-pillar point feature encoder using Conv1d + max-pool.
+    """Per-pillar point feature encoder using Linear + max-pool.
 
-    Adapted from PointMamba's Encoder, but accepts arbitrary input channels
-    (not just xyz).
+    Uses nn.Linear instead of nn.Conv1d(kernel_size=1) to avoid cuDNN
+    backward issues with very large batch dimensions (tens of thousands
+    of pillars treated as batch).
     """
 
     def __init__(self, in_channels, encoder_channel):
         super().__init__()
         self.encoder_channel = encoder_channel
-        self.first_conv = nn.Sequential(
-            nn.Conv1d(in_channels, 128, 1),
-            nn.BatchNorm1d(128),
-            nn.ReLU(inplace=True),
-            nn.Conv1d(128, 256, 1)
-        )
-        self.second_conv = nn.Sequential(
-            nn.Conv1d(512, 512, 1),
-            nn.BatchNorm1d(512),
-            nn.ReLU(inplace=True),
-            nn.Conv1d(512, encoder_channel, 1)
-        )
+        self.first_linear1 = nn.Linear(in_channels, 128)
+        self.first_bn1 = nn.BatchNorm1d(128)
+        self.first_linear2 = nn.Linear(128, 256)
+
+        self.second_linear1 = nn.Linear(512, 512)
+        self.second_bn1 = nn.BatchNorm1d(512)
+        self.second_linear2 = nn.Linear(512, encoder_channel)
 
     def forward(self, pillar_features):
         """
@@ -49,18 +45,26 @@ class PillarEncoder(nn.Module):
         Returns:
             (K, encoder_channel)
         """
-        # (K, P, C) -> (K, C, P)
-        x = pillar_features.transpose(1, 2).contiguous()
-        # (K, 256, P)
-        feature = self.first_conv(x)
-        # (K, 256, 1)
-        feature_global = torch.max(feature, dim=2, keepdim=True)[0]
-        # (K, 512, P)
-        feature = torch.cat([feature_global.expand(-1, -1, x.shape[2]), feature], dim=1)
-        # (K, encoder_channel, P)
-        feature = self.second_conv(feature)
-        # (K, encoder_channel)
-        feature_global = torch.max(feature, dim=2, keepdim=False)[0]
+        # pillar_features: (K, P, C)
+        # first block: Linear(C->128) + BN + ReLU + Linear(128->256)
+        x = self.first_linear1(pillar_features)      # (K, P, 128)
+        x = self.first_bn1(x.transpose(1, 2)).transpose(1, 2)  # BN over channel dim
+        x = F.relu(x)
+        x = self.first_linear2(x)                    # (K, P, 256)
+
+        # global max pool
+        feature_global = torch.max(x, dim=1, keepdim=True)[0]  # (K, 1, 256)
+        # concat global + per-point: (K, P, 512)
+        feature = torch.cat([feature_global.expand(-1, x.shape[1], -1), x], dim=2)
+
+        # second block: Linear(512->512) + BN + ReLU + Linear(512->encoder_channel)
+        feature = self.second_linear1(feature)        # (K, P, 512)
+        feature = self.second_bn1(feature.transpose(1, 2)).transpose(1, 2)
+        feature = F.relu(feature)
+        feature = self.second_linear2(feature)        # (K, P, encoder_channel)
+
+        # global max pool -> (K, encoder_channel)
+        feature_global = torch.max(feature, dim=1, keepdim=False)[0]
         return feature_global
 
 
