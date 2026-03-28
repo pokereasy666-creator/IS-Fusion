@@ -32,6 +32,12 @@ model = dict(
     ),
 )
 
+# Enable find_unused_parameters for DDP (fusion model has conditional branches)
+model_wrapper_cfg = dict(
+    type='MMDistributedDataParallel',
+    find_unused_parameters=True,
+)
+
 # Increase batch size to use more GPU memory (6.8GB -> ~20GB target on 24GB A30)
 train_dataloader = dict(batch_size=3)
 
