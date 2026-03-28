@@ -1046,7 +1046,9 @@ class ISFusionEncoder(BaseModule):
                 cur_coords.transpose(1, 0)
             )
 
-            # lidar2image
+            # lidar2image (fall back to lidar2img if lidar2image key is absent)
+            if cur_lidar2image is None:
+                cur_lidar2image = cur_lidar2img
             if isinstance(cur_lidar2image, list): cur_lidar2image = torch.stack([x if x.dim()==2 else x.view(4,4) for x in cur_lidar2image])
             if cur_lidar2image.dim() == 2: cur_lidar2image = cur_lidar2image.unsqueeze(0)
             if isinstance(cur_lidar2image, torch.Tensor):
