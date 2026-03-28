@@ -1136,7 +1136,7 @@ class ISFusionEncoder(BaseModule):
         for b in range(bs):
             this_pillar_coors = pillar_coors_list[b]
             output = ref_img_pillar_cam[0][b].reshape(self.embed_dims, -1, num_points_in_pillar)
-            decorated_img_feat[b, :, this_pillar_coors[:, 2].long(), this_pillar_coors[:, 3].long()] = output.sum(dim=2)
+            decorated_img_feat[b, :, this_pillar_coors[:, 2].long(), this_pillar_coors[:, 3].long()] = output.sum(dim=2).to(decorated_img_feat.dtype)
 
         return decorated_img_feat
 
