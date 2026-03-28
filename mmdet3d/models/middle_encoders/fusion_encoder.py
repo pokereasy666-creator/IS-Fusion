@@ -960,52 +960,44 @@ class ISFusionEncoder(BaseModule):
     def img_point_sampling(self, reference_voxel, mlvl_feats, num_cam=6, batch_size=4, **kwargs):
 
         import torch
-        def _get_val(key):
-            val = kwargs.get('img_metas', [])
-            while isinstance(val, list) and len(val) == 1: val = val[0]
-            if hasattr(val, 'data'): val = val.data
-            while isinstance(val, list) and len(val) == 1: val = val[0]
-            if hasattr(val, 'data'): val = val.data
-            if isinstance(val, list) and len(val) > 0 and isinstance(val[0], dict):
-                return val[0].get(key)
-            if isinstance(val, dict):
-                return val.get(key)
-            return None
 
-        lidar2img = _get_val('lidar2img')
-        img_aug_matrix = _get_val('img_aug_matrix')
-        image_size = _get_val('input_shape')
-        lidar2image = _get_val('lidar2image')
-        if isinstance(lidar2image, torch.Tensor): lidar2image = [lidar2image]
-
-        lidar_aug_matrix = _get_val('lidar_aug_matrix')
-        camera2ego = _get_val('camera2ego')
-        lidar2ego = _get_val('lidar2ego')
-        lidar2camera = _get_val('lidar2camera')
-        
-        if isinstance(lidar_aug_matrix, torch.Tensor): lidar_aug_matrix = [lidar_aug_matrix]
-        if isinstance(camera2ego, torch.Tensor): camera2ego = [camera2ego]
-        if isinstance(lidar2ego, torch.Tensor): lidar2ego = [lidar2ego]
-        if isinstance(lidar2camera, torch.Tensor): lidar2camera = [lidar2camera]
-
-        
-        if isinstance(lidar2img, torch.Tensor): lidar2img = [lidar2img]
-        if isinstance(img_aug_matrix, torch.Tensor): img_aug_matrix = [img_aug_matrix]
-  # from UVTR
-
-        img_aug_matrix = kwargs.get('img_aug_matrix', None)
-        lidar_aug_matrix = kwargs.get('lidar_aug_matrix', None)
-        lidar2image = kwargs.get('lidar2img', None)
-        # --- 安全解包 DataContainer ---
+        # --- Unwrap img_metas from DataContainer ---
         _metas = kwargs.get("img_metas", [])
         if isinstance(_metas, list):
             _metas = [m.data[0] if hasattr(m, "data") and isinstance(m.data, list) else (m.data if hasattr(m, "data") else m) for m in _metas]
         elif hasattr(_metas, "data"):
             _metas = _metas.data
-        if isinstance(_metas, list) and isinstance(_metas[0], list):
+        if isinstance(_metas, list) and len(_metas) > 0 and isinstance(_metas[0], list):
             _metas = _metas[0]
-            
+
+        # _metas is now a list of dicts, one per sample in the batch
+        def _get_val(key):
+            """Extract a key from img_metas as a list of per-sample values."""
+            vals = [m.get(key) for m in _metas]
+            # If all None, return None
+            if all(v is None for v in vals):
+                return None
+            return vals
+
         image_size = _metas[0]["input_shape"]
+
+        lidar2img = _get_val('lidar2img')
+        img_aug_matrix = _get_val('img_aug_matrix')
+        lidar2image = _get_val('lidar2image')
+        lidar_aug_matrix = _get_val('lidar_aug_matrix')
+        camera2ego = _get_val('camera2ego')
+        lidar2ego = _get_val('lidar2ego')
+        lidar2camera = _get_val('lidar2camera')
+
+        # Also check top-level kwargs as fallback (some pipelines pass these directly)
+        if lidar2img is None:
+            lidar2img = kwargs.get('lidar2img', None)
+        if img_aug_matrix is None:
+            img_aug_matrix = kwargs.get('img_aug_matrix', None)
+        if lidar_aug_matrix is None:
+            lidar_aug_matrix = kwargs.get('lidar_aug_matrix', None)
+        if lidar2image is None:
+            lidar2image = kwargs.get('lidar2image', None)
         # ------------------------------
 
         # Transfer to Point cloud range with X,Y,Z
@@ -1015,38 +1007,40 @@ class ISFusionEncoder(BaseModule):
         for b in range(batch_size):
             cur_coords = reference_voxel[b].reshape(-1, 3)[:, :3].clone()
 
-            def _get_item(matrix_var, batch_idx):
-                val = matrix_var
-                while isinstance(val, list) and len(val) == 1: val = val[0]
-                if hasattr(val, 'data'): val = val.data
-                while isinstance(val, list) and len(val) == 1: val = val[0]
-                if hasattr(val, 'data'): val = val.data
-                
-                res = val[batch_idx] if (isinstance(val, list) or isinstance(val, torch.Tensor)) else val
-                
-                # 自动将取出来的 Tensor 送到正确的设备
-                if isinstance(res, torch.Tensor):
-                    res = res.to(cur_coords.device).float()
-                return res
-
-            def _unwrap_dc(val, device):
-                """Unwrap mmcv DataContainer to a plain tensor."""
+            def _to_tensor(val, device):
+                """Convert val to a float tensor on device, unwrapping DC if needed."""
                 while hasattr(val, 'data') and not isinstance(val, torch.Tensor):
                     val = val.data
-                if isinstance(val, list):
+                if isinstance(val, (list, tuple)):
                     val = torch.tensor(val, device=device, dtype=torch.float32)
+                elif isinstance(val, np.ndarray):
+                    val = torch.from_numpy(val).to(device=device, dtype=torch.float32)
                 elif not isinstance(val, torch.Tensor):
                     val = torch.tensor(val, device=device, dtype=torch.float32)
                 return val.to(device).float()
 
-            cur_img_aug_matrix = _unwrap_dc(_get_item(img_aug_matrix, b), cur_coords.device)
-            cur_lidar2img = _unwrap_dc(_get_item(lidar2img, b), cur_coords.device)
-            cur_lidar_aug_matrix = _unwrap_dc(_get_item(lidar_aug_matrix, b), cur_coords.device)
-            cur_lidar2image = _unwrap_dc(_get_item(lidar2image, b), cur_coords.device)
+            def _get_batch_item(var, batch_idx, device):
+                """Index into a per-batch variable and return a tensor."""
+                if var is None:
+                    return None
+                val = var
+                # var is a list of per-sample values from _get_val
+                if isinstance(val, (list, tuple)):
+                    val = val[batch_idx]
+                elif isinstance(val, torch.Tensor) and val.dim() >= 1:
+                    val = val[batch_idx]
+                # Unwrap any remaining DC
+                return _to_tensor(val, device)
+
+            cur_img_aug_matrix = _get_batch_item(img_aug_matrix, b, cur_coords.device)
+            cur_lidar2img = _get_batch_item(lidar2img, b, cur_coords.device)
+            cur_lidar_aug_matrix = _get_batch_item(lidar_aug_matrix, b, cur_coords.device)
+            cur_lidar2image = _get_batch_item(lidar2image, b, cur_coords.device)
 
 
             # inverse aug for pseudo points
-            if cur_lidar_aug_matrix.dim() < 2: cur_lidar_aug_matrix = torch.eye(4, device=cur_coords.device)
+            if cur_lidar_aug_matrix is None or cur_lidar_aug_matrix.dim() < 2:
+                cur_lidar_aug_matrix = torch.eye(4, device=cur_coords.device)
             cur_coords -= cur_lidar_aug_matrix[:3, 3]
             cur_coords = cur_lidar_aug_matrix[:3, :3].cpu().inverse().to(cur_lidar_aug_matrix.device).matmul(
                 cur_coords.transpose(1, 0)
