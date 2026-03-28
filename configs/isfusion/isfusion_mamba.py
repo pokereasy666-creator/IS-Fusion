@@ -32,10 +32,10 @@ model = dict(
     ),
 )
 
-# Enable find_unused_parameters for DDP (fusion model has conditional branches)
+# static_graph=True needed for DDP + gradient checkpointing compatibility
 model_wrapper_cfg = dict(
     type='MMDistributedDataParallel',
-    find_unused_parameters=True,
+    static_graph=True,
 )
 
 # Increase batch size to use more GPU memory (6.8GB -> ~20GB target on 24GB A30)
