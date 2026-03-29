@@ -43,6 +43,5 @@ train_dataloader = dict(batch_size=5)
 
 # Scale learning rate linearly with batch size (base: 6.25e-6 for bs=1, effective bs=5*1GPU=5)
 optim_wrapper = dict(
-    type='AmpOptimWrapper',  # FP16 mixed precision
     optimizer=dict(lr=6.25e-6 * 5),
 )
