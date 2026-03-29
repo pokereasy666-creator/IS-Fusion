@@ -41,8 +41,8 @@ model_wrapper_cfg = dict(
 # Increase batch size to use more GPU memory
 train_dataloader = dict(batch_size=4)
 
-# Scale learning rate linearly with batch size (base: 6.25e-6 for bs=1, effective bs=4*2GPUs=8)
+# Scale learning rate linearly with batch size (base: 6.25e-6 for bs=1, effective bs=4*4GPUs=16)
 optim_wrapper = dict(
     type='AmpOptimWrapper',  # FP16 mixed precision
-    optimizer=dict(lr=6.25e-6 * 8),
+    optimizer=dict(lr=6.25e-6 * 16),
 )
