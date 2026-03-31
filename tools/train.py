@@ -10,7 +10,6 @@ from mmengine.dist import init_dist
 from mmengine.runner import Runner
 
 from mmdet3d import register_all_modules
-from mmdet3d.runner import CustomEpochBasedRunner
 from mmdet3d.utils import collect_env, get_root_logger
 
 
@@ -151,7 +150,7 @@ def main():
     _migrate_legacy_data_config(cfg)
 
     # Build the runner from config and launch training
-    runner = CustomEpochBasedRunner.from_cfg(cfg)
+    runner = Runner.from_cfg(cfg)
     runner.train()
 
 

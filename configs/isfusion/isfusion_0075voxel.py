@@ -426,7 +426,7 @@ test_cfg = dict()
 test_evaluator = dict(type='NuScenesMetric')
 
 # runtime settings
-custom_hooks = []
+custom_hooks = [dict(type='EpochSyncHook')]
 
 default_scope = 'mmdet3d'
 default_hooks = dict(
