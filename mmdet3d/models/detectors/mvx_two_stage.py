@@ -148,7 +148,7 @@ class MVXTwoStageDetector(Base3DDetector):
     def with_fusion(self):
         """bool: Whether the detector has a fusion layer."""
         return hasattr(self,
-                       'pts_fusion_layer') and self.fusion_layer is not None
+                       'pts_fusion_layer') and self.pts_fusion_layer is not None
 
     @property
     def with_img_neck(self):

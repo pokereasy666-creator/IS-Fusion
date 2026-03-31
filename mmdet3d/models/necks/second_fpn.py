@@ -93,9 +93,6 @@ class SECONDFPN(BaseModule):
             out = ups[0]
 
         del ups
-        import gc
-        gc.collect()
-        torch.cuda.empty_cache()
         out = out.permute(0, 1, 3, 2).contiguous() #todo align with bevfusion
 
         return [out]

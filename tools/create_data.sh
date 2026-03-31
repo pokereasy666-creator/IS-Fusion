@@ -19,7 +19,7 @@ srun -p ${PARTITION} \
     --ntasks-per-node=${GPUS_PER_NODE} \
     --kill-on-bad-exit=1 \
     ${SRUN_ARGS} \
-    python -u tools/create_data.py kitti \
-            --root-path ./data/kitti \
-            --out-dir ./data/kitti \
-            --extra-tag kitti
+    python -u tools/create_data.py ${5:-nuscenes} \
+            --root-path ${6:-./data/nuscenes} \
+            --out-dir ${7:-./data/nuscenes} \
+            --extra-tag ${8:-nuscenes}

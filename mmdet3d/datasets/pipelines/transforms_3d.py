@@ -1860,13 +1860,13 @@ class ModalMask3D(object):
                     random_indices = random.sample(range(len(input_dict['img'])), 3)
                     input_dict['img_mask_idx'] = random_indices
                 else:
-                    input_dict['img_mask_idx'] = [-1, -1, -1]
+                    input_dict['img_mask_idx'] = []
             else:
                 if seed > 0.5:
                     random_indices = random.sample(range(len(input_dict['img'])), 2)
                     input_dict['img_mask_idx'] = random_indices
                 else:
-                    input_dict['img_mask_idx'] = [-1, -1]
+                    input_dict['img_mask_idx'] = []
         return input_dict
 
     def __repr__(self):
