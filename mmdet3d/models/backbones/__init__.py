@@ -7,9 +7,10 @@ from .pointnet2_sa_ssg import PointNet2SASSG
 from .second import SECOND
 from .swin import SwinTransformer
 from .sst_v2 import SSTv2
+from .laplacian_swin import LaplacianSwinTransformer
 
 __all__ = [
     'ResNet', 'ResNetV1d', 'ResNeXt', 'SSDVGG', 'HRNet', 'NoStemRegNet',
     'SECOND', 'PointNet2SASSG', 'PointNet2SAMSG', 'MultiBackbone',
-    'SwinTransformer', 'SSTv2'
+    'SwinTransformer', 'SSTv2', 'LaplacianSwinTransformer'
 ]
