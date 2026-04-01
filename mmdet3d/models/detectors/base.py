@@ -97,7 +97,7 @@ class Base3DDetector(BaseDetector):
                 pts_filename = data['img_metas'][0][batch_id]['pts_filename']
                 box_mode_3d = data['img_metas'][0][batch_id]['box_mode_3d']
             else:
-                ValueError(
+                raise ValueError(
                     f"Unsupported data type {type(data['img_metas'][0])} "
                     f'for visualization!')
             file_name = osp.split(pts_filename)[-1].split('.')[0]
@@ -114,7 +114,7 @@ class Base3DDetector(BaseDetector):
                 pred_bboxes = Box3DMode.convert(pred_bboxes, box_mode_3d,
                                                 Box3DMode.DEPTH)
             elif box_mode_3d != Box3DMode.DEPTH:
-                ValueError(
+                raise ValueError(
                     f'Unsupported box_mode_3d {box_mode_3d} for convertion!')
             pred_bboxes = pred_bboxes.tensor.cpu().numpy()
             show_result(points, None, pred_bboxes, out_dir, file_name)
