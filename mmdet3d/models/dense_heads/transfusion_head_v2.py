@@ -72,20 +72,27 @@ from mmdet3d.models.fusion_layers import apply_3d_transformation
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
 
 try:
+    from mmdet3d.registry import MODELS
     from mmdet3d.core.bbox.coders.transfusion_bbox_coder import TransFusionBBoxCoder
     if 'TransFusionBBoxCoder' not in MODELS:
         MODELS.register_module(module=TransFusionBBoxCoder, force=True)
-except:
+except Exception:
     pass
 
 
 
+import warnings
 import torch
 from torch import nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from torch.nn import Linear
-from torch.nn.init import xavier_uniform_, constant_
+from torch.nn.init import xavier_uniform_, xavier_normal_, constant_
+try:
+    from mmcv.cnn import kaiming_init
+except ImportError:
+    from mmengine.model.weight_init import kaiming_init
+from mmdet3d.core.post_processing import circle_nms
 
 
 class PositionEmbeddingLearned(nn.Module):

@@ -73,7 +73,7 @@ def apply_3d_transformation(pcd, coord_type, img_meta, reverse=False):
             print(pcd_rotate_mat)
             try:
                 rotate_func = partial(pcd.rotate, rotation=pcd_rotate_mat.inverse())
-            except:
+            except Exception:
                 print("Double Err")
                 pcd_rotate_mat = torch.eye(3, dtype=dtype, device=device)
                 rotate_func = partial(pcd.rotate, rotation=pcd_rotate_mat.inverse())

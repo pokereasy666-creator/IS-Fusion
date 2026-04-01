@@ -547,7 +547,7 @@ class LoadForeground2DFromMultiSweeps(object):
                         sweep_fg_info = np.load(sweep_fg_path, allow_pickle=True).item()
                         sweep_fg_info = self._organize(sweep_fg_info, results, sweep)
                         fg_info = self._merge_sweeps(fg_info, sweep_fg_info, sweep)
-                    except: continue
+                    except Exception: continue
                 else: continue
             fg_info = self._make_point_class(fg_info)
             results['foreground2D_info'] = fg_info

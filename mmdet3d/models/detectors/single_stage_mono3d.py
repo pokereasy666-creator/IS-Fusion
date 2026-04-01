@@ -196,7 +196,7 @@ class SingleStageMono3DDetector(SingleStageDetector):
                 img_filename = data['img_metas'][0][batch_id]['filename']
                 cam2img = data['img_metas'][0][batch_id]['cam2img']
             else:
-                ValueError(
+                raise ValueError(
                     f"Unsupported data type {type(data['img_metas'][0])} "
                     f'for visualization!')
             img = mmcv.imread(img_filename)

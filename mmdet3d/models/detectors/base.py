@@ -3,6 +3,11 @@ import mmcv
 import torch
 from os import path as osp
 
+try:
+    from mmengine.structures import BaseDataElement as DC
+except ImportError:
+    from mmcv.utils import DataContainer as DC
+
 from mmdet3d.registry import DETECTORS
 from mmdet3d.core import Box3DMode, Coord3DMode, show_result
 from mmdet.models.detectors import BaseDetector
@@ -81,8 +86,8 @@ class Base3DDetector(BaseDetector):
             elif mmcv.is_list_of(data['points'][0], torch.Tensor):
                 points = data['points'][0][batch_id]
             else:
-                ValueError(f"Unsupported data type {type(data['points'][0])} "
-                           f'for visualization!')
+                raise ValueError(f"Unsupported data type {type(data['points'][0])} "
+                                 f'for visualization!')
             if isinstance(data['img_metas'][0], DC):
                 pts_filename = data['img_metas'][0]._data[0][batch_id][
                     'pts_filename']
