@@ -77,14 +77,17 @@ def _migrate_legacy_data_config(cfg):
         ds_type = ds_cfg.get('type', '')
         metric_type = _DATASET_TO_METRIC.get(ds_type)
         if metric_type is None:
-            raise ValueError(
+            import warnings
+            warnings.warn(
                 f'No evaluator metric registered for dataset type '
-                f'"{ds_type}". Please set val_evaluator and '
-                f'test_evaluator explicitly in your config.')
-        if not cfg.get('val_evaluator'):
-            cfg.val_evaluator = dict(type=metric_type)
-        if not cfg.get('test_evaluator'):
-            cfg.test_evaluator = dict(type=metric_type)
+                f'"{ds_type}". Skipping automatic evaluator setup. '
+                f'Please set val_evaluator and test_evaluator explicitly '
+                f'in your config if evaluation is needed.')
+        else:
+            if not cfg.get('val_evaluator'):
+                cfg.val_evaluator = dict(type=metric_type)
+            if not cfg.get('test_evaluator'):
+                cfg.test_evaluator = dict(type=metric_type)
     if not cfg.get('val_cfg'):
         cfg.val_cfg = dict()
     if not cfg.get('test_cfg'):

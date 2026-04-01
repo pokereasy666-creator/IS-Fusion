@@ -103,28 +103,35 @@ def main():
 
     # Build test_evaluator from legacy config if not already present
     if not cfg.get('test_evaluator'):
+        _DATASET_TO_METRIC = {
+            'NuScenesDataset': 'NuScenesMetric',
+        }
         if cfg.get('val_evaluator'):
             cfg.test_evaluator = cfg.val_evaluator.copy()
-        elif cfg.get('data') and cfg.data.get('test'):
-            # Infer evaluator type from legacy dataset type
-            _DATASET_TO_METRIC = {
-                'NuScenesDataset': 'NuScenesMetric',
-            }
-            ds_cfg = cfg.data.test.copy()
-            while ds_cfg.get('dataset'):
-                ds_cfg = ds_cfg['dataset']
-            ds_type = ds_cfg.get('type', '')
-            metric_type = _DATASET_TO_METRIC.get(ds_type)
-            if metric_type is None:
-                raise ValueError(
-                    f'No evaluator metric registered for dataset type '
-                    f'"{ds_type}". Please set test_evaluator explicitly '
-                    f'in your config.')
-            cfg.test_evaluator = dict(type=metric_type)
         else:
-            raise ValueError(
-                'Config has no test_evaluator and no legacy data.test to '
-                'infer from. Please define test_evaluator in your config.')
+            # Try to infer from legacy cfg.data.test or v2 test_dataloader
+            ds_cfg = None
+            if cfg.get('data') and cfg.data.get('test'):
+                ds_cfg = cfg.data.test.copy()
+            elif cfg.get('test_dataloader') and cfg.test_dataloader.get('dataset'):
+                ds_cfg = cfg.test_dataloader.dataset.copy()
+
+            if ds_cfg is not None:
+                while ds_cfg.get('dataset'):
+                    ds_cfg = ds_cfg['dataset']
+                ds_type = ds_cfg.get('type', '')
+                metric_type = _DATASET_TO_METRIC.get(ds_type)
+                if metric_type is not None:
+                    cfg.test_evaluator = dict(type=metric_type)
+                else:
+                    raise ValueError(
+                        f'No evaluator metric registered for dataset type '
+                        f'"{ds_type}". Please set test_evaluator explicitly '
+                        f'in your config.')
+            else:
+                raise ValueError(
+                    'Config has no test_evaluator and no dataset config to '
+                    'infer from. Please define test_evaluator in your config.')
 
     # Ensure test_cfg exists
     if not cfg.get('test_cfg'):
