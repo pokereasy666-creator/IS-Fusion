@@ -41,6 +41,12 @@ model_wrapper_cfg = dict(
 # Increase batch size to use more GPU memory
 train_dataloader = dict(batch_size=5)
 
+# Ensure hooks are registered for this config variant
+custom_hooks = [
+    dict(type='EpochSyncHook'),
+    dict(type='DatasetInjectionHook'),
+]
+
 # Scale learning rate linearly with batch size (base: 6.25e-6 for bs=1, effective bs=5*1GPU=5)
 optim_wrapper = dict(
     optimizer=dict(lr=6.25e-6 * 5),

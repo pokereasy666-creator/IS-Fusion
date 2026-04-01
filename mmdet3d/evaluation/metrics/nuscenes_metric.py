@@ -80,6 +80,10 @@ class NuScenesMetric(BaseMetric):
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+    def set_dataset(self, dataset):
+        """Explicitly inject the dataset instance for evaluation."""
+        self.dataset = dataset
+
     def _get_dataset(self):
         """Try to obtain the dataset from the runner.
 
