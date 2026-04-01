@@ -3,14 +3,17 @@ from mmengine.runner import Runner
 
 
 class CustomEpochBasedRunner(Runner):
-    """Custom runner that calls set_epoch on datasets each epoch."""
+    """Custom runner that calls set_epoch on datasets each epoch.
 
-    def set_dataset(self, dataset):
-        self._dataset = dataset
+    .. deprecated::
+        Prefer using :class:`EpochSyncHook` (registered via ``custom_hooks``
+        in the config) together with the standard ``Runner``.  This class is
+        kept only for backward compatibility.
+    """
 
-    def train(self, data_loader, **kwargs):
-        if hasattr(self, '_dataset'):
-            for dataset in self._dataset:
-                if hasattr(dataset, 'set_epoch'):
-                    dataset.set_epoch(self.epoch)
-        super().train(data_loader, **kwargs)
+    def train(self):
+        # Propagate current epoch to dataset pipeline transforms
+        dataloader = self.train_dataloader
+        if hasattr(dataloader, 'dataset') and hasattr(dataloader.dataset, 'set_epoch'):
+            dataloader.dataset.set_epoch(self.epoch)
+        return super().train()

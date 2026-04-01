@@ -65,10 +65,24 @@ def _migrate_legacy_data_config(cfg):
     if not cfg.get('test_dataloader') and cfg.data.get('test'):
         cfg.test_dataloader = _build_compat_dataloader(
             cfg.data.test, workers, batch_size, shuffle=False, test_mode=True)
-    if not cfg.get('val_evaluator'):
-        cfg.val_evaluator = dict(type='NuScenesMetric')
-    if not cfg.get('test_evaluator'):
-        cfg.test_evaluator = dict(type='NuScenesMetric')
+    # Infer evaluator type from dataset type if not explicitly configured
+    _DATASET_TO_METRIC = {
+        'NuScenesDataset': 'NuScenesMetric',
+        'KittiDataset': 'KittiMetric',
+        'WaymoDataset': 'WaymoMetric',
+        'LyftDataset': 'LyftMetric',
+    }
+    if not cfg.get('val_evaluator') or not cfg.get('test_evaluator'):
+        # Walk through dataset wrappers to find the actual dataset type
+        ds_cfg = cfg.data.get('val', cfg.data.get('train', {}))
+        while ds_cfg.get('dataset'):
+            ds_cfg = ds_cfg['dataset']
+        ds_type = ds_cfg.get('type', '')
+        metric_type = _DATASET_TO_METRIC.get(ds_type, ds_type.replace('Dataset', 'Metric'))
+        if not cfg.get('val_evaluator'):
+            cfg.val_evaluator = dict(type=metric_type)
+        if not cfg.get('test_evaluator'):
+            cfg.test_evaluator = dict(type=metric_type)
     if not cfg.get('val_cfg'):
         cfg.val_cfg = dict()
     if not cfg.get('test_cfg'):

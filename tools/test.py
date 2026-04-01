@@ -101,8 +101,19 @@ def main():
         if cfg.get('val_evaluator'):
             cfg.test_evaluator = cfg.val_evaluator.copy()
         else:
-            # Fallback: use dataset.evaluate() style
-            cfg.test_evaluator = dict(type='NuScenesMetric')
+            # Infer evaluator type from dataset type
+            _DATASET_TO_METRIC = {
+                'NuScenesDataset': 'NuScenesMetric',
+                'KittiDataset': 'KittiMetric',
+                'WaymoDataset': 'WaymoMetric',
+                'LyftDataset': 'LyftMetric',
+            }
+            ds_cfg = cfg.data.test.copy()
+            while ds_cfg.get('dataset'):
+                ds_cfg = ds_cfg['dataset']
+            ds_type = ds_cfg.get('type', '')
+            metric_type = _DATASET_TO_METRIC.get(ds_type, ds_type.replace('Dataset', 'Metric'))
+            cfg.test_evaluator = dict(type=metric_type)
 
     # Ensure test_cfg exists
     if not cfg.get('test_cfg'):
