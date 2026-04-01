@@ -68,9 +68,6 @@ def _migrate_legacy_data_config(cfg):
     # Infer evaluator type from dataset type if not explicitly configured
     _DATASET_TO_METRIC = {
         'NuScenesDataset': 'NuScenesMetric',
-        'KittiDataset': 'KittiMetric',
-        'WaymoDataset': 'WaymoMetric',
-        'LyftDataset': 'LyftMetric',
     }
     if not cfg.get('val_evaluator') or not cfg.get('test_evaluator'):
         # Walk through dataset wrappers to find the actual dataset type
@@ -78,7 +75,12 @@ def _migrate_legacy_data_config(cfg):
         while ds_cfg.get('dataset'):
             ds_cfg = ds_cfg['dataset']
         ds_type = ds_cfg.get('type', '')
-        metric_type = _DATASET_TO_METRIC.get(ds_type, ds_type.replace('Dataset', 'Metric'))
+        metric_type = _DATASET_TO_METRIC.get(ds_type)
+        if metric_type is None:
+            raise ValueError(
+                f'No evaluator metric registered for dataset type '
+                f'"{ds_type}". Please set val_evaluator and '
+                f'test_evaluator explicitly in your config.')
         if not cfg.get('val_evaluator'):
             cfg.val_evaluator = dict(type=metric_type)
         if not cfg.get('test_evaluator'):

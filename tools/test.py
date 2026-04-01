@@ -93,27 +93,38 @@ def main():
 
     # Build test_dataloader from legacy data.test if not already present
     if not cfg.get('test_dataloader'):
-        batch_size = args.bs
-        cfg.test_dataloader = _build_compat_test_dataloader(cfg, batch_size)
+        if cfg.get('data') and cfg.data.get('test'):
+            batch_size = args.bs
+            cfg.test_dataloader = _build_compat_test_dataloader(cfg, batch_size)
+        else:
+            raise ValueError(
+                'Config has no test_dataloader and no legacy data.test. '
+                'Please define test_dataloader in your config.')
 
     # Build test_evaluator from legacy config if not already present
     if not cfg.get('test_evaluator'):
         if cfg.get('val_evaluator'):
             cfg.test_evaluator = cfg.val_evaluator.copy()
-        else:
-            # Infer evaluator type from dataset type
+        elif cfg.get('data') and cfg.data.get('test'):
+            # Infer evaluator type from legacy dataset type
             _DATASET_TO_METRIC = {
                 'NuScenesDataset': 'NuScenesMetric',
-                'KittiDataset': 'KittiMetric',
-                'WaymoDataset': 'WaymoMetric',
-                'LyftDataset': 'LyftMetric',
             }
             ds_cfg = cfg.data.test.copy()
             while ds_cfg.get('dataset'):
                 ds_cfg = ds_cfg['dataset']
             ds_type = ds_cfg.get('type', '')
-            metric_type = _DATASET_TO_METRIC.get(ds_type, ds_type.replace('Dataset', 'Metric'))
+            metric_type = _DATASET_TO_METRIC.get(ds_type)
+            if metric_type is None:
+                raise ValueError(
+                    f'No evaluator metric registered for dataset type '
+                    f'"{ds_type}". Please set test_evaluator explicitly '
+                    f'in your config.')
             cfg.test_evaluator = dict(type=metric_type)
+        else:
+            raise ValueError(
+                'Config has no test_evaluator and no legacy data.test to '
+                'infer from. Please define test_evaluator in your config.')
 
     # Ensure test_cfg exists
     if not cfg.get('test_cfg'):

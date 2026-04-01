@@ -267,11 +267,15 @@ if __name__ == '__main__':
             version=train_version,
             max_sweeps=args.max_sweeps)
         test_version = f'{args.version}-test'
-        lyft_data_prep(
-            root_path=args.root_path,
-            info_prefix=args.extra_tag,
-            version=test_version,
-            max_sweeps=args.max_sweeps)
+        test_data_path = osp.join(args.root_path, test_version)
+        if osp.isdir(test_data_path):
+            lyft_data_prep(
+                root_path=args.root_path,
+                info_prefix=args.extra_tag,
+                version=test_version,
+                max_sweeps=args.max_sweeps)
+        else:
+            print(f'Skipping Lyft test split: {test_data_path} not found.')
     elif args.dataset == 'waymo' and args.version != 'v1.0-mini':
         waymo_data_prep(
             root_path=args.root_path,
