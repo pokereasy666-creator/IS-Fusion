@@ -565,7 +565,7 @@ class PointSegClassMapping(object):
         self.valid_cat_ids = valid_cat_ids
         self.max_cat_id = int(max_cat_id)
         neg_cls = len(valid_cat_ids)
-        self.cat_id2class = np.ones(self.max_cat_id + 1, dtype=np.int) * neg_cls
+        self.cat_id2class = np.ones(self.max_cat_id + 1, dtype=np.intp) * neg_cls
         for cls_idx, cat_id in enumerate(valid_cat_ids):
             self.cat_id2class[cat_id] = cls_idx
     def __call__(self, results):
@@ -737,7 +737,7 @@ class LoadAnnotations3D(LoadAnnotations):
 
         try:
             mask_bytes = mmcv.load(pts_instance_mask_path, backend_args=self.backend_args)
-            pts_instance_mask = np.frombuffer(mask_bytes, dtype=np.int)
+            pts_instance_mask = np.frombuffer(mask_bytes, dtype=np.int64)
         except Exception:
             pts_instance_mask = np.fromfile(
                 pts_instance_mask_path, dtype=np.int64)
