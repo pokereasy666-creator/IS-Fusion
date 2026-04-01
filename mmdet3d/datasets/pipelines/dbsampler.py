@@ -501,8 +501,8 @@ class MMDataBaseSampler(DataBaseSampler):
                 label = all_labels[inds]
                 if label == 0:
                     x1, y1, x2, y2 = [int(ii) for ii in bbox_2d]
-                    img[x1:x2, y1:y2] = self.mixup * origin_img[x1:x2, y1:y2] + \
-                            (1 - self.mixup) * img[x1:x2, y1:y2]
+                    img[y1:y2, x1:x2] = self.mixup * origin_img[y1:y2, x1:x2] + \
+                            (1 - self.mixup) * img[y1:y2, x1:x2]
                 else:
                     inds -= num_origin
                     info = sampled[inds]
@@ -831,8 +831,8 @@ class MMDataBaseSamplerV2(DataBaseSampler):
                     x1, y1, x2, y2 = [int(ii) for ii in bbox_2d]
                     img[camera_idx] = np.array(img[camera_idx])
                     origin_img[camera_idx] = np.array(origin_img[camera_idx])
-                    img[camera_idx][x1:x2, y1:y2] = self.mixup * origin_img[camera_idx][x1:x2, y1:y2] + \
-                            (1 - self.mixup) * img[camera_idx][x1:x2, y1:y2]
+                    img[camera_idx][y1:y2, x1:x2] = self.mixup * origin_img[camera_idx][y1:y2, x1:x2] + \
+                            (1 - self.mixup) * img[camera_idx][y1:y2, x1:x2]
                     img[camera_idx] = Image.fromarray(img[camera_idx])
                 else:   #  paste GT
                     inds -= num_origin

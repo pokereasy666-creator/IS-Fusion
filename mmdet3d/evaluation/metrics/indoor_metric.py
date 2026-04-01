@@ -43,11 +43,12 @@ class IndoorMetric(BaseMetric):
                 result = data_sample.to_dict()
             self.results.append(result)
 
+    def set_dataset(self, dataset):
+        """Explicitly inject the dataset instance for evaluation."""
+        self.dataset = dataset
+
     def compute_metrics(self, results: List[dict]) -> Dict[str, float]:
-        try:
-            dataset = self.dataset
-        except AttributeError:
-            dataset = None
+        dataset = getattr(self, 'dataset', None)
 
         if dataset is not None and hasattr(dataset, 'evaluate'):
             return dataset.evaluate(
@@ -60,4 +61,5 @@ class IndoorMetric(BaseMetric):
         raise RuntimeError(
             'IndoorMetric requires the dataset to provide an evaluate() '
             'method. Ensure the dataloader dataset is an indoor dataset '
-            '(e.g. SUNRGBDDataset, ScanNetDataset, S3DISDataset).')
+            '(e.g. SUNRGBDDataset, ScanNetDataset, S3DISDataset) and '
+            'add DatasetInjectionHook to custom_hooks in your config.')
