@@ -105,6 +105,15 @@ def main():
     if not cfg.get('test_evaluator'):
         _DATASET_TO_METRIC = {
             'NuScenesDataset': 'NuScenesMetric',
+            'KittiDataset': 'KittiMetric',
+            'WaymoDataset': 'WaymoMetric',
+            'LyftDataset': 'LyftMetric',
+            'SUNRGBDDataset': 'IndoorMetric',
+            'ScanNetDataset': 'IndoorMetric',
+            'S3DISDataset': 'IndoorMetric',
+            'ScanNetSegDataset': 'SegMetric',
+            'S3DISSegDataset': 'SegMetric',
+            'SemanticKITTIDataset': 'SegMetric',
         }
         if cfg.get('val_evaluator'):
             cfg.test_evaluator = cfg.val_evaluator.copy()

@@ -1,4 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import logging
 import mmcv
 import numpy as np
 import os
@@ -547,7 +548,11 @@ class LoadForeground2DFromMultiSweeps(object):
                         sweep_fg_info = np.load(sweep_fg_path, allow_pickle=True).item()
                         sweep_fg_info = self._organize(sweep_fg_info, results, sweep)
                         fg_info = self._merge_sweeps(fg_info, sweep_fg_info, sweep)
-                    except Exception: continue
+                    except Exception as e:
+                        logging.getLogger(__name__).warning(
+                            f'Failed to load foreground info from '
+                            f'{sweep_fg_path}: {e}')
+                        continue
                 else: continue
             fg_info = self._make_point_class(fg_info)
             results['foreground2D_info'] = fg_info

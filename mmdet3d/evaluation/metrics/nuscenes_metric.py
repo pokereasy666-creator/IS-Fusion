@@ -65,7 +65,7 @@ class NuScenesMetric(BaseMetric):
         to the runner's test dataloader, which already implements the full
         nuScenes evaluation protocol via the nuscenes-devkit.
         """
-        dataset = self._dataset
+        dataset = self._get_dataset()
         if dataset is not None and hasattr(dataset, 'evaluate'):
             return dataset.evaluate(
                 results,
@@ -82,13 +82,14 @@ class NuScenesMetric(BaseMetric):
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
-    @property
-    def _dataset(self):
-        """Try to obtain the dataset from the runner."""
-        try:
-            return self.dataset
-        except AttributeError:
-            return None
+    def _get_dataset(self):
+        """Try to obtain the dataset from the runner.
+
+        mmengine's Evaluator sets ``self.dataset`` on the metric when the
+        evaluator is constructed with a dataloader. If it was never set,
+        we return None instead of raising.
+        """
+        return getattr(self, 'dataset', None)
 
     def _evaluate_via_devkit(self, results: List[dict]) -> Dict[str, float]:
         """Minimal direct nuscenes-devkit evaluation."""
@@ -101,10 +102,12 @@ class NuScenesMetric(BaseMetric):
                 'nuscenes-devkit is not installed. '
                 'Cannot compute nuScenes metrics.',
                 logger='current',
-                level=30)
-            return {}
+                level=40)
+            raise RuntimeError(
+                'NuScenesMetric: neither Dataset.evaluate() nor '
+                'nuscenes-devkit is available. Install nuscenes-devkit or '
+                'ensure the dataloader dataset is a NuScenesDataset.')
 
-        from mmdet3d.datasets.nuscenes_dataset import NuScenesDataset
         tmp_dir = None
         if self.jsonfile_prefix is None:
             tmp_dir = tempfile.TemporaryDirectory()
@@ -112,14 +115,37 @@ class NuScenesMetric(BaseMetric):
         else:
             jsonfile_prefix = self.jsonfile_prefix
 
-        # Attempt a basic evaluation — the caller should ideally go
-        # through NuScenesDataset.evaluate() for full fidelity.
-        print_log(
-            'Direct devkit evaluation is limited. For full fidelity, '
-            'ensure NuScenesDataset.evaluate() is available.',
-            logger='current',
-            level=30)
+        try:
+            from mmdet3d.datasets.nuscenes_dataset import NuScenesDataset
+            # Use NuScenesDataset's format_results + nuScenes devkit
+            result_files, _ = NuScenesDataset.format_results_static(
+                results, jsonfile_prefix)
+            if isinstance(result_files, dict):
+                result_path = result_files.get('pts_bbox', result_files.get(
+                    next(iter(result_files))))
+            else:
+                result_path = result_files
 
-        if tmp_dir is not None:
-            tmp_dir.cleanup()
-        return {}
+            nusc = NuScenes(
+                version='v1.0-trainval', dataroot=self.data_root, verbose=False)
+            eval_config = config_factory('detection_cvpr_2019')
+            nusc_eval = NuScenesEval(
+                nusc, config=eval_config, result_path=result_path,
+                eval_set='val', output_dir=osp.dirname(jsonfile_prefix),
+                verbose=False)
+            metrics_summary = nusc_eval.main(render_curves=False)
+            metrics = dict()
+            for k, v in metrics_summary['label_aps'].items():
+                for thresh, ap in v.items():
+                    metrics[f'{k}_AP_{thresh}'] = ap
+            metrics['NDS'] = metrics_summary.get('nd_score', 0.0)
+            metrics['mAP'] = metrics_summary.get('mean_ap', 0.0)
+            return metrics
+        except Exception as e:
+            print_log(
+                f'Direct nuscenes-devkit evaluation failed: {e}',
+                logger='current', level=40)
+            raise
+        finally:
+            if tmp_dir is not None:
+                tmp_dir.cleanup()

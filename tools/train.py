@@ -68,6 +68,15 @@ def _migrate_legacy_data_config(cfg):
     # Infer evaluator type from dataset type if not explicitly configured
     _DATASET_TO_METRIC = {
         'NuScenesDataset': 'NuScenesMetric',
+        'KittiDataset': 'KittiMetric',
+        'WaymoDataset': 'WaymoMetric',
+        'LyftDataset': 'LyftMetric',
+        'SUNRGBDDataset': 'IndoorMetric',
+        'ScanNetDataset': 'IndoorMetric',
+        'S3DISDataset': 'IndoorMetric',
+        'ScanNetSegDataset': 'SegMetric',
+        'S3DISSegDataset': 'SegMetric',
+        'SemanticKITTIDataset': 'SegMetric',
     }
     if not cfg.get('val_evaluator') or not cfg.get('test_evaluator'):
         # Walk through dataset wrappers to find the actual dataset type
