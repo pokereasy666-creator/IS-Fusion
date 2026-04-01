@@ -1,6 +1,4 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import os.path as osp
-import tempfile
 from typing import Dict, List, Optional, Sequence
 
 from mmengine.evaluator import BaseMetric
@@ -92,60 +90,16 @@ class NuScenesMetric(BaseMetric):
         return getattr(self, 'dataset', None)
 
     def _evaluate_via_devkit(self, results: List[dict]) -> Dict[str, float]:
-        """Minimal direct nuscenes-devkit evaluation."""
-        try:
-            from nuscenes import NuScenes
-            from nuscenes.eval.detection.config import config_factory
-            from nuscenes.eval.detection.evaluate import NuScenesEval
-        except ImportError:
-            print_log(
-                'nuscenes-devkit is not installed. '
-                'Cannot compute nuScenes metrics.',
-                logger='current',
-                level=40)
-            raise RuntimeError(
-                'NuScenesMetric: neither Dataset.evaluate() nor '
-                'nuscenes-devkit is available. Install nuscenes-devkit or '
-                'ensure the dataloader dataset is a NuScenesDataset.')
+        """Fallback evaluation when Dataset.evaluate() is unavailable.
 
-        tmp_dir = None
-        if self.jsonfile_prefix is None:
-            tmp_dir = tempfile.TemporaryDirectory()
-            jsonfile_prefix = osp.join(tmp_dir.name, 'results')
-        else:
-            jsonfile_prefix = self.jsonfile_prefix
-
-        try:
-            from mmdet3d.datasets.nuscenes_dataset import NuScenesDataset
-            # Use NuScenesDataset's format_results + nuScenes devkit
-            result_files, _ = NuScenesDataset.format_results_static(
-                results, jsonfile_prefix)
-            if isinstance(result_files, dict):
-                result_path = result_files.get('pts_bbox', result_files.get(
-                    next(iter(result_files))))
-            else:
-                result_path = result_files
-
-            nusc = NuScenes(
-                version='v1.0-trainval', dataroot=self.data_root, verbose=False)
-            eval_config = config_factory('detection_cvpr_2019')
-            nusc_eval = NuScenesEval(
-                nusc, config=eval_config, result_path=result_path,
-                eval_set='val', output_dir=osp.dirname(jsonfile_prefix),
-                verbose=False)
-            metrics_summary = nusc_eval.main(render_curves=False)
-            metrics = dict()
-            for k, v in metrics_summary['label_aps'].items():
-                for thresh, ap in v.items():
-                    metrics[f'{k}_AP_{thresh}'] = ap
-            metrics['NDS'] = metrics_summary.get('nd_score', 0.0)
-            metrics['mAP'] = metrics_summary.get('mean_ap', 0.0)
-            return metrics
-        except Exception as e:
-            print_log(
-                f'Direct nuscenes-devkit evaluation failed: {e}',
-                logger='current', level=40)
-            raise
-        finally:
-            if tmp_dir is not None:
-                tmp_dir.cleanup()
+        This path requires the dataset instance to convert results into the
+        nuScenes JSON submission format (sample tokens, coordinate transforms,
+        etc.).  Since we don't have the dataset, we raise a clear error.
+        """
+        raise RuntimeError(
+            'NuScenesMetric: the dataset object is not available on this '
+            'metric instance, so results cannot be formatted for the '
+            'nuscenes-devkit.  Ensure the evaluator is constructed with a '
+            'dataloader whose dataset is a NuScenesDataset (which provides '
+            'its own evaluate() method), or set the evaluator explicitly in '
+            'your config.')
