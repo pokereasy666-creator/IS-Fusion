@@ -133,14 +133,18 @@ def main():
                 if metric_type is not None:
                     cfg.test_evaluator = dict(type=metric_type)
                 else:
-                    raise ValueError(
+                    import warnings
+                    warnings.warn(
                         f'No evaluator metric registered for dataset type '
-                        f'"{ds_type}". Please set test_evaluator explicitly '
-                        f'in your config.')
+                        f'"{ds_type}". Skipping automatic evaluator setup. '
+                        f'Please set test_evaluator explicitly in your '
+                        f'config if evaluation is needed.')
             else:
-                raise ValueError(
+                import warnings
+                warnings.warn(
                     'Config has no test_evaluator and no dataset config to '
-                    'infer from. Please define test_evaluator in your config.')
+                    'infer from. Please define test_evaluator in your '
+                    'config if evaluation is needed.')
 
     # Ensure test_cfg exists
     if not cfg.get('test_cfg'):
