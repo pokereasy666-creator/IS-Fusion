@@ -89,18 +89,28 @@ def _migrate_legacy_data_config(cfg):
             import warnings
             warnings.warn(
                 f'No evaluator metric registered for dataset type '
-                f'"{ds_type}". Skipping automatic evaluator setup. '
-                f'Please set val_evaluator and test_evaluator explicitly '
-                f'in your config if evaluation is needed.')
+                f'"{ds_type}". Removing val/test triplets to satisfy '
+                f'MMEngine Runner constraints. Set val_evaluator and '
+                f'test_evaluator explicitly in your config if evaluation '
+                f'is needed.')
+            # MMEngine requires (dataloader, cfg, evaluator) as an
+            # all-or-nothing triplet.  Drop the incomplete ones.
+            for key in ('val_dataloader', 'val_evaluator', 'val_cfg',
+                        'test_dataloader', 'test_evaluator', 'test_cfg'):
+                cfg.pop(key, None)
+            return
         else:
             if not cfg.get('val_evaluator'):
                 cfg.val_evaluator = dict(type=metric_type)
             if not cfg.get('test_evaluator'):
                 cfg.test_evaluator = dict(type=metric_type)
-    if not cfg.get('val_cfg'):
-        cfg.val_cfg = dict()
-    if not cfg.get('test_cfg'):
-        cfg.test_cfg = dict()
+    # Only add val_cfg / test_cfg when the full triplet is present
+    if cfg.get('val_dataloader') and cfg.get('val_evaluator'):
+        if not cfg.get('val_cfg'):
+            cfg.val_cfg = dict()
+    if cfg.get('test_dataloader') and cfg.get('test_evaluator'):
+        if not cfg.get('test_cfg'):
+            cfg.test_cfg = dict()
 
 
 def main():

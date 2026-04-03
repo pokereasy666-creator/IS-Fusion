@@ -115,8 +115,10 @@ def main():
             'S3DISSegDataset': 'SegMetric',
             'SemanticKITTIDataset': 'SegMetric',
         }
+        _inferred = False
         if cfg.get('val_evaluator'):
             cfg.test_evaluator = cfg.val_evaluator.copy()
+            _inferred = True
         else:
             # Try to infer from legacy cfg.data.test or v2 test_dataloader
             ds_cfg = None
@@ -132,23 +134,23 @@ def main():
                 metric_type = _DATASET_TO_METRIC.get(ds_type)
                 if metric_type is not None:
                     cfg.test_evaluator = dict(type=metric_type)
-                else:
-                    import warnings
-                    warnings.warn(
-                        f'No evaluator metric registered for dataset type '
-                        f'"{ds_type}". Skipping automatic evaluator setup. '
-                        f'Please set test_evaluator explicitly in your '
-                        f'config if evaluation is needed.')
-            else:
-                import warnings
-                warnings.warn(
-                    'Config has no test_evaluator and no dataset config to '
-                    'infer from. Please define test_evaluator in your '
-                    'config if evaluation is needed.')
+                    _inferred = True
 
-    # Ensure test_cfg exists
-    if not cfg.get('test_cfg'):
-        cfg.test_cfg = dict()
+        if not _inferred:
+            import warnings
+            warnings.warn(
+                'Could not infer test_evaluator for this config. '
+                'Removing test triplet (test_dataloader, test_cfg, '
+                'test_evaluator) to satisfy MMEngine Runner constraints. '
+                'Set test_evaluator explicitly in your config if '
+                'evaluation is needed.')
+            for key in ('test_dataloader', 'test_evaluator', 'test_cfg'):
+                cfg.pop(key, None)
+
+    # Only add test_cfg when the full triplet is present
+    if cfg.get('test_dataloader') and cfg.get('test_evaluator'):
+        if not cfg.get('test_cfg'):
+            cfg.test_cfg = dict()
 
     # Set random seeds
     if args.seed is not None:
