@@ -2,6 +2,8 @@
 from mmengine.hooks import Hook
 from mmengine.runner import Runner
 
+from mmdet3d.registry import RUNNERS
+
 
 class _EpochSyncInternalHook(Hook):
     """Internal hook that propagates epoch to dataset each epoch."""
@@ -14,6 +16,7 @@ class _EpochSyncInternalHook(Hook):
             dataloader.dataset.set_epoch(runner.epoch)
 
 
+@RUNNERS.register_module()
 class CustomEpochBasedRunner(Runner):
     """Custom runner that calls set_epoch on datasets every epoch.
 

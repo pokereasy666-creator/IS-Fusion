@@ -89,16 +89,19 @@ def _migrate_legacy_data_config(cfg):
             import warnings
             warnings.warn(
                 f'No evaluator metric registered for dataset type '
-                f'"{ds_type}". Removing val/test triplets to satisfy '
-                f'MMEngine Runner constraints. Set val_evaluator and '
-                f'test_evaluator explicitly in your config if evaluation '
-                f'is needed.')
+                f'"{ds_type}". Incomplete val/test triplets will be '
+                f'removed to satisfy MMEngine Runner constraints. Set '
+                f'val_evaluator and test_evaluator explicitly in your '
+                f'config if evaluation is needed.')
             # MMEngine requires (dataloader, cfg, evaluator) as an
-            # all-or-nothing triplet.  Drop the incomplete ones.
-            for key in ('val_dataloader', 'val_evaluator', 'val_cfg',
-                        'test_dataloader', 'test_evaluator', 'test_cfg'):
-                cfg.pop(key, None)
-            return
+            # all-or-nothing triplet.  Only drop incomplete ones;
+            # preserve any triplet the user explicitly configured.
+            if not cfg.get('val_evaluator'):
+                for key in ('val_dataloader', 'val_evaluator', 'val_cfg'):
+                    cfg.pop(key, None)
+            if not cfg.get('test_evaluator'):
+                for key in ('test_dataloader', 'test_evaluator', 'test_cfg'):
+                    cfg.pop(key, None)
         else:
             if not cfg.get('val_evaluator'):
                 cfg.val_evaluator = dict(type=metric_type)

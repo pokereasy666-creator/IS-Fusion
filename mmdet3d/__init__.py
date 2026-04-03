@@ -62,6 +62,7 @@ def register_all_modules(init_default_scope=True):
     import mmdet3d.core  # noqa: F401
     import mmdet3d.evaluation  # noqa: F401
     import mmdet3d.engine  # noqa: F401
+    import mmdet3d.runner  # noqa: F401
     import mmdet3d.visualization  # noqa: F401
 
     if init_default_scope:
