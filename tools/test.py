@@ -137,15 +137,11 @@ def main():
                     _inferred = True
 
         if not _inferred:
-            import warnings
-            warnings.warn(
+            raise RuntimeError(
                 'Could not infer test_evaluator for this config. '
-                'Removing test triplet (test_dataloader, test_cfg, '
-                'test_evaluator) to satisfy MMEngine Runner constraints. '
-                'Set test_evaluator explicitly in your config if '
-                'evaluation is needed.')
-            for key in ('test_dataloader', 'test_evaluator', 'test_cfg'):
-                cfg.pop(key, None)
+                'The test script requires a complete test triplet '
+                '(test_dataloader, test_cfg, test_evaluator). Please set '
+                'test_evaluator explicitly in your config.')
 
     # Only add test_cfg when the full triplet is present
     if cfg.get('test_dataloader') and cfg.get('test_evaluator'):
