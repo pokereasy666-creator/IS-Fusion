@@ -2,7 +2,7 @@
 
 IS-Fusion is a multi-modal 3D object detection framework that fuses **LiDAR point clouds** and **multi-view camera images** for autonomous driving. It operates on the NuScenes dataset with 10 object classes.
 
-This diagram shows the **Mamba variant**, where the LiDAR branch uses `MambaMiddleEncoder` (replacing `DynamicVFE + SparseEncoder`). Raw points are pillarized and processed by bidirectional Mamba SSM blocks for long-range context modeling.
+This diagram shows the **Mamba variant**, where the LiDAR branch uses `MambaMiddleEncoder` (replacing `DynamicVFE + SparseEncoder`). The image branch features a **Laplacian pyramid** for edge extraction and **EGA (Edge-Guided Attention)** modules for edge-aware multi-scale feature refinement.
 
 ---
 
@@ -19,14 +19,81 @@ This diagram shows the **Mamba variant**, where the LiDAR branch uses `MambaMidd
   └──────────┬───────────┘                          └──────────┬───────────┘
              │                                                  │
              ▼                                                  │
-  ┌──────────────────────┐                                      │
-  │    Image Backbone    │                                      │
-  │ LaplacianSwinTransf. │                                      │
-  │  (multi-scale feat.) │                                      │
-  └──────────┬───────────┘                                      │
-             │                                                  │
-             │  [C192, C384, C768]                              │
-             ▼                                                  ▼
+  ┌───────────────────────────────────────────────────────┐     │
+  │         LaplacianSwinTransformer (Image Backbone)     │     │
+  │                                                       │     │
+  │  ┌─────────────────────────────────────────────────┐  │     │
+  │  │ Laplacian Edge Extraction (no grad)             │  │     │
+  │  │   RGB -> grayscale -> 5-level Laplacian pyramid │  │     │
+  │  │   (Gauss smooth -> downsample -> upsample ->    │  │     │
+  │  │    subtract = high-freq edge at each scale)     │  │     │
+  │  │   Select level 1 -> shared edge_feature (1ch)   │  │     │
+  │  └────────────────────┬────────────────────────────┘  │     │
+  │                       │ edge_feature                   │     │
+  │                       │ (shared across all EGA stages) │     │
+  │                       ▼                                │     │
+  │  ┌─────────────────────────────────────────────────┐  │     │
+  │  │ Swin-T Encoder (4 stages)                       │  │     │
+  │  │   s0: (96,  H/4,  W/4)                         │  │     │
+  │  │   s1: (192, H/8,  W/8)                         │  │     │
+  │  │   s2: (384, H/16, W/16)                        │  │     │
+  │  │   s3: (768, H/32, W/32)                        │  │     │
+  │  └──┬──────┬──────┬──────┬─────────────────────────┘  │     │
+  │     s0     s1     s2     s3                            │     │
+  │     │      │      │      │                             │     │
+  │     │      │      │      ▼                             │     │
+  │     │      │      │  ┌──────────────────────────┐     │     │
+  │     │      │      │  │ Stage 3 (deepest, no EGA)│     │     │
+  │     │      │      │  │ s3 -> Conv+Up -> d3      │     │     │
+  │     │      │      │  │ d3 -> Out -> pred3 (1ch) │     │     │
+  │     │      │      │  └────────┬──────────────┬──┘     │     │
+  │     │      │      │           │ d3           │ pred3  │     │
+  │     │      │      ▼           │              ▼        │     │
+  │     │      │  ┌───────────────┼────────────────────┐  │     │
+  │     │      │  │ Stage 2: EGA(edge, s2, pred3)      │  │     │
+  │     │      │  │   -> ega2_out (384, H/16, W/16)    │  │     │
+  │     │      │  │ concat(d3, ega2) -> Up -> d2       │  │     │
+  │     │      │  │ d2 -> Out -> pred2 (1ch)           │  │     │
+  │     │      │  └────────┬─────────────────────┬─────┘  │     │
+  │     │      │           │ d2                  │ pred2  │     │
+  │     │      ▼           │                     ▼        │     │
+  │     │  ┌───────────────┼───────────────────────────┐  │     │
+  │     │  │ Stage 1: EGA(edge, s1, pred2)             │  │     │
+  │     │  │   -> ega1_out (192, H/8, W/8)             │  │     │
+  │     │  │ concat(d2, ega1) -> Up -> d1              │  │     │
+  │     │  │ d1 -> Out -> pred1 (1ch)                  │  │     │
+  │     │  └────────┬──────────────────────────┬───────┘  │     │
+  │     │           │ d1                       │ pred1    │     │
+  │     ▼           │                          ▼          │     │
+  │  ┌──────────────┼─────────────────────────────────┐   │     │
+  │  │ Stage 0: EGA(edge, s0, pred1)                  │   │     │
+  │  │   -> ega0_out (96, H/4, W/4)                   │   │     │
+  │  │ concat(d1, ega0) -> Up -> d0                    │   │     │
+  │  └────────────────────────────────────────────────┘   │     │
+  │                                                       │     │
+  │  ┌─────────────────────────────────────────────────┐  │     │
+  │  │ EGA Module Internals (3-input attention)        │  │     │
+  │  │                                                 │  │     │
+  │  │   Inputs: edge_feature, encoder_feat x, pred    │  │     │
+  │  │                                                 │  │     │
+  │  │   Reverse att:  background = x * (1-sigmoid(p)) │  │     │
+  │  │   Boundary att: boundary  = x * Laplace(sig(p)) │  │     │
+  │  │   High-freq:    hf       = x * interp(edge)     │  │     │
+  │  │                     │         │         │        │  │     │
+  │  │                     └────┬────┘────┬────┘        │  │     │
+  │  │                          ▼         │             │  │     │
+  │  │   Concat(bg, bd, hf) -> Conv(3C->C)             │  │     │
+  │  │     -> spatial attention map -> multiply         │  │     │
+  │  │     -> + residual(x)                             │  │     │
+  │  │     -> CBAM (ChannelGate + SpatialGate)          │  │     │
+  │  │     -> output                                    │  │     │
+  │  └─────────────────────────────────────────────────┘  │     │
+  │                                                       │     │
+  │  Output to FPN: (ega1[192], ega2[384], s3[768])       │     │
+  └──────────────────────┬────────────────────────────────┘     │
+                         │                                       │
+                         │  [C192, C384, C768]                   │
+                         ▼                                       ▼
   ┌──────────────────────┐          ┌───────────────────────────────────────────┐
   │    Image Neck        │          │          MambaMiddleEncoder               │
   │  GeneralizedLSSFPN   │          │                                           │
@@ -229,6 +296,9 @@ This diagram shows the **Mamba variant**, where the LiDAR branch uses `MambaMidd
 |---|---|---|
 | Main Detector | `ISFusionDetector` | `mmdet3d/models/detectors/isfusion.py` |
 | Image Backbone | `LaplacianSwinTransformer` | `mmdet3d/models/backbones/laplacian_swin.py` |
+| Laplacian Pyramid | `make_laplace_pyramid` | `mmdet3d/models/backbones/laplacian_ega.py` |
+| Edge-Guided Attention | `EGA` | `mmdet3d/models/backbones/laplacian_ega.py` |
+| CBAM | `ChannelGate` + `SpatialGate` | `mmdet3d/models/backbones/laplacian_ega.py` |
 | Image Neck | `GeneralizedLSSFPN` | `mmdet3d/models/necks/generalized_lss.py` |
 | Middle Encoder | `MambaMiddleEncoder` | `mmdet3d/models/middle_encoders/mamba_encoder.py` |
 | Pillar Encoder | `PillarEncoder` | `mmdet3d/models/middle_encoders/mamba_encoder.py` |
