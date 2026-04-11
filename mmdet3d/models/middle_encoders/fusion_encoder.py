@@ -967,8 +967,11 @@ class ISFusionEncoder(BaseModule):
             _metas = [m.data[0] if hasattr(m, "data") and isinstance(m.data, list) else (m.data if hasattr(m, "data") else m) for m in _metas]
         elif hasattr(_metas, "data"):
             _metas = _metas.data
-        if isinstance(_metas, list) and len(_metas) > 0 and isinstance(_metas[0], list):
+        # Flatten nested lists/tuples until we reach a list of dicts
+        while isinstance(_metas, (list, tuple)) and len(_metas) > 0 and not isinstance(_metas[0], dict):
             _metas = _metas[0]
+        if not isinstance(_metas, list):
+            _metas = [_metas]
 
         # _metas is now a list of dicts, one per sample in the batch
         def _get_val(key):
