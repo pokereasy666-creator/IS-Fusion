@@ -992,7 +992,7 @@ class ISFusionEncoder(BaseModule):
                 return None
             return vals
 
-        image_size = _metas[0]["input_shape"]
+        image_size = _metas[0].get("input_shape") or _metas[0].get("img_shape") or _metas[0].get("pad_shape")
 
         lidar2img = _get_val('lidar2img')
         img_aug_matrix = _get_val('img_aug_matrix')
