@@ -1022,7 +1022,7 @@ class ISFusionEncoder(BaseModule):
 
             def _to_tensor(val, device):
                 """Convert val to a float tensor on device, unwrapping DC if needed."""
-                while hasattr(val, 'data') and not isinstance(val, torch.Tensor):
+                while hasattr(val, 'data') and not isinstance(val, (torch.Tensor, np.ndarray)):
                     val = val.data
                 if isinstance(val, (list, tuple)):
                     val = torch.tensor(val, device=device, dtype=torch.float32)
