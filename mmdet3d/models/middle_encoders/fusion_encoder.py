@@ -1020,11 +1020,21 @@ class ISFusionEncoder(BaseModule):
         for b in range(batch_size):
             cur_coords = reference_voxel[b].reshape(-1, 3)[:, :3].clone()
 
+            def _unwrap_val(val):
+                """Recursively unwrap DataContainer objects."""
+                for _ in range(10):  # safety limit
+                    if type(val).__name__ == 'DataContainer':
+                        val = val.data
+                    else:
+                        break
+                return val
+
             def _to_tensor(val, device):
                 """Convert val to a float tensor on device, unwrapping DC if needed."""
-                while hasattr(val, 'data') and not isinstance(val, (torch.Tensor, np.ndarray)):
-                    val = val.data
+                val = _unwrap_val(val)
                 if isinstance(val, (list, tuple)):
+                    # Elements inside may also be DCs
+                    val = [_unwrap_val(v) for v in val]
                     val = torch.tensor(val, device=device, dtype=torch.float32)
                 elif isinstance(val, np.ndarray):
                     val = torch.from_numpy(val).to(device=device, dtype=torch.float32)
@@ -1036,13 +1046,12 @@ class ISFusionEncoder(BaseModule):
                 """Index into a per-batch variable and return a tensor."""
                 if var is None:
                     return None
-                val = var
-                # var is a list of per-sample values from _get_val
+                val = _unwrap_val(var)
+                # Index by batch
                 if isinstance(val, (list, tuple)):
                     val = val[batch_idx]
                 elif isinstance(val, torch.Tensor) and val.dim() >= 1:
                     val = val[batch_idx]
-                # Unwrap any remaining DC
                 return _to_tensor(val, device)
 
             cur_img_aug_matrix = _get_batch_item(img_aug_matrix, b, cur_coords.device)
