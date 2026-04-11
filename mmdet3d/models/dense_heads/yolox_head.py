@@ -16,7 +16,7 @@ except ImportError:
     from mmdet.core import MlvlPointGenerator, bbox_xyxy_to_cxcywh
 from ..builder import HEADS, build_loss
 from .base_dense_head import BaseDenseHead
-from .dense_test_mixins import BBoxTestMixin
+from .dense_text_mixins import BBoxTestMixin
 
 
 @HEADS.register_module()

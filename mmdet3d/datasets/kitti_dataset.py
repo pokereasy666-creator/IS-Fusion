@@ -3,6 +3,7 @@ import copy
 import mmcv
 import numpy as np
 import os
+from os import path as osp
 import tempfile
 import torch
 from mmdet3d.registry import DATASETS

@@ -91,7 +91,7 @@ class NuScenesMetric(BaseMetric):
             return None
 
     def _evaluate_via_devkit(self, results: List[dict]) -> Dict[str, float]:
-        """Minimal direct nuscenes-devkit evaluation."""
+        """Fallback nuscenes-devkit evaluation via NuScenesDataset."""
         try:
             from nuscenes import NuScenes
             from nuscenes.eval.detection.config import config_factory
@@ -105,21 +105,28 @@ class NuScenesMetric(BaseMetric):
             return {}
 
         from mmdet3d.datasets.nuscenes_dataset import NuScenesDataset
-        tmp_dir = None
-        if self.jsonfile_prefix is None:
-            tmp_dir = tempfile.TemporaryDirectory()
-            jsonfile_prefix = osp.join(tmp_dir.name, 'results')
-        else:
-            jsonfile_prefix = self.jsonfile_prefix
 
-        # Attempt a basic evaluation — the caller should ideally go
-        # through NuScenesDataset.evaluate() for full fidelity.
-        print_log(
-            'Direct devkit evaluation is limited. For full fidelity, '
-            'ensure NuScenesDataset.evaluate() is available.',
-            logger='current',
-            level=30)
+        # Build a lightweight dataset instance to access format_results
+        # and _evaluate_single, which handle sample token mapping and
+        # the full nuScenes evaluation protocol.
+        try:
+            dataset = NuScenesDataset(
+                ann_file=osp.join(self.data_root,
+                                  'nuscenes_infos_val.pkl'),
+                data_root=self.data_root,
+                pipeline=[],
+                test_mode=True)
+        except Exception as e:
+            print_log(
+                f'Failed to instantiate NuScenesDataset for evaluation: '
+                f'{e}. Cannot compute nuScenes metrics without dataset '
+                f'info (sample tokens). Ensure the dataset object is '
+                f'accessible via the Runner or provide a valid data_root.',
+                logger='current',
+                level=40)
+            return {}
 
-        if tmp_dir is not None:
-            tmp_dir.cleanup()
-        return {}
+        return dataset.evaluate(
+            results,
+            metric=self.metric,
+            jsonfile_prefix=self.jsonfile_prefix)

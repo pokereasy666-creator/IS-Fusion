@@ -70,6 +70,7 @@ from mmdet3d.models.builder import HEADS, build_loss
 from mmdet3d.models.utils import clip_sigmoid
 from mmdet3d.models.fusion_layers import apply_3d_transformation
 from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
+from mmdet3d.core.post_processing import circle_nms
 
 try:
     from mmdet3d.core.bbox.coders.transfusion_bbox_coder import TransFusionBBoxCoder

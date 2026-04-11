@@ -11,4 +11,13 @@ else:
     else:
         IS_SPCONV2_AVAILABLE = False
 
+# Re-export commonly used spconv classes so that code doing
+# ``from mmdet3d.ops import spconv; spconv.SparseSequential(...)``
+# works transparently.
+if IS_SPCONV2_AVAILABLE:
+    from spconv.pytorch import (SparseConvTensor, SparseSequential,
+                                SparseModule, SparseMaxPool3d,
+                                SparseConv2d, SparseConv3d,
+                                SubMConv2d, SubMConv3d)
+
 __all__ = ['IS_SPCONV2_AVAILABLE']

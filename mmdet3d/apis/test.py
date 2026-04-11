@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import time
 
+import numpy as np
 import torch
 import torch.distributed as dist
 from mmengine.dist import get_dist_info

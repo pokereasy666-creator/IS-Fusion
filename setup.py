@@ -3,11 +3,16 @@ from setuptools import find_packages, setup
 import os
 import shutil
 import sys
-import torch
 import warnings
 from os import path as osp
-from torch.utils.cpp_extension import (BuildExtension, CppExtension,
-                                       CUDAExtension)
+
+try:
+    import torch
+    from torch.utils.cpp_extension import (BuildExtension, CppExtension,
+                                           CUDAExtension)
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
 
 
 def readme():
@@ -53,7 +58,6 @@ def make_cuda_ext(name,
     else:
         print('Compiling {} without CUDA'.format(name))
         extension = CppExtension
-        # raise EnvironmentError('CUDA is required to compile MMDetection!')
 
     return extension(
         name='{}.{}'.format(module, name),
@@ -189,59 +193,10 @@ def add_mim_extention():
 
 if __name__ == '__main__':
     add_mim_extention()
-    setup(
-        name='mmdet3d',
-        version=get_version(),
-        description=("OpenMMLab's next-generation platform"
-                     'for general 3D object detection.'),
-        long_description=readme(),
-        long_description_content_type='text/markdown',
-        author='OpenMMLab',
-        author_email='zwwdev@gmail.com',
-        keywords='computer vision, 3D object detection',
-        url='https://github.com/open-mmlab/mmdetection3d',
-        packages=find_packages(),
-        include_package_data=True,
-        package_data={'mmdet3d.ops': ['*/*.so']},
-        classifiers=[
-            'Development Status :: 4 - Beta',
-            'License :: OSI Approved :: Apache Software License',
-            'Operating System :: OS Independent',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
-        ],
-        license='Apache License 2.0',
-        setup_requires=parse_requirements('requirements/build.txt'),
-        tests_require=parse_requirements('requirements/tests.txt'),
-        install_requires=parse_requirements('requirements/runtime.txt'),
-        extras_require={
-            'all': parse_requirements('requirements.txt'),
-            'tests': parse_requirements('requirements/tests.txt'),
-            'build': parse_requirements('requirements/build.txt'),
-            'optional': parse_requirements('requirements/optional.txt'),
-        },
-        ext_modules=[
-            # make_cuda_ext(
-            #     name='sparse_conv_ext',
-            #     module='mmdet3d.ops.spconv',
-            #     extra_include_path=[
-            #         # PyTorch 1.5 uses ninjia, which requires absolute path
-            #         # of included files, relative path will cause failure.
-            #         os.path.abspath(
-            #             os.path.join(*'mmdet3d.ops.spconv'.split('.'),
-            #                          'include/'))
-            #     ],
-            #     sources=[
-            #         'src/all.cc',
-            #         'src/reordering.cc',
-            #         'src/reordering_cuda.cu',
-            #         'src/indice.cc',
-            #         'src/indice_cuda.cu',
-            #         'src/maxpool.cc',
-            #         'src/maxpool_cuda.cu',
-            #     ],
-            #     extra_args=['-w', '-std=c++14']),
+    ext_modules = []
+    cmdclass = {}
+    if HAS_TORCH:
+        ext_modules = [
             make_cuda_ext(
                 name="bev_pool_ext",
                 module="mmdet3d.ops.bev_pool",
@@ -325,7 +280,42 @@ if __name__ == '__main__':
                 module='mmdet3d.ops.gather_points',
                 extra_args=['-std=c++17'],
                 sources=['src/gather_points.cpp'],
-                sources_cuda=['src/gather_points_cuda.cu'])
+                sources_cuda=['src/gather_points_cuda.cu']),
+        ]
+        cmdclass = {'build_ext': BuildExtension}
+
+    setup(
+        name='mmdet3d',
+        version=get_version(),
+        description=("OpenMMLab's next-generation platform"
+                     'for general 3D object detection.'),
+        long_description=readme(),
+        long_description_content_type='text/markdown',
+        author='OpenMMLab',
+        author_email='zwwdev@gmail.com',
+        keywords='computer vision, 3D object detection',
+        url='https://github.com/open-mmlab/mmdetection3d',
+        packages=find_packages(),
+        include_package_data=True,
+        package_data={'mmdet3d.ops': ['*/*.so']},
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            'License :: OSI Approved :: Apache Software License',
+            'Operating System :: OS Independent',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
         ],
-        cmdclass={'build_ext': BuildExtension},
+        license='Apache License 2.0',
+        setup_requires=parse_requirements('requirements/build.txt'),
+        tests_require=parse_requirements('requirements/tests.txt'),
+        install_requires=parse_requirements('requirements/runtime.txt'),
+        extras_require={
+            'all': parse_requirements('requirements.txt'),
+            'tests': parse_requirements('requirements/tests.txt'),
+            'build': parse_requirements('requirements/build.txt'),
+            'optional': parse_requirements('requirements/optional.txt'),
+        },
+        ext_modules=ext_modules,
+        cmdclass=cmdclass,
         zip_safe=False)
