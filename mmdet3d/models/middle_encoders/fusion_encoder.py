@@ -963,13 +963,23 @@ class ISFusionEncoder(BaseModule):
 
         # --- Unwrap img_metas from DataContainer ---
         _metas = kwargs.get("img_metas", [])
-        if isinstance(_metas, list):
-            _metas = [m.data[0] if hasattr(m, "data") and isinstance(m.data, list) else (m.data if hasattr(m, "data") else m) for m in _metas]
-        elif hasattr(_metas, "data"):
-            _metas = _metas.data
-        # Flatten nested lists/tuples until we reach a list of dicts
-        while isinstance(_metas, (list, tuple)) and len(_metas) > 0 and not isinstance(_metas[0], dict):
-            _metas = _metas[0]
+        # Recursively unwrap DC and nested structures until we have a flat list of dicts
+        def _unwrap_metas(val):
+            # Unwrap DataContainer
+            while hasattr(val, 'data') and not isinstance(val, torch.Tensor):
+                val = val.data
+            # If it's a list/tuple, check if elements need unwrapping
+            if isinstance(val, (list, tuple)):
+                flat = []
+                for item in val:
+                    result = _unwrap_metas(item)
+                    if isinstance(result, list):
+                        flat.extend(result)
+                    else:
+                        flat.append(result)
+                return flat
+            return val
+        _metas = _unwrap_metas(_metas)
         if not isinstance(_metas, list):
             _metas = [_metas]
 
