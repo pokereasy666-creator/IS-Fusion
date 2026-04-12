@@ -60,19 +60,37 @@ def build_data_cfg(config_path, skip_type, cfg_options):
     if cfg.get('custom_imports', None):
         from mmcv.utils import import_modules_from_strings
         import_modules_from_strings(**cfg['custom_imports'])
-    # extract inner dataset of `RepeatDataset` as `cfg.data.train`
-    # so we don't need to worry about it later
-    if cfg.data.train['type'] == 'RepeatDataset':
-        cfg.data.train = cfg.data.train.dataset
-    # use only first dataset for `ConcatDataset`
-    if cfg.data.train['type'] == 'ConcatDataset':
-        cfg.data.train = cfg.data.train.datasets[0]
-    train_data_cfg = cfg.data.train
+
+    # resolve train dataset config: v2 layout (train_dataloader.dataset) or
+    # legacy v1 layout (data.train)
+    if hasattr(cfg, 'train_dataloader'):
+        train_data_cfg = cfg.train_dataloader.dataset
+    else:
+        train_data_cfg = cfg.data.train
+
+    # unwrap dataset wrappers
+    wrapper_types = ('RepeatDataset', 'CBGSDataset')
+    while train_data_cfg.get('type', '') in wrapper_types:
+        train_data_cfg = train_data_cfg.dataset
+    if train_data_cfg.get('type', '') == 'ConcatDataset':
+        train_data_cfg = train_data_cfg.datasets[0]
+
     # eval_pipeline purely consists of loading functions
-    # use eval_pipeline for data loading
+    # use eval_pipeline / test_pipeline for data loading
+    if hasattr(cfg, 'eval_pipeline'):
+        eval_pipeline = cfg.eval_pipeline
+    elif hasattr(cfg, 'test_pipeline'):
+        eval_pipeline = cfg.test_pipeline
+    else:
+        eval_pipeline = train_data_cfg.get('pipeline', [])
     train_data_cfg['pipeline'] = [
-        x for x in cfg.eval_pipeline if x['type'] not in skip_type
+        x for x in eval_pipeline if x['type'] not in skip_type
     ]
+
+    # store resolved train config back so callers can access it uniformly
+    if not hasattr(cfg, 'data'):
+        cfg.data = dict()
+    cfg.data.train = train_data_cfg
 
     return cfg
 

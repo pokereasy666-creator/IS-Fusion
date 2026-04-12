@@ -35,15 +35,27 @@ def main():
     if cfg.get('cudnn_benchmark', False):
         torch.backends.cudnn.benchmark = True
     cfg.model.pretrained = None
-    cfg.data.test.test_mode = True
+
+    # resolve test dataset config: v2 layout (test_dataloader.dataset) or
+    # legacy v1 layout (data.test)
+    if hasattr(cfg, 'test_dataloader'):
+        test_data_cfg = cfg.test_dataloader.dataset
+        # unwrap CBGSDataset wrapper if present
+        if test_data_cfg.get('type', '') == 'CBGSDataset':
+            test_data_cfg = test_data_cfg.dataset
+        num_workers = cfg.test_dataloader.get('num_workers', 2)
+    else:
+        test_data_cfg = cfg.data.test
+        num_workers = cfg.data.get('workers_per_gpu', 2)
+    test_data_cfg.test_mode = True
 
     # build the dataloader
     # TODO: support multiple images per gpu (only minor changes are needed)
-    dataset = build_dataset(cfg.data.test)
+    dataset = build_dataset(test_data_cfg)
     data_loader = build_dataloader(
         dataset,
         samples_per_gpu=1,
-        workers_per_gpu=cfg.data.workers_per_gpu,
+        workers_per_gpu=num_workers,
         dist=False,
         shuffle=False)
 
