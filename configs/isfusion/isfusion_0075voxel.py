@@ -422,7 +422,10 @@ test_cfg = dict()
 test_evaluator = dict(type='NuScenesMetric')
 
 # runtime settings
-custom_hooks = [dict(type='EmptyCacheHook', after_iter=True, priority='HIGH')]
+custom_hooks = [
+    dict(type='EmptyCacheHook', after_iter=True, priority='HIGH'),
+    dict(type='SetEpochHook'),
+]
 
 default_scope = 'mmdet3d'
 default_hooks = dict(

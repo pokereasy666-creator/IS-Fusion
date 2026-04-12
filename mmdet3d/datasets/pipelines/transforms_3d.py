@@ -1835,15 +1835,22 @@ class GlobalRotScaleTrans(object):
 @PIPELINES.register_module()
 class ModalMask3D(object):
 
-    def __init__(self, mode='test', dataset_type='NuScenesDataset', **kwargs):
+    def __init__(self, mode='test', dataset_type='NuScenesDataset',
+                 stop_epoch=None, **kwargs):
         super(ModalMask3D, self).__init__()
         self.mode = mode
         self.dataset_type = dataset_type
+        self.stop_epoch = stop_epoch
+        self.epoch = -1
 
     def set_epoch(self, epoch):
         self.epoch = epoch
 
     def __call__(self, input_dict):
+
+        if self.stop_epoch is not None and self.epoch >= self.stop_epoch:
+            input_dict['img_mask_idx'] = []
+            return input_dict
 
         if self.mode == 'test':
             # drop img0

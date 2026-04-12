@@ -472,9 +472,11 @@ class LoadForeground2D(object):
 
 @PIPELINES.register_module()
 class LoadForeground2DFromMultiSweeps(object):
-    def __init__(self, dataset="NuScenesDataset", sweeps_num=10):
+    def __init__(self, dataset="NuScenesDataset", sweeps_num=10,
+                 test_mode=False):
         self.dataset = dataset
         self.sweeps_num = sweeps_num
+        self.test_mode = test_mode
     def _organize(self, fg_info, results, sweep):
         cam_num = len(fg_info['virtual_pixel_indices'])
         fg_pixels, fg_points, fg_real_pixels, fg_real_points = [], [], [], []
@@ -494,7 +496,7 @@ class LoadForeground2DFromMultiSweeps(object):
             fg_real_points_set = fg_info['real_points'][i]
             timestamp_real = np.zeros((fg_real_points_set.shape[0], 1))
             fg_real_points_set = np.concatenate((fg_real_points_set, timestamp_real), axis=1)
-            fg_real_points_set[:, -1] = ts - sweep_ts / 1e-6
+            fg_real_points_set[:, -1] = ts - sweep_ts
             fg_real_pixels.append(fg_info['real_pixel_indices'][i][:,:3])
             fg_real_points.append(fg_real_points_set)
         return dict(fg_pixels=fg_pixels, fg_points=fg_points, fg_real_pixels=fg_real_pixels, fg_real_points=fg_real_points)
@@ -708,6 +710,7 @@ class LoadAnnotations3D(LoadAnnotations):
         self.with_mask_3d = with_mask_3d
         self.with_seg_3d = with_seg_3d
         self.seg_3d_dtype = seg_3d_dtype
+        self.backend_args = file_client_args
 
     def _load_bboxes_3d(self, results):
         results['gt_bboxes_3d'] = results['ann_info']['gt_bboxes_3d']
