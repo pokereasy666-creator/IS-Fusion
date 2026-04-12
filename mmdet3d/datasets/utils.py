@@ -1,20 +1,19 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmdet3d.compat import DataContainer, Registry
+from mmdet3d.datasets.builder import PIPELINES
 
 # yapf: disable
 from mmdet3d.datasets.pipelines import (Collect3D, DefaultFormatBundle3D,
                                         LoadAnnotations3D,
                                         LoadImageFromFileMono3D,
                                         LoadMultiViewImageFromFiles,
+                                        LoadMultiViewImageFromFilesV2,
+                                        Collect3DV2,
                                         LoadPointsFromFile,
                                         LoadPointsFromMultiSweeps,
                                         MultiScaleFlipAug3D,
                                         PointSegClassMapping)
 # yapf: enable
-try:
-    from mmdet.datasets.builder import PIPELINES
-except ImportError:
-    PIPELINES = Registry('pipeline')
 try:
     from mmdet.datasets.pipelines import LoadImageFromFile
 except (ImportError, ModuleNotFoundError):
@@ -40,8 +39,9 @@ def is_loading_function(transform):
     # TODO: use more elegant way to distinguish loading modules
     loading_functions = (LoadImageFromFile, LoadPointsFromFile,
                          LoadAnnotations3D, LoadMultiViewImageFromFiles,
+                         LoadMultiViewImageFromFilesV2,
                          LoadPointsFromMultiSweeps, DefaultFormatBundle3D,
-                         Collect3D, LoadImageFromFileMono3D,
+                         Collect3D, Collect3DV2, LoadImageFromFileMono3D,
                          PointSegClassMapping)
     if isinstance(transform, dict):
         obj_cls = PIPELINES.get(transform['type'])
