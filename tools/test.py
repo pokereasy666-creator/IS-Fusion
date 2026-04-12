@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
     parser.add_argument('--out', help='output result file in pickle format')
-    parser.add_argument('--bs', type=int, default=1, help='batch size')
+    parser.add_argument('--bs', type=int, default=None, help='batch size')
     parser.add_argument('--seed', type=int, default=0, help='random seed')
     parser.add_argument(
         '--deterministic',
@@ -93,8 +93,12 @@ def main():
 
     # Build test_dataloader from legacy data.test if not already present
     if not cfg.get('test_dataloader'):
-        batch_size = args.bs
+        batch_size = args.bs if args.bs is not None else 1
         cfg.test_dataloader = _build_compat_test_dataloader(cfg, batch_size)
+
+    # Override batch_size if --bs was explicitly provided on the command line
+    if args.bs is not None:
+        cfg.test_dataloader.batch_size = args.bs
 
     # Build test_evaluator from legacy config if not already present
     if not cfg.get('test_evaluator'):

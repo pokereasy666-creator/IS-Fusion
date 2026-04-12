@@ -759,10 +759,12 @@ class LoadAnnotations3D(LoadAnnotations):
     def _load_bboxes(self, results):
         """Load 2D bboxes from ann_info (mmdet3d v1.x format)."""
         results['gt_bboxes'] = results['ann_info']['bboxes']
+        return results
 
     def _load_labels(self, results):
         """Load 2D labels from ann_info (mmdet3d v1.x format)."""
         results['gt_labels'] = results['ann_info']['labels']
+        return results
 
     def __call__(self, results):
         # 调用父类 (LoadAnnotations) 加载 2D 信息 (如 with_bbox=True)
