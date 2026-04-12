@@ -97,12 +97,10 @@ class NuScenesMetric(BaseMetric):
             from nuscenes.eval.detection.config import config_factory
             from nuscenes.eval.detection.evaluate import NuScenesEval
         except ImportError:
-            print_log(
+            raise RuntimeError(
                 'nuscenes-devkit is not installed. '
-                'Cannot compute nuScenes metrics.',
-                logger='current',
-                level=30)
-            return {}
+                'Cannot compute nuScenes metrics. '
+                'Install it with: pip install nuscenes-devkit')
 
         from mmdet3d.datasets.nuscenes_dataset import NuScenesDataset
 
@@ -117,14 +115,12 @@ class NuScenesMetric(BaseMetric):
                 pipeline=[],
                 test_mode=True)
         except Exception as e:
-            print_log(
+            raise RuntimeError(
                 f'Failed to instantiate NuScenesDataset for evaluation: '
                 f'{e}. Cannot compute nuScenes metrics without dataset '
                 f'info (sample tokens). Ensure the dataset object is '
-                f'accessible via the Runner or provide a valid data_root.',
-                logger='current',
-                level=40)
-            return {}
+                f'accessible via the Runner or provide a valid data_root.'
+            ) from e
 
         return dataset.evaluate(
             results,

@@ -100,15 +100,15 @@ class Base3DSegmentor(BaseSegmentor):
             elif is_list_of(data['points'][0], torch.Tensor):
                 points = data['points'][0][batch_id]
             else:
-                ValueError(f"Unsupported data type {type(data['points'][0])} "
-                           f'for visualization!')
+                raise ValueError(f"Unsupported data type {type(data['points'][0])} "
+                                 f'for visualization!')
             if isinstance(data['img_metas'][0], DC):
                 pts_filename = data['img_metas'][0]._data[0][batch_id][
                     'pts_filename']
             elif is_list_of(data['img_metas'][0], dict):
                 pts_filename = data['img_metas'][0][batch_id]['pts_filename']
             else:
-                ValueError(
+                raise ValueError(
                     f"Unsupported data type {type(data['img_metas'][0])} "
                     f'for visualization!')
             file_name = osp.split(pts_filename)[-1].split('.')[0]

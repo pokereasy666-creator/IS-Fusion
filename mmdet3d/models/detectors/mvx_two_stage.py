@@ -2,10 +2,7 @@
 import mmcv
 import torch
 import warnings
-try:
-    from mmengine.structures import BaseDataElement as DC
-except ImportError:
-    from mmcv.utils import DataContainer as DC
+from mmdet3d.compat import DataContainer as DC
 from os import path as osp
 from torch.nn import functional as F
 
@@ -487,8 +484,8 @@ class MVXTwoStageDetector(Base3DDetector):
             elif mmcv.is_list_of(data['points'][0], torch.Tensor):
                 points = data['points'][0][batch_id]
             else:
-                ValueError(f"Unsupported data type {type(data['points'][0])} "
-                           f'for visualization!')
+                raise ValueError(f"Unsupported data type {type(data['points'][0])} "
+                                 f'for visualization!')
             if isinstance(data['img_metas'][0], DC):
                 pts_filename = data['img_metas'][0]._data[0][batch_id][
                     'pts_filename']
@@ -498,7 +495,7 @@ class MVXTwoStageDetector(Base3DDetector):
                 pts_filename = data['img_metas'][0][batch_id]['pts_filename']
                 box_mode_3d = data['img_metas'][0][batch_id]['box_mode_3d']
             else:
-                ValueError(
+                raise ValueError(
                     f"Unsupported data type {type(data['img_metas'][0])} "
                     f'for visualization!')
             file_name = osp.split(pts_filename)[-1].split('.')[0]
@@ -515,7 +512,7 @@ class MVXTwoStageDetector(Base3DDetector):
                 pred_bboxes = Box3DMode.convert(pred_bboxes, box_mode_3d,
                                                 Box3DMode.DEPTH)
             elif box_mode_3d != Box3DMode.DEPTH:
-                ValueError(
+                raise ValueError(
                     f'Unsupported box_mode_3d {box_mode_3d} for convertion!')
 
             pred_bboxes = pred_bboxes.tensor.cpu().numpy()
