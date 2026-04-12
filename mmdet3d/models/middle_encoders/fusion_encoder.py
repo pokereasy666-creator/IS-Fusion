@@ -750,10 +750,10 @@ class DeformableTransformerDecoder(nn.Module):
                 intermediate.append(output)
 
                 if self.use_look_forward_twice:
-                    # Note: ref_point_head is not yet implemented, so
-                    # new_reference_points cannot be computed.  Fall back to
-                    # the current reference_points to avoid a NameError.
-                    intermediate_reference_points.append(reference_points)
+                    raise NotImplementedError(
+                        'use_look_forward_twice=True requires ref_point_head '
+                        'to compute new_reference_points, but it is not yet '
+                        'implemented. Set use_look_forward_twice=False.')
                 else:
                     intermediate_reference_points.append(reference_points)
 
