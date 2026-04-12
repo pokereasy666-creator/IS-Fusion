@@ -135,9 +135,9 @@ class ScanNetData(object):
                     f'{sample_idx}_sem_label.npy')
 
                 pts_instance_mask = np.load(pts_instance_mask_path).astype(
-                    np.long)
+                    np.int64)
                 pts_semantic_mask = np.load(pts_semantic_mask_path).astype(
-                    np.long)
+                    np.int64)
 
                 mmcv.mkdir_or_exist(osp.join(self.root_dir, 'instance_mask'))
                 mmcv.mkdir_or_exist(osp.join(self.root_dir, 'semantic_mask'))
@@ -226,7 +226,7 @@ class ScanNetSegData(object):
         ])  # used for seg task
         self.ignore_index = len(self.cat_ids)
 
-        self.cat_id2class = np.ones((self.all_ids.shape[0],), dtype=np.int) * \
+        self.cat_id2class = np.ones((self.all_ids.shape[0],), dtype=np.intp) * \
             self.ignore_index
         for i, cat_id in enumerate(self.cat_ids):
             self.cat_id2class[cat_id] = i
@@ -256,7 +256,7 @@ class ScanNetSegData(object):
             if mask.endswith('npy'):
                 mask = np.load(mask)
             else:
-                mask = np.fromfile(mask, dtype=np.long)
+                mask = np.fromfile(mask, dtype=np.int64)
         label = self.cat_id2class[mask]
         return label
 

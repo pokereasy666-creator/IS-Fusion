@@ -29,6 +29,37 @@ def convert_SyncBN(config):
                 convert_SyncBN(config[item])
 
 
+def _get_test_pipeline_and_box_type(cfg):
+    """Extract test pipeline and box_type_3d from either v1 or v2 config.
+
+    v1 layout: cfg.data.test.pipeline / cfg.data.test.box_type_3d
+    v2 layout: cfg.test_pipeline (top-level) or
+               cfg.test_dataloader.dataset.pipeline /
+               cfg.test_dataloader.dataset.box_type_3d
+    """
+    # --- pipeline ---
+    if hasattr(cfg, 'data') and hasattr(cfg.data, 'test'):
+        pipeline = deepcopy(cfg.data.test.pipeline)
+        box_type_str = getattr(cfg.data.test, 'box_type_3d', 'LiDAR')
+    elif hasattr(cfg, 'test_dataloader'):
+        ds_cfg = cfg.test_dataloader.dataset
+        # unwrap CBGSDataset or similar wrappers
+        while hasattr(ds_cfg, 'dataset'):
+            ds_cfg = ds_cfg.dataset
+        pipeline = deepcopy(ds_cfg.pipeline)
+        box_type_str = getattr(ds_cfg, 'box_type_3d', 'LiDAR')
+    elif hasattr(cfg, 'test_pipeline'):
+        pipeline = deepcopy(cfg.test_pipeline)
+        box_type_str = 'LiDAR'
+    else:
+        raise AttributeError(
+            'Cannot find test pipeline in config. Expected either '
+            'cfg.data.test.pipeline (v1) or '
+            'cfg.test_dataloader.dataset.pipeline (v2).')
+
+    return pipeline, box_type_str
+
+
 def init_model(config, checkpoint=None, device='cuda:0'):
     """Initialize a model from config file."""
     if isinstance(config, str):
@@ -69,9 +100,9 @@ def inference_detector(model, pcd):
     """Inference point cloud with the detector."""
     cfg = model.cfg
     device = next(model.parameters()).device
-    test_pipeline = deepcopy(cfg.data.test.pipeline)
-    test_pipeline = Compose(test_pipeline)
-    box_type_3d, box_mode_3d = get_box_type(cfg.data.test.box_type_3d)
+    pipeline_cfg, box_type_str = _get_test_pipeline_and_box_type(cfg)
+    test_pipeline = Compose(pipeline_cfg)
+    box_type_3d, box_mode_3d = get_box_type(box_type_str)
     data = dict(
         pts_filename=pcd,
         box_type_3d=box_type_3d,
@@ -97,9 +128,9 @@ def inference_multi_modality_detector(model, pcd, image, ann_file):
     """Inference point cloud with the multi-modality detector."""
     cfg = model.cfg
     device = next(model.parameters()).device
-    test_pipeline = deepcopy(cfg.data.test.pipeline)
-    test_pipeline = Compose(test_pipeline)
-    box_type_3d, box_mode_3d = get_box_type(cfg.data.test.box_type_3d)
+    pipeline_cfg, box_type_str = _get_test_pipeline_and_box_type(cfg)
+    test_pipeline = Compose(pipeline_cfg)
+    box_type_3d, box_mode_3d = get_box_type(box_type_str)
     data_infos = fileio_load(ann_file)
     image_idx = int(re.findall(r'\d+', image)[-1])
     for x in data_infos:
@@ -147,9 +178,9 @@ def inference_mono_3d_detector(model, image, ann_file):
     """Inference image with the monocular 3D detector."""
     cfg = model.cfg
     device = next(model.parameters()).device
-    test_pipeline = deepcopy(cfg.data.test.pipeline)
-    test_pipeline = Compose(test_pipeline)
-    box_type_3d, box_mode_3d = get_box_type(cfg.data.test.box_type_3d)
+    pipeline_cfg, box_type_str = _get_test_pipeline_and_box_type(cfg)
+    test_pipeline = Compose(pipeline_cfg)
+    box_type_3d, box_mode_3d = get_box_type(box_type_str)
     data_infos = fileio_load(ann_file)
     for x in data_infos['images']:
         if osp.basename(x['file_name']) != osp.basename(image):
@@ -183,8 +214,8 @@ def inference_segmentor(model, pcd):
     """Inference point cloud with the segmentor."""
     cfg = model.cfg
     device = next(model.parameters()).device
-    test_pipeline = deepcopy(cfg.data.test.pipeline)
-    test_pipeline = Compose(test_pipeline)
+    pipeline_cfg, _ = _get_test_pipeline_and_box_type(cfg)
+    test_pipeline = Compose(pipeline_cfg)
     data = dict(
         pts_filename=pcd,
         img_fields=[],

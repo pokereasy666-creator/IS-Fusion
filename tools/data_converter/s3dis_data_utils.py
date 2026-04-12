@@ -75,8 +75,8 @@ class S3DISData(object):
                 f'{self.split}_{sample_idx}_sem_label.npy')
 
             points = np.load(pts_filename).astype(np.float32)
-            pts_instance_mask = np.load(pts_instance_mask_path).astype(np.int)
-            pts_semantic_mask = np.load(pts_semantic_mask_path).astype(np.int)
+            pts_instance_mask = np.load(pts_instance_mask_path).astype(np.intp)
+            pts_semantic_mask = np.load(pts_semantic_mask_path).astype(np.intp)
 
             mmcv.mkdir_or_exist(osp.join(self.root_dir, 'points'))
             mmcv.mkdir_or_exist(osp.join(self.root_dir, 'instance_mask'))
@@ -176,7 +176,7 @@ class S3DISSegData(object):
                                  12])  # used for seg task
         self.ignore_index = len(self.cat_ids)
 
-        self.cat_id2class = np.ones((self.all_ids.shape[0],), dtype=np.int) * \
+        self.cat_id2class = np.ones((self.all_ids.shape[0],), dtype=np.intp) * \
             self.ignore_index
         for i, cat_id in enumerate(self.cat_ids):
             self.cat_id2class[cat_id] = i
@@ -204,7 +204,7 @@ class S3DISSegData(object):
             if mask.endswith('npy'):
                 mask = np.load(mask)
             else:
-                mask = np.fromfile(mask, dtype=np.long)
+                mask = np.fromfile(mask, dtype=np.int64)
         label = self.cat_id2class[mask]
         return label
 
