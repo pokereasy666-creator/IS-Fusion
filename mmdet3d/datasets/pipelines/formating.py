@@ -4,17 +4,7 @@ import torch
 from mmdet3d.core.bbox import BaseInstance3DBoxes
 from mmdet3d.core.points import BasePoints
 from mmdet3d.datasets.builder import PIPELINES
-
-
-# DataContainer is no longer available in v2; use a minimal stand-in.
-class DC:
-    """Minimal DataContainer replacement for v2 compatibility."""
-
-    def __init__(self, data, stack=False, pad_dims=None, cpu_only=False):
-        self.data = data
-        self.stack = stack
-        self.pad_dims = pad_dims
-        self.cpu_only = cpu_only
+from mmdet3d.compat import DataContainer as DC
 
 
 def to_tensor(data):

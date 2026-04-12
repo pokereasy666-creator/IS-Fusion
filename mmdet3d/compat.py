@@ -35,15 +35,28 @@ try:
     from mmcv.parallel import DataContainer
 except ImportError:
     class DataContainer:
-        """Minimal stand-in for mmcv.parallel.DataContainer."""
+        """Minimal stand-in for mmcv.parallel.DataContainer.
+
+        The real mmcv DataContainer stores data in ``_data`` and exposes it
+        via a ``.data`` property.  We mirror that layout so that code using
+        either ``._data`` or ``.data`` works transparently.
+        """
 
         def __init__(self, data, stack=False, pad_dims=None, cpu_only=False,
                      padding_value=0):
-            self.data = data
+            self._data = data
             self.stack = stack
             self.pad_dims = pad_dims
             self.cpu_only = cpu_only
             self.padding_value = padding_value
+
+        @property
+        def data(self):
+            return self._data
+
+        @data.setter
+        def data(self, value):
+            self._data = value
 
 
 # ── Registry ──

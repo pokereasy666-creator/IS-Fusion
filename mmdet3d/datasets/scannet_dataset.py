@@ -141,10 +141,10 @@ class ScanNetDataset(Custom3DDataset):
         if info['annos']['gt_num'] != 0:
             gt_bboxes_3d = info['annos']['gt_boxes_upright_depth'].astype(
                 np.float32)  # k, 6
-            gt_labels_3d = info['annos']['class'].astype(np.long)
+            gt_labels_3d = info['annos']['class'].astype(np.int64)
         else:
             gt_bboxes_3d = np.zeros((0, 6), dtype=np.float32)
-            gt_labels_3d = np.zeros((0, ), dtype=np.long)
+            gt_labels_3d = np.zeros((0, ), dtype=np.int64)
 
         # to target box structure
         gt_bboxes_3d = DepthInstance3DBoxes(
@@ -441,7 +441,7 @@ class ScanNetSegDataset(Custom3DSegDataset):
         mmcv.mkdir_or_exist(txtfile_prefix)
 
         # need to map network output to original label idx
-        pred2label = np.zeros(len(self.VALID_CLASS_IDS)).astype(np.int)
+        pred2label = np.zeros(len(self.VALID_CLASS_IDS)).astype(np.intp)
         for original_label, output_idx in self.label_map.items():
             if output_idx != self.ignore_index:
                 pred2label[output_idx] = original_label
@@ -450,7 +450,7 @@ class ScanNetSegDataset(Custom3DSegDataset):
         for i, result in enumerate(results):
             info = self.data_infos[i]
             sample_idx = info['point_cloud']['lidar_idx']
-            pred_sem_mask = result['semantic_mask'].numpy().astype(np.int)
+            pred_sem_mask = result['semantic_mask'].numpy().astype(np.intp)
             pred_label = pred2label[pred_sem_mask]
             curr_file = f'{txtfile_prefix}/{sample_idx}.txt'
             np.savetxt(curr_file, pred_label, fmt='%d')
