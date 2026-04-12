@@ -365,7 +365,9 @@ class KittiMonoDataset(NuScenesMonoDataset):
             det_annos += annos
 
         if pklfile_prefix is not None:
-            if not pklfile_prefix.endswith(('.pkl', '.pickle')):
+            if pklfile_prefix.endswith(('.pkl', '.pickle')):
+                out = pklfile_prefix
+            else:
                 out = f'{pklfile_prefix}.pkl'
             mmcv.dump(det_annos, out)
             print('Result is saved to %s' % out)
@@ -450,7 +452,9 @@ class KittiMonoDataset(NuScenesMonoDataset):
             det_annos += annos
 
         if pklfile_prefix is not None:
-            if not pklfile_prefix.endswith(('.pkl', '.pickle')):
+            if pklfile_prefix.endswith(('.pkl', '.pickle')):
+                out = pklfile_prefix
+            else:
                 out = f'{pklfile_prefix}.pkl'
             mmcv.dump(det_annos, out)
             print('Result is saved to %s' % out)
