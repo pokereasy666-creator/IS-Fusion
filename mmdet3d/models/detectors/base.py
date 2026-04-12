@@ -3,6 +3,7 @@ import mmcv
 import torch
 from os import path as osp
 
+from mmdet3d.compat import DataContainer as DC
 from mmdet3d.registry import DETECTORS
 from mmdet3d.core import Box3DMode, Coord3DMode, show_result
 from mmdet.models.detectors import BaseDetector

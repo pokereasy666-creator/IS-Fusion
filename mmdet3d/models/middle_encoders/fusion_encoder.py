@@ -24,7 +24,7 @@ ext_module = ext_loader.load_ext(
 
 from torch.nn.parameter import Parameter
 from torch.nn import Linear
-from torch.nn.init import xavier_uniform_, constant_
+from torch.nn.init import xavier_uniform_, xavier_normal_, constant_
 
 from mmdet3d.ops import SparseBasicBlock, make_sparse_convmodule
 from mmdet3d.ops.spconv import IS_SPCONV2_AVAILABLE
@@ -35,6 +35,7 @@ else:
 
 from mmdet3d.models.middle_encoders.multi_scale_deformable_attn_function import MultiScaleDeformableAttnFunction_fp32
 from mmcv.ops.multi_scale_deform_attn import multi_scale_deformable_attn_pytorch
+ms_deform_attn_core_pytorch = multi_scale_deformable_attn_pytorch
 
 class MultiheadAttention(nn.Module):
     r"""Allows the model to jointly attend to information
@@ -749,7 +750,10 @@ class DeformableTransformerDecoder(nn.Module):
                 intermediate.append(output)
 
                 if self.use_look_forward_twice:
-                    intermediate_reference_points.append(new_reference_points)
+                    # Note: ref_point_head is not yet implemented, so
+                    # new_reference_points cannot be computed.  Fall back to
+                    # the current reference_points to avoid a NameError.
+                    intermediate_reference_points.append(reference_points)
                 else:
                     intermediate_reference_points.append(reference_points)
 

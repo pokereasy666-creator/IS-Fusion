@@ -3,6 +3,7 @@
 # =====================================================================
 
 import copy
+import warnings
 import numpy as np
 
 # --- Gaussian Heatmap Utils ---
@@ -45,6 +46,10 @@ def draw_heatmap_gaussian(heatmap, center, radius, k=1):
 # ------------------------------
 
 from mmcv.cnn import ConvModule, build_conv_layer
+try:
+    from mmcv.cnn import kaiming_init
+except ImportError:
+    from mmengine.model.weight_init import kaiming_init
 import torch
 # --- 强制补回 force_fp32 ---
 try:
@@ -73,10 +78,11 @@ from mmdet3d.ops.iou3d.iou3d_utils import nms_gpu
 from mmdet3d.core.post_processing import circle_nms
 
 try:
+    from mmdet.models import MODELS as _MODELS_REGISTRY
     from mmdet3d.core.bbox.coders.transfusion_bbox_coder import TransFusionBBoxCoder
-    if 'TransFusionBBoxCoder' not in MODELS:
-        MODELS.register_module(module=TransFusionBBoxCoder, force=True)
-except:
+    if 'TransFusionBBoxCoder' not in _MODELS_REGISTRY:
+        _MODELS_REGISTRY.register_module(module=TransFusionBBoxCoder, force=True)
+except (ImportError, ModuleNotFoundError):
     pass
 
 
@@ -86,7 +92,7 @@ from torch import nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from torch.nn import Linear
-from torch.nn.init import xavier_uniform_, constant_
+from torch.nn.init import xavier_uniform_, xavier_normal_, constant_
 
 
 class PositionEmbeddingLearned(nn.Module):

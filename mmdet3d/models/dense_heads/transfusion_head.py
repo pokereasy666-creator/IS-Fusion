@@ -1,8 +1,9 @@
 import copy
+import warnings
 import numpy as np
 import torch
 from mmcv.cnn import ConvModule, build_conv_layer
-from mmdet3d.compat import AssignResult, BaseModule, build_assigner, build_bbox_coder, build_sampler, force_fp32, multi_apply
+from mmdet3d.compat import AssignResult, BaseModule, PseudoSampler, build_assigner, build_bbox_coder, build_sampler, force_fp32, multi_apply
 try:
     from mmcv.cnn import kaiming_init
 except ImportError:
@@ -11,7 +12,7 @@ from torch import nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from torch.nn import Linear
-from torch.nn.init import xavier_uniform_, constant_
+from torch.nn.init import xavier_uniform_, xavier_normal_, constant_
 
 try:
     from mmdet3d.core import (circle_nms, draw_heatmap_gaussian, gaussian_radius, xywhr2xyxyr)

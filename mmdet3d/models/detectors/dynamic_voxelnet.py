@@ -1,6 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from mmdet3d.compat import force_fp32, auto_fp16, DETECTORS
+from mmdet3d.core.bbox import bbox3d2result
+from mmdet3d.core.post_processing import merge_aug_bboxes_3d
 from torch.nn import functional as F
 from .voxelnet import VoxelNet
 
