@@ -286,7 +286,9 @@ class Custom3DSegDataset(Dataset):
         if pklfile_prefix is None:
             tmp_dir = tempfile.TemporaryDirectory()
             pklfile_prefix = osp.join(tmp_dir.name, 'results')
-            out = f'{pklfile_prefix}.pkl'
+        else:
+            tmp_dir = None
+        out = f'{pklfile_prefix}.pkl'
         mmcv.dump(outputs, out)
         return outputs, tmp_dir
 
