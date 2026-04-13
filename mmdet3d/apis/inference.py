@@ -89,10 +89,21 @@ def init_model(config, checkpoint=None, device='cuda:0'):
 
 
 def _prepare_data(data, device):
-    """Move data to device, handling nested dicts, lists, and DataContainer."""
+    """Move data to device, unpacking DataContainer with correct semantics.
+
+    For ``cpu_only=True`` DC items (e.g. img_metas), the inner data is wrapped
+    in a list to provide the batch dimension that ``forward_test`` /
+    ``simple_test`` expect:  ``DC(meta_dict)`` → ``[meta_dict]``.
+
+    For other DC items the inner data is extracted directly and moved to device.
+    """
     from mmdet3d.compat import DataContainer
     if isinstance(data, DataContainer):
-        return _prepare_data(data._data, device)
+        inner = data._data
+        if data.cpu_only:
+            # Wrap in list to provide batch dimension: [meta_dict]
+            return [inner]
+        return _prepare_data(inner, device)
     elif isinstance(data, dict):
         return {k: _prepare_data(v, device) for k, v in data.items()}
     elif isinstance(data, (list, tuple)):

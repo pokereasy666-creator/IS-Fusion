@@ -41,27 +41,46 @@ def build_dataset(cfg, default_args=None):
 
 
 def _collate_dc(batch):
-    """Collate function that unpacks DataContainer before default collation.
+    """Collate a batch of dicts whose values may be DataContainer.
 
-    Pipeline transforms wrap outputs in DataContainer, which PyTorch's
-    default_collate cannot handle.  This function recursively extracts the
-    inner ``._data`` so that tensors, numpy arrays, and plain Python objects
-    reach the default collation path.
+    Respects the DC flags set by DefaultFormatBundle3D / Collect3D:
+
+    * ``cpu_only=True`` (img_metas, gt_bboxes_3d as box objects):
+      gathered as a plain list — never touched by ``default_collate``.
+    * ``stack=True`` (img): stacked into a single batched tensor via
+      ``torch.stack``.
+    * ``stack=False`` (points, voxels, gt_labels_3d):
+      gathered as a plain list of tensors — not stacked, because samples
+      may have different sizes.
+
+    Non-DC values fall through to ``default_collate``.
     """
+    import torch
     from torch.utils.data.dataloader import default_collate
     from mmdet3d.compat import DataContainer
 
-    def _unwrap(obj):
-        if isinstance(obj, DataContainer):
-            return _unwrap(obj._data)
-        elif isinstance(obj, dict):
-            return {k: _unwrap(v) for k, v in obj.items()}
-        elif isinstance(obj, (list, tuple)):
-            return type(obj)(_unwrap(v) for v in obj)
-        return obj
+    if not isinstance(batch[0], dict):
+        return default_collate(batch)
 
-    batch = [_unwrap(sample) for sample in batch]
-    return default_collate(batch)
+    result = {}
+    for key in batch[0]:
+        samples = [d[key] for d in batch]
+        first = samples[0]
+
+        if isinstance(first, DataContainer):
+            if first.cpu_only:
+                result[key] = [s._data for s in samples]
+            elif first.stack:
+                result[key] = torch.stack([s._data for s in samples], dim=0)
+            else:
+                result[key] = [s._data for s in samples]
+        else:
+            try:
+                result[key] = default_collate(samples)
+            except (TypeError, RuntimeError):
+                result[key] = samples
+
+    return result
 
 
 def build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1,

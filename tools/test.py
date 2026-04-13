@@ -135,12 +135,26 @@ def main():
 
     metrics = runner.test()
 
-    rank, _ = get_dist_info()
-    if rank == 0:
-        if args.out:
+    rank, world_size = get_dist_info()
+    if args.out:
+        # Gather predictions from all ranks under distributed testing
+        if world_size > 1:
+            from mmengine.dist import all_gather_object
+            gathered = all_gather_object(predictions)
+            # Interleave results so sample order matches the DistributedSampler
+            all_predictions = []
+            for i in range(max(len(g) for g in gathered)):
+                for g in gathered:
+                    if i < len(g):
+                        all_predictions.append(g[i])
+            predictions = all_predictions
+
+        if rank == 0:
             print(f'\nwriting results to {args.out}')
             from mmengine.fileio import dump
             dump(predictions, args.out)
+
+    if rank == 0:
         print(metrics)
 
 
