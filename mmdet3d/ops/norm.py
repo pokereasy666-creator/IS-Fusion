@@ -4,13 +4,11 @@ from mmdet3d.compat import force_fp32
 try:
     from mmcv.cnn import NORM_LAYERS
 except ImportError:
-    # MMCV 2.x 移除了 NORM_LAYERS，我们定义一个假的注册表来骗过代码
-    class DummyRegistry:
-        def register_module(self, name=None, force=False, module=None):
-            def _register(cls):
-                return cls
-            return _register
-    NORM_LAYERS = DummyRegistry()
+    # MMCV 2.x exposes normalization layers through the model registry.
+    try:
+        from mmcv.cnn.bricks.registry import MODELS as NORM_LAYERS
+    except ImportError:
+        from mmengine.registry import MODELS as NORM_LAYERS
 
 from torch import distributed as dist
 from torch import nn as nn
@@ -144,7 +142,7 @@ class AllReduce(Function):
 #         return input * scale + bias
 
 
-@NORM_LAYERS.register_module('naiveSyncBN1d')
+@NORM_LAYERS.register_module(name='naiveSyncBN1d')
 class NaiveSyncBatchNorm1d(nn.BatchNorm1d):
     """Synchronized Batch Normalization for 3D Tensors.
     Note:
@@ -213,7 +211,7 @@ class NaiveSyncBatchNorm1d(nn.BatchNorm1d):
         return output
 
 
-@NORM_LAYERS.register_module('naiveSyncBN2d')
+@NORM_LAYERS.register_module(name='naiveSyncBN2d')
 class NaiveSyncBatchNorm2d(nn.BatchNorm2d):
     """Synchronized Batch Normalization for 4D Tensors.
     Note:

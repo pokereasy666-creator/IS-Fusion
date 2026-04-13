@@ -82,7 +82,7 @@ class QueryAndGroup(nn.Module):
                              points_xyz, center_xyz)
 
         if self.uniform_sample:
-            unique_cnt = torch.zeros((idx.shape[0], idx.shape[1]))
+            unique_cnt = idx.new_zeros((idx.shape[0], idx.shape[1]))
             for i_batch in range(idx.shape[0]):
                 for i_region in range(idx.shape[1]):
                     unique_ind = torch.unique(idx[i_batch, i_region, :])
@@ -91,7 +91,8 @@ class QueryAndGroup(nn.Module):
                     sample_ind = torch.randint(
                         0,
                         num_unique, (self.sample_num - num_unique, ),
-                        dtype=torch.long)
+                        dtype=torch.long,
+                        device=idx.device)
                     all_ind = torch.cat((unique_ind, unique_ind[sample_ind]))
                     idx[i_batch, i_region, :] = all_ind
 

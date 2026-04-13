@@ -109,7 +109,19 @@ class WaymoMetric(LegacyDatasetMetric):
 
 @METRICS.register_module()
 class IndoorMetric(LegacyDatasetMetric):
-    pass
+    @staticmethod
+    def _to_legacy_result(data_sample):
+        if isinstance(data_sample, dict):
+            if 'pts_bbox' in data_sample:
+                return data_sample['pts_bbox']
+            return data_sample
+        if hasattr(data_sample, 'pred_instances_3d'):
+            pred = data_sample.pred_instances_3d
+            return dict(
+                boxes_3d=pred.bboxes_3d,
+                scores_3d=pred.scores_3d,
+                labels_3d=pred.labels_3d)
+        return LegacyDatasetMetric._to_legacy_result(data_sample)
 
 
 @METRICS.register_module()
