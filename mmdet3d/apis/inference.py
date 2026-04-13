@@ -91,19 +91,28 @@ def init_model(config, checkpoint=None, device='cuda:0'):
 def _prepare_data(data, device):
     """Move data to device, unpacking DataContainer with correct semantics.
 
-    For ``cpu_only=True`` DC items (e.g. img_metas), the inner data is wrapped
-    in a list to provide the batch dimension that ``forward_test`` /
-    ``simple_test`` expect:  ``DC(meta_dict)`` → ``[meta_dict]``.
+    The legacy ``forward_test`` expects the outer list to represent test-time
+    augmentations (added by ``MultiScaleFlipAug3D``) and each inner value to
+    carry a batch dimension.  After stripping the TTA list with ``[0]``,
+    ``simple_test`` receives per-field values whose structure depends on the
+    DC flags:
 
-    For other DC items the inner data is extracted directly and moved to device.
+    * ``cpu_only=True`` (img_metas): ``DC(meta)`` → ``[meta]``
+    * ``stack=False``   (points):    ``DC(tensor)`` → ``[tensor]``
+      Both are wrapped in a list so ``voxelize()`` / ``extract_feat()``
+      can iterate over batch samples.
+    * ``stack=True``    (img):       ``DC(tensor)`` → ``tensor``
+      Returned directly because the tensor already represents the full batch.
     """
     from mmdet3d.compat import DataContainer
     if isinstance(data, DataContainer):
         inner = data._data
         if data.cpu_only:
-            # Wrap in list to provide batch dimension: [meta_dict]
             return [inner]
-        return _prepare_data(inner, device)
+        if data.stack:
+            return _prepare_data(inner, device)
+        # stack=False: wrap in batch list after moving to device
+        return [_prepare_data(inner, device)]
     elif isinstance(data, dict):
         return {k: _prepare_data(v, device) for k, v in data.items()}
     elif isinstance(data, (list, tuple)):

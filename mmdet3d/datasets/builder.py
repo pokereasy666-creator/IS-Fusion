@@ -53,11 +53,46 @@ def _collate_dc(batch):
       gathered as a plain list of tensors — not stacked, because samples
       may have different sizes.
 
+    DCs may be nested inside lists/tuples (e.g. after
+    ``MultiScaleFlipAug3D``).  The function descends recursively so that
+    ``[DC(tensor)]`` from each sample is collated correctly.
+
     Non-DC values fall through to ``default_collate``.
     """
     import torch
     from torch.utils.data.dataloader import default_collate
     from mmdet3d.compat import DataContainer
+
+    def _collate_field(samples):
+        """Collate a list of per-sample values for a single field."""
+        first = samples[0]
+
+        if isinstance(first, DataContainer):
+            if first.cpu_only:
+                return [s._data for s in samples]
+            elif first.stack:
+                return torch.stack([s._data for s in samples], dim=0)
+            else:
+                return [s._data for s in samples]
+        elif isinstance(first, (list, tuple)):
+            # Recurse into lists/tuples (e.g. TTA wrappers from
+            # MultiScaleFlipAug3D): transpose list-of-lists then collate
+            # each position.
+            collated = []
+            for i in range(len(first)):
+                inner_samples = [s[i] for s in samples]
+                collated.append(_collate_field(inner_samples))
+            return type(first)(collated)
+        elif isinstance(first, dict):
+            return {
+                k: _collate_field([s[k] for s in samples])
+                for k in first
+            }
+        else:
+            try:
+                return default_collate(samples)
+            except (TypeError, RuntimeError):
+                return samples
 
     if not isinstance(batch[0], dict):
         return default_collate(batch)
@@ -65,20 +100,7 @@ def _collate_dc(batch):
     result = {}
     for key in batch[0]:
         samples = [d[key] for d in batch]
-        first = samples[0]
-
-        if isinstance(first, DataContainer):
-            if first.cpu_only:
-                result[key] = [s._data for s in samples]
-            elif first.stack:
-                result[key] = torch.stack([s._data for s in samples], dim=0)
-            else:
-                result[key] = [s._data for s in samples]
-        else:
-            try:
-                result[key] = default_collate(samples)
-            except (TypeError, RuntimeError):
-                result[key] = samples
+        result[key] = _collate_field(samples)
 
     return result
 

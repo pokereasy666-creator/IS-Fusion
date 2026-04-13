@@ -141,13 +141,16 @@ def main():
         if world_size > 1:
             from mmengine.dist import all_gather_object
             gathered = all_gather_object(predictions)
-            # Interleave results so sample order matches the DistributedSampler
+            # Interleave results so sample order matches DistributedSampler
             all_predictions = []
             for i in range(max(len(g) for g in gathered)):
                 for g in gathered:
                     if i < len(g):
                         all_predictions.append(g[i])
-            predictions = all_predictions
+            # DistributedSampler pads to make len divisible by world_size;
+            # crop to the actual dataset length to remove duplicates.
+            dataset_size = len(runner.test_dataloader.dataset)
+            predictions = all_predictions[:dataset_size]
 
         if rank == 0:
             print(f'\nwriting results to {args.out}')
