@@ -2,6 +2,10 @@
 from mmcv.ops import (RoIAlign, SigmoidFocalLoss, get_compiler_version,
                       get_compiling_cuda_version, nms, roi_align,
                       sigmoid_focal_loss)
+try:
+    from mmcv.ops import batched_nms, soft_nms
+except ImportError:
+    from mmcv.ops.nms import batched_nms, soft_nms
 
 from .ball_query import ball_query
 from .furthest_point_sample import (Points_Sampler, furthest_point_sample,
@@ -41,5 +45,8 @@ __all__ = [
     'points_in_boxes_batch', 'get_compiler_version', 'assign_score_withk',
     'get_compiling_cuda_version', 'Points_Sampler', 'build_sa_module',
     'PAConv', 'PAConvCUDA', 'PAConvSAModuleMSG', 'PAConvSAModule',
-    'PAConvCUDASAModule', 'PAConvCUDASAModuleMSG'
+    'PAConvCUDASAModule', 'PAConvCUDASAModuleMSG', 'flat2window',
+    'window2flat', 'SRATensor', 'DebugSRATensor', 'get_flat2win_inds',
+    'get_inner_win_inds', 'make_continuous_inds', 'flat2window_v2',
+    'window2flat_v2', 'get_flat2win_inds_v2', 'get_window_coors'
 ]
