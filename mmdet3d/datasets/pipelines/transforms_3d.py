@@ -317,31 +317,32 @@ class PhotoMetricDistortionMultiViewImage:
                 'PhotoMetricDistortion needs the input image of dtype np.float32,' \
                 ' please set "to_float32=True" in "LoadImageFromFile" pipeline'
             # random brightness
-            if random.randint(2):
-                delta = random.uniform(-self.brightness_delta,
-                                       self.brightness_delta)
+            if np.random.randint(2):
+                delta = np.random.uniform(-self.brightness_delta,
+                                          self.brightness_delta)
                 img += delta
 
             # mode == 0 --> do random contrast first
             # mode == 1 --> do random contrast last
-            mode = random.randint(2)
+            mode = np.random.randint(2)
             if mode == 1:
-                if random.randint(2):
-                    alpha = random.uniform(self.contrast_lower,
-                                           self.contrast_upper)
+                if np.random.randint(2):
+                    alpha = np.random.uniform(self.contrast_lower,
+                                              self.contrast_upper)
                     img *= alpha
 
             # convert color from BGR to HSV
             img = mmcv.bgr2hsv(img)
 
             # random saturation
-            if random.randint(2):
-                img[..., 1] *= random.uniform(self.saturation_lower,
-                                              self.saturation_upper)
+            if np.random.randint(2):
+                img[..., 1] *= np.random.uniform(self.saturation_lower,
+                                                 self.saturation_upper)
 
             # random hue
-            if random.randint(2):
-                img[..., 0] += random.uniform(-self.hue_delta, self.hue_delta)
+            if np.random.randint(2):
+                img[..., 0] += np.random.uniform(-self.hue_delta,
+                                                 self.hue_delta)
                 img[..., 0][img[..., 0] > 360] -= 360
                 img[..., 0][img[..., 0] < 0] += 360
 
@@ -350,14 +351,14 @@ class PhotoMetricDistortionMultiViewImage:
 
             # random contrast
             if mode == 0:
-                if random.randint(2):
-                    alpha = random.uniform(self.contrast_lower,
-                                           self.contrast_upper)
+                if np.random.randint(2):
+                    alpha = np.random.uniform(self.contrast_lower,
+                                              self.contrast_upper)
                     img *= alpha
 
             # randomly swap channels
-            if random.randint(2):
-                img = img[..., random.permutation(3)]
+            if np.random.randint(2):
+                img = img[..., np.random.permutation(3)]
             new_imgs.append(img)
         results['img'] = new_imgs
         return results

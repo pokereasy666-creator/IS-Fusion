@@ -69,6 +69,7 @@ def main():
     if args.fuse_conv_bn:
         model = fuse_module(model)
 
+    model = model.cuda()
     model = nn.DataParallel(model, device_ids=[0])
 
     model.eval()
