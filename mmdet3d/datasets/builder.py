@@ -40,12 +40,35 @@ def build_dataset(cfg, default_args=None):
     return dataset
 
 
+def _collate_dc(batch):
+    """Collate function that unpacks DataContainer before default collation.
+
+    Pipeline transforms wrap outputs in DataContainer, which PyTorch's
+    default_collate cannot handle.  This function recursively extracts the
+    inner ``._data`` so that tensors, numpy arrays, and plain Python objects
+    reach the default collation path.
+    """
+    from torch.utils.data.dataloader import default_collate
+    from mmdet3d.compat import DataContainer
+
+    def _unwrap(obj):
+        if isinstance(obj, DataContainer):
+            return _unwrap(obj._data)
+        elif isinstance(obj, dict):
+            return {k: _unwrap(v) for k, v in obj.items()}
+        elif isinstance(obj, (list, tuple)):
+            return type(obj)(_unwrap(v) for v in obj)
+        return obj
+
+    batch = [_unwrap(sample) for sample in batch]
+    return default_collate(batch)
+
+
 def build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1,
                      dist=False, shuffle=True, seed=None,
                      persistent_workers=False, **kwargs):
     """Build a PyTorch DataLoader."""
     from torch.utils.data import DataLoader
-    from torch.utils.data.dataloader import default_collate
 
     sampler = None
     if dist:
@@ -59,6 +82,6 @@ def build_dataloader(dataset, samples_per_gpu, workers_per_gpu, num_gpus=1,
         num_workers=workers_per_gpu,
         sampler=sampler,
         shuffle=shuffle if sampler is None else False,
-        collate_fn=default_collate,
+        collate_fn=_collate_dc,
         persistent_workers=persistent_workers and workers_per_gpu > 0,
     )

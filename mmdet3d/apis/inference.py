@@ -70,7 +70,10 @@ def init_model(config, checkpoint=None, device='cuda:0'):
     config.model.pretrained = None
     convert_SyncBN(config.model)
     config.model.train_cfg = None
-    model = build_model(config.model, test_cfg=config.get('test_cfg'))
+    # Only pass top-level test_cfg if the model config doesn't already have one,
+    # otherwise build_detector asserts "test_cfg specified in both".
+    test_cfg = config.get('test_cfg') if not config.model.get('test_cfg') else None
+    model = build_model(config.model, test_cfg=test_cfg)
     if checkpoint is not None:
         ckpt = load_checkpoint(model, checkpoint)
         if 'CLASSES' in ckpt.get('meta', {}):
@@ -86,8 +89,11 @@ def init_model(config, checkpoint=None, device='cuda:0'):
 
 
 def _prepare_data(data, device):
-    """Move data to device, handling nested dicts and lists."""
-    if isinstance(data, dict):
+    """Move data to device, handling nested dicts, lists, and DataContainer."""
+    from mmdet3d.compat import DataContainer
+    if isinstance(data, DataContainer):
+        return _prepare_data(data._data, device)
+    elif isinstance(data, dict):
         return {k: _prepare_data(v, device) for k, v in data.items()}
     elif isinstance(data, (list, tuple)):
         return type(data)(_prepare_data(v, device) for v in data)

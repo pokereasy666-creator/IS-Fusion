@@ -61,7 +61,10 @@ def main():
 
     # build the model and load checkpoint
     cfg.model.train_cfg = None
-    model = build_detector(cfg.model, test_cfg=cfg.get('test_cfg'))
+    # Only pass top-level test_cfg if the model config doesn't already have one,
+    # otherwise build_detector asserts "test_cfg specified in both".
+    test_cfg = cfg.get('test_cfg') if not cfg.model.get('test_cfg') else None
+    model = build_detector(cfg.model, test_cfg=test_cfg)
     load_checkpoint(model, args.checkpoint, map_location='cpu')
     if args.fuse_conv_bn:
         model = fuse_module(model)

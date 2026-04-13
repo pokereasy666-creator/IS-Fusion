@@ -119,6 +119,20 @@ def main():
 
     # Build runner and run test
     runner = Runner.from_cfg(cfg)
+
+    # Collect per-sample predictions if --out is specified
+    predictions = []
+    if args.out:
+        from mmengine.hooks import Hook
+
+        class _PredictionCollector(Hook):
+            def after_test_iter(self, runner, batch_idx=0,
+                                data_batch=None, outputs=None):
+                if outputs is not None:
+                    predictions.extend(outputs)
+
+        runner.register_hook(_PredictionCollector(), priority='LOW')
+
     metrics = runner.test()
 
     rank, _ = get_dist_info()
@@ -126,7 +140,7 @@ def main():
         if args.out:
             print(f'\nwriting results to {args.out}')
             from mmengine.fileio import dump
-            dump(metrics, args.out)
+            dump(predictions, args.out)
         print(metrics)
 
 
