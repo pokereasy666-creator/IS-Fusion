@@ -157,64 +157,99 @@ def show_seg_data(idx, dataset, out_dir, filename, show=False):
         snapshot=True)
 
 
+def _show_proj_single_view(img, gt_bboxes, proj_mat, img_metas,
+                           out_dir, filename, show):
+    """Project 3D bboxes onto a single 2D image and save/show the result."""
+    if isinstance(gt_bboxes, DepthInstance3DBoxes):
+        show_multi_modality_result(
+            img, gt_bboxes, None, None, out_dir, filename,
+            box_mode='depth', img_metas=img_metas, show=show)
+    elif isinstance(gt_bboxes, LiDARInstance3DBoxes):
+        show_multi_modality_result(
+            img, gt_bboxes, None, proj_mat, out_dir, filename,
+            box_mode='lidar', img_metas=img_metas, show=show)
+    elif isinstance(gt_bboxes, CameraInstance3DBoxes):
+        show_multi_modality_result(
+            img, gt_bboxes, None, proj_mat, out_dir, filename,
+            box_mode='camera', img_metas=img_metas, show=show)
+    else:
+        warnings.warn(
+            f'unrecognized gt box type {type(gt_bboxes)}, only show image')
+        show_multi_modality_result(
+            img, None, None, None, out_dir, filename, show=show)
+
+
 def show_proj_bbox_img(idx,
                        dataset,
                        out_dir,
                        filename,
                        show=False,
                        is_nus_mono=False):
-    """Visualize 3D bboxes on 2D image by projection."""
+    """Visualize 3D bboxes on 2D image by projection.
+
+    Supports both single-view (legacy Collect3D) and multi-view
+    (Collect3DV2) pipelines.  For multi-view, each camera view is
+    projected and saved separately as ``<filename>_cam<idx>``.
+    """
     try:
         example = dataset.prepare_train_data(idx)
     except AttributeError:  # for Mono-3D datasets
         example = dataset.prepare_train_img(idx)
     gt_bboxes = dataset.get_ann_info(idx)['gt_bboxes_3d']
     img_metas = _unwrap_data(example['img_metas'])
-    img = _unwrap_data(example['img']).numpy()
-    # need to transpose channel to first dim
-    img = img.transpose(1, 2, 0)
+    img = _unwrap_data(example['img'])
+    if hasattr(img, 'numpy'):
+        img = img.numpy()
+
     # no 3D gt bboxes, just show img
     if gt_bboxes.tensor.shape[0] == 0:
         gt_bboxes = None
-    if isinstance(gt_bboxes, DepthInstance3DBoxes):
-        show_multi_modality_result(
-            img,
-            gt_bboxes,
-            None,
-            None,
-            out_dir,
-            filename,
-            box_mode='depth',
-            img_metas=img_metas,
-            show=show)
-    elif isinstance(gt_bboxes, LiDARInstance3DBoxes):
-        show_multi_modality_result(
-            img,
-            gt_bboxes,
-            None,
-            img_metas['lidar2img'],
-            out_dir,
-            filename,
-            box_mode='lidar',
-            img_metas=img_metas,
-            show=show)
-    elif isinstance(gt_bboxes, CameraInstance3DBoxes):
-        show_multi_modality_result(
-            img,
-            gt_bboxes,
-            None,
-            img_metas['cam2img'],
-            out_dir,
-            filename,
-            box_mode='camera',
-            img_metas=img_metas,
-            show=show)
+
+    # Resolve lidar2img / cam2img projection matrix.
+    # Collect3DV2 stores lidar2img as a top-level DC tensor field;
+    # legacy Collect3D keeps it inside img_metas.
+    lidar2img = None
+    if 'lidar2img' in example:
+        lidar2img = _unwrap_data(example['lidar2img'])
+        if hasattr(lidar2img, 'numpy'):
+            lidar2img = lidar2img.numpy()
+    elif isinstance(img_metas, dict) and 'lidar2img' in img_metas:
+        lidar2img = np.asarray(img_metas['lidar2img'])
+
+    cam2img = None
+    if 'cam2img' in example:
+        cam2img = _unwrap_data(example['cam2img'])
+        if hasattr(cam2img, 'numpy'):
+            cam2img = cam2img.numpy()
+    elif isinstance(img_metas, dict) and 'cam2img' in img_metas:
+        cam2img = np.asarray(img_metas['cam2img'])
+
+    # Multi-view: img shape (num_views, C, H, W)
+    if img.ndim == 4:
+        num_views = img.shape[0]
+        for cam_idx in range(num_views):
+            cam_img = img[cam_idx].transpose(1, 2, 0)  # (C,H,W) → (H,W,C)
+            cam_name = f'{filename}_cam{cam_idx}'
+            if isinstance(gt_bboxes, LiDARInstance3DBoxes):
+                proj = lidar2img[cam_idx] if lidar2img is not None else None
+            elif isinstance(gt_bboxes, CameraInstance3DBoxes):
+                proj = cam2img[cam_idx] if cam2img is not None else None
+            else:
+                proj = None
+            _show_proj_single_view(
+                cam_img, gt_bboxes, proj, img_metas,
+                out_dir, cam_name, show)
     else:
-        # can't project, just show img
-        warnings.warn(
-            f'unrecognized gt box type {type(gt_bboxes)}, only show image')
-        show_multi_modality_result(
-            img, None, None, None, out_dir, filename, show=show)
+        # Single-view: img shape (C, H, W)
+        img = img.transpose(1, 2, 0)
+        if isinstance(gt_bboxes, LiDARInstance3DBoxes):
+            proj = lidar2img
+        elif isinstance(gt_bboxes, CameraInstance3DBoxes):
+            proj = cam2img
+        else:
+            proj = None
+        _show_proj_single_view(
+            img, gt_bboxes, proj, img_metas, out_dir, filename, show)
 
 
 def main():
