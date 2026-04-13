@@ -6,6 +6,8 @@ import numpy as np
 import torch
 from mmengine.runner import Runner
 
+from mmdet3d.evaluation.metrics import attach_runner_datasets_to_metrics
+
 
 def set_random_seed(seed, deterministic=False):
     """Set random seed."""
@@ -38,4 +40,8 @@ def train_model(model,
         meta: Meta information dict.
     """
     runner = Runner.from_cfg(cfg)
+    eval_splits = []
+    if cfg.get('val_dataloader') and cfg.get('val_evaluator'):
+        eval_splits.append('val')
+    attach_runner_datasets_to_metrics(runner, *eval_splits)
     runner.train()

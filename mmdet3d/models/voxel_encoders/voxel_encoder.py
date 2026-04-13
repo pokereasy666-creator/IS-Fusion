@@ -336,7 +336,7 @@ class DynamicVFE(nn.Module):
         if with_voxel_center:
             in_channels += 3
         if with_distance:
-            in_channels += 3
+            in_channels += 1
         self.in_channels = in_channels
         self._with_distance = with_distance
         self._with_cluster_center = with_cluster_center
@@ -516,7 +516,7 @@ class DynamicVFE(nn.Module):
                 features_ls.append(points_dist)
 
             if kwargs.get('painted_points', None) is not None:
-                painted_points = kwargs['painted_points ']
+                painted_points = kwargs['painted_points']
                 for i in range(len(self.fusion_layer)):
                     painted_points = self.fusion_layer[i](painted_points)
                 features_ls.append(painted_points)

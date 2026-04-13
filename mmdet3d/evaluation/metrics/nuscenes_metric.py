@@ -26,6 +26,8 @@ class NuScenesMetric(BaseMetric):
         prefix (str or None): Metric prefix. Defaults to None.
     """
 
+    requires_dataset = True
+
     def __init__(self,
                  data_root: str = 'data/nuscenes/',
                  metric: str = 'bbox',

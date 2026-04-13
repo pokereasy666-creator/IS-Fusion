@@ -9,6 +9,7 @@ from mmengine.dist import get_dist_info, init_dist
 from mmengine.runner import Runner
 
 from mmdet3d import register_all_modules
+from mmdet3d.evaluation.metrics import attach_runner_datasets_to_metrics
 
 
 def parse_args():
@@ -119,6 +120,7 @@ def main():
 
     # Build runner and run test
     runner = Runner.from_cfg(cfg)
+    attach_runner_datasets_to_metrics(runner, 'test')
 
     # Collect per-sample predictions if --out is specified
     predictions = []

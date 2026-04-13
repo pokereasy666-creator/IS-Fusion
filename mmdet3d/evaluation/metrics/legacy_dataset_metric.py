@@ -5,10 +5,40 @@ from mmengine.evaluator import BaseMetric
 from mmengine.registry import METRICS
 
 
+def _iter_evaluator_metrics(evaluator):
+    metrics = getattr(evaluator, 'metrics', None)
+    if metrics is None:
+        metrics = getattr(evaluator, '_metrics', None)
+    if metrics is None:
+        return (evaluator,)
+    if isinstance(metrics, dict):
+        return tuple(metrics.values())
+    if isinstance(metrics, (list, tuple)):
+        return tuple(metrics)
+    return (metrics,)
+
+
+def attach_dataset_to_metrics(evaluator, dataset) -> None:
+    if evaluator is None or dataset is None:
+        return
+
+    for metric in _iter_evaluator_metrics(evaluator):
+        if getattr(metric, 'requires_dataset', False):
+            metric.dataset = dataset
+
+
+def attach_runner_datasets_to_metrics(runner, *splits) -> None:
+    for split in splits:
+        evaluator = getattr(runner, f'{split}_evaluator')
+        dataloader = getattr(runner, f'{split}_dataloader')
+        attach_dataset_to_metrics(evaluator, dataloader.dataset)
+
+
 class LegacyDatasetMetric(BaseMetric):
     """MMEngine metric wrapper for legacy dataset ``evaluate`` methods."""
 
     default_metric = None
+    requires_dataset = True
 
     def __init__(self,
                  metric=None,

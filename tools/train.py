@@ -10,6 +10,7 @@ from mmengine.dist import init_dist
 from mmengine.runner import Runner
 
 from mmdet3d import register_all_modules
+from mmdet3d.evaluation.metrics import attach_runner_datasets_to_metrics
 from mmdet3d.utils import collect_env, get_root_logger
 
 
@@ -151,6 +152,10 @@ def main():
 
     # Build the runner from config and launch training
     runner = Runner.from_cfg(cfg)
+    eval_splits = []
+    if cfg.get('val_dataloader') and cfg.get('val_evaluator'):
+        eval_splits.append('val')
+    attach_runner_datasets_to_metrics(runner, *eval_splits)
     runner.train()
 
 
