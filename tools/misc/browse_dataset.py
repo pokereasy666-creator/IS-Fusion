@@ -13,6 +13,23 @@ from mmdet3d.core.visualizer import (show_multi_modality_result, show_result,
 from mmdet3d.datasets import build_dataset
 
 
+def _unwrap_data(value):
+    """Unwrap a pipeline output that may be wrapped in a TTA list and/or DC.
+
+    After ``MultiScaleFlipAug3D``, values are ``[DC(x)]`` (a list containing
+    a single DataContainer).  Without TTA they are plain ``DC(x)``.  This
+    helper normalises both forms to the inner payload ``x``.
+    """
+    from mmdet3d.compat import DataContainer
+    # Strip outer TTA list: [DC(x)] → DC(x)
+    if isinstance(value, (list, tuple)) and len(value) == 1:
+        value = value[0]
+    # Strip DataContainer wrapper: DC(x) → x
+    if isinstance(value, DataContainer):
+        value = value._data
+    return value
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Browse a dataset')
     parser.add_argument('config', help='train config file path')
@@ -109,7 +126,7 @@ def to_depth_mode(points, bboxes):
 def show_det_data(idx, dataset, out_dir, filename, show=False):
     """Visualize 3D point cloud and 3D bboxes."""
     example = dataset.prepare_train_data(idx)
-    points = example['points']._data.numpy()
+    points = _unwrap_data(example['points']).numpy()
     gt_bboxes = dataset.get_ann_info(idx)['gt_bboxes_3d'].tensor
     if dataset.box_mode_3d != Box3DMode.DEPTH:
         points, gt_bboxes = to_depth_mode(points, gt_bboxes)
@@ -126,8 +143,8 @@ def show_det_data(idx, dataset, out_dir, filename, show=False):
 def show_seg_data(idx, dataset, out_dir, filename, show=False):
     """Visualize 3D point cloud and segmentation mask."""
     example = dataset.prepare_train_data(idx)
-    points = example['points']._data.numpy()
-    gt_seg = example['pts_semantic_mask']._data.numpy()
+    points = _unwrap_data(example['points']).numpy()
+    gt_seg = _unwrap_data(example['pts_semantic_mask']).numpy()
     show_seg_result(
         points,
         gt_seg.copy(),
@@ -152,8 +169,8 @@ def show_proj_bbox_img(idx,
     except AttributeError:  # for Mono-3D datasets
         example = dataset.prepare_train_img(idx)
     gt_bboxes = dataset.get_ann_info(idx)['gt_bboxes_3d']
-    img_metas = example['img_metas']._data
-    img = example['img']._data.numpy()
+    img_metas = _unwrap_data(example['img_metas'])
+    img = _unwrap_data(example['img']).numpy()
     # need to transpose channel to first dim
     img = img.transpose(1, 2, 0)
     # no 3D gt bboxes, just show img
