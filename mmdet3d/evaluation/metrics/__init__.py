@@ -1,10 +1,12 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from .legacy_dataset_metric import (IndoorMetric, KittiMetric, LyftMetric,
                                     SegMetric, WaymoMetric,
-                                    attach_runner_datasets_to_metrics)
+                                    attach_runner_datasets_to_metrics,
+                                    get_legacy_metric_cfg)
 from .nuscenes_metric import NuScenesMetric
 
 __all__ = [
     'NuScenesMetric', 'KittiMetric', 'LyftMetric', 'WaymoMetric',
-    'IndoorMetric', 'SegMetric', 'attach_runner_datasets_to_metrics'
+    'IndoorMetric', 'SegMetric', 'attach_runner_datasets_to_metrics',
+    'get_legacy_metric_cfg'
 ]

@@ -9,7 +9,8 @@ from mmengine.dist import get_dist_info, init_dist
 from mmengine.runner import Runner
 
 from mmdet3d import register_all_modules
-from mmdet3d.evaluation.metrics import attach_runner_datasets_to_metrics
+from mmdet3d.evaluation.metrics import (attach_runner_datasets_to_metrics,
+                                        get_legacy_metric_cfg)
 
 
 def parse_args():
@@ -106,8 +107,8 @@ def main():
         if cfg.get('val_evaluator'):
             cfg.test_evaluator = cfg.val_evaluator.copy()
         else:
-            # Fallback: use dataset.evaluate() style
-            cfg.test_evaluator = dict(type='NuScenesMetric')
+            cfg.test_evaluator = get_legacy_metric_cfg(
+                cfg.test_dataloader.get('dataset'))
 
     # Ensure test_cfg exists
     if not cfg.get('test_cfg'):

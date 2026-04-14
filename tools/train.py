@@ -10,7 +10,8 @@ from mmengine.dist import init_dist
 from mmengine.runner import Runner
 
 from mmdet3d import register_all_modules
-from mmdet3d.evaluation.metrics import attach_runner_datasets_to_metrics
+from mmdet3d.evaluation.metrics import (attach_runner_datasets_to_metrics,
+                                        get_legacy_metric_cfg)
 from mmdet3d.utils import collect_env, get_root_logger
 
 
@@ -67,9 +68,13 @@ def _migrate_legacy_data_config(cfg):
         cfg.test_dataloader = _build_compat_dataloader(
             cfg.data.test, workers, batch_size, shuffle=False, test_mode=True)
     if not cfg.get('val_evaluator'):
-        cfg.val_evaluator = dict(type='NuScenesMetric')
+        cfg.val_evaluator = get_legacy_metric_cfg(
+            cfg.val_dataloader.get('dataset') if cfg.get('val_dataloader')
+            else None)
     if not cfg.get('test_evaluator'):
-        cfg.test_evaluator = dict(type='NuScenesMetric')
+        cfg.test_evaluator = get_legacy_metric_cfg(
+            cfg.test_dataloader.get('dataset') if cfg.get('test_dataloader')
+            else None)
     if not cfg.get('val_cfg'):
         cfg.val_cfg = dict()
     if not cfg.get('test_cfg'):

@@ -222,8 +222,6 @@ class HungarianAssigner3DV3(BaseAssigner):
         self.iou_cost = build_match_cost(iou_cost)
         self.pc_range = pc_range
         self.code_weights = code_weights
-        if self.code_weights:
-            self.code_weights = torch.tensor(self.code_weights)[None, :].cuda()
 
     def assign(self,
                bbox_pred,
@@ -286,9 +284,16 @@ class HungarianAssigner3DV3(BaseAssigner):
         # regression L1 cost
         normalized_gt_bboxes = normalize_bbox(gt_bboxes, self.pc_range)
 
-        if self.code_weights is not None:
-            bbox_pred = bbox_pred * self.code_weights
-            normalized_gt_bboxes = normalized_gt_bboxes * self.code_weights
+        code_weights = code_weights if code_weights is not None else self.code_weights
+        if code_weights is not None:
+            if isinstance(code_weights, torch.Tensor):
+                code_weights = code_weights.to(
+                    device=bbox_pred.device, dtype=bbox_pred.dtype)
+            else:
+                code_weights = bbox_pred.new_tensor(code_weights)
+            code_weights = code_weights[None, :]
+            bbox_pred = bbox_pred * code_weights
+            normalized_gt_bboxes = normalized_gt_bboxes * code_weights
 
         reg_cost = self.reg_cost(bbox_pred[:, :8], normalized_gt_bboxes[:, :8])
 

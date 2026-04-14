@@ -5,6 +5,41 @@ from mmengine.evaluator import BaseMetric
 from mmengine.registry import METRICS
 
 
+_LEGACY_DATASET_METRICS = {
+    'KittiDataset': 'KittiMetric',
+    'LyftDataset': 'LyftMetric',
+    'NuScenesDataset': 'NuScenesMetric',
+    'NuScenesMonoDataset': 'NuScenesMetric',
+    'WaymoDataset': 'WaymoMetric',
+    'ScanNetDataset': 'IndoorMetric',
+    'SUNRGBDDataset': 'IndoorMetric',
+    'S3DISDataset': 'IndoorMetric',
+    'ScanNetSegDataset': 'SegMetric',
+    'S3DISSegDataset': 'SegMetric',
+}
+
+
+def _get_dataset_type(dataset_cfg) -> Optional[str]:
+    if dataset_cfg is None:
+        return None
+    if isinstance(dataset_cfg, (list, tuple)):
+        return _get_dataset_type(dataset_cfg[0]) if dataset_cfg else None
+    if not hasattr(dataset_cfg, 'get'):
+        return None
+
+    dataset_type = dataset_cfg.get('type')
+    if dataset_type in ('RepeatDataset', 'ClassBalancedDataset', 'CBGSDataset'):
+        return _get_dataset_type(dataset_cfg.get('dataset'))
+    if dataset_type == 'ConcatDataset':
+        return _get_dataset_type(dataset_cfg.get('datasets'))
+    return dataset_type
+
+
+def get_legacy_metric_cfg(dataset_cfg, fallback='NuScenesMetric') -> dict:
+    dataset_type = _get_dataset_type(dataset_cfg)
+    return dict(type=_LEGACY_DATASET_METRICS.get(dataset_type, fallback))
+
+
 def _iter_evaluator_metrics(evaluator):
     metrics = getattr(evaluator, 'metrics', None)
     if metrics is None:
