@@ -1232,7 +1232,8 @@ class TransFusionHeadV2(nn.Module):
                     score_layer,
                     self.train_cfg,
                 )
-            elif self.train_cfg.assigner.type == "HeuristicAssigner":
+            elif self.train_cfg.assigner.type in ("HeuristicAssigner",
+                                                  "HeuristicAssigner3D"):
                 assign_result = self.bbox_assigner.assign(
                     bboxes_tensor_layer,
                     gt_bboxes_tensor,
@@ -1623,27 +1624,16 @@ class TransFusionHeadV2(nn.Module):
                 ret_layer.append(ret)
             rets.append(ret_layer)
         assert len(rets) == 1
-        assert len(rets[0]) == 1
-        try:
-            from mmdet3d.core.bbox import LiDARInstance3DBoxes
-        except ImportError:
-            try:
-                from mmdet3d.structures import LiDARInstance3DBoxes
-            except ImportError:
-                from mmdet3d.structures.bbox_3d import LiDARInstance3DBoxes
-            
-        raw_boxes = rets[0][0]["bboxes"]
-        # 获取 box 的维度 (通常是 9)
-        b_dim = raw_boxes.shape[-1] if raw_boxes.shape[0] > 0 else 9
-        # TransFusion 的中心点预测即为物理重心，因此 origin=(0.5, 0.5, 0.5)
-        wrapped_boxes = LiDARInstance3DBoxes(raw_boxes, box_dim=b_dim, origin=(0.5, 0.5, 0.5))
-        
-        res = [
-            [
+        res = []
+        for ret in rets[0]:
+            raw_boxes = ret["bboxes"]
+            b_dim = raw_boxes.shape[-1] if raw_boxes.dim() > 1 else 9
+            wrapped_boxes = LiDARInstance3DBoxes(
+                raw_boxes, box_dim=b_dim, origin=(0.5, 0.5, 0.5))
+            res.append([
                 wrapped_boxes,
-                rets[0][0]["scores"],
-                rets[0][0]["labels"].int(),
-            ]
-        ]
+                ret["scores"],
+                ret["labels"].int(),
+            ])
         return res
 

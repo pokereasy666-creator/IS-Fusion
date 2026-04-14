@@ -122,6 +122,45 @@ def _prepare_data(data, device):
     return data
 
 
+def _ensure_test_aug(data):
+    """Wrap plain pipeline outputs in the forward_test augmentation axis."""
+    if not isinstance(data, dict) or 'img_metas' not in data:
+        return data
+
+    img_metas = data['img_metas']
+    if not isinstance(img_metas, (list, tuple)) or not img_metas:
+        return data
+
+    # TTA pipelines already return [[meta], ...] after _prepare_data.
+    if isinstance(img_metas[0], (list, tuple)):
+        return data
+
+    data['img_metas'] = [img_metas]
+    for key in ('points', 'img'):
+        if key in data:
+            data[key] = [data[key]]
+    return data
+
+
+def _set_img_meta(data, key, value):
+    """Set a key on img_metas before or after DataContainer unwrapping."""
+    if not isinstance(data, dict) or 'img_metas' not in data:
+        return
+
+    from mmdet3d.compat import DataContainer
+
+    def _set(meta):
+        if isinstance(meta, DataContainer):
+            _set(meta.data)
+        elif isinstance(meta, dict):
+            meta[key] = value
+        elif isinstance(meta, (list, tuple)):
+            for item in meta:
+                _set(item)
+
+    _set(data['img_metas'])
+
+
 def inference_detector(model, pcd):
     """Inference point cloud with the detector."""
     cfg = model.cfg
@@ -145,6 +184,7 @@ def inference_detector(model, pcd):
         seg_fields=[])
     data = test_pipeline(data)
     data = _prepare_data(data, device)
+    data = _ensure_test_aug(data)
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
     return result, data
@@ -184,17 +224,16 @@ def inference_multi_modality_detector(model, pcd, image, ann_file):
         Trv2c = info['calib']['Tr_velo_to_cam'].astype(np.float32)
         P2 = info['calib']['P2'].astype(np.float32)
         lidar2img = P2 @ rect @ Trv2c
-        if 'img_metas' in data:
-            data['img_metas'][0].data['lidar2img'] = lidar2img
+        _set_img_meta(data, 'lidar2img', lidar2img)
     elif box_mode_3d == Box3DMode.DEPTH:
         rt_mat = info['calib']['Rt']
         rt_mat = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]
                            ]) @ rt_mat.transpose(1, 0)
         depth2img = info['calib']['K'] @ rt_mat
-        if 'img_metas' in data:
-            data['img_metas'][0].data['depth2img'] = depth2img
+        _set_img_meta(data, 'depth2img', depth2img)
 
     data = _prepare_data(data, device)
+    data = _ensure_test_aug(data)
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
     return result, data
@@ -231,6 +270,7 @@ def inference_mono_3d_detector(model, image, ann_file):
 
     data = test_pipeline(data)
     data = _prepare_data(data, device)
+    data = _ensure_test_aug(data)
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
     return result, data
@@ -253,6 +293,7 @@ def inference_segmentor(model, pcd):
         seg_fields=[])
     data = test_pipeline(data)
     data = _prepare_data(data, device)
+    data = _ensure_test_aug(data)
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
     return result, data

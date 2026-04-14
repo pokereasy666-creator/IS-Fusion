@@ -1168,7 +1168,8 @@ class TransFusionHead(nn.Module):
 
             if self.train_cfg.assigner.type == 'HungarianAssigner3D':
                 assign_result = self.bbox_assigner.assign(bboxes_tensor_layer, gt_bboxes_tensor, gt_labels_3d, score_layer, self.train_cfg)
-            elif self.train_cfg.assigner.type == 'HeuristicAssigner':
+            elif self.train_cfg.assigner.type in ('HeuristicAssigner',
+                                                  'HeuristicAssigner3D'):
                 assign_result = self.bbox_assigner.assign(bboxes_tensor_layer, gt_bboxes_tensor, None, gt_labels_3d, self.query_labels[batch_idx])
             else:
                 raise NotImplementedError
@@ -1402,10 +1403,12 @@ class TransFusionHead(nn.Module):
                 ret_layer.append(ret)
             rets.append(ret_layer)
         assert len(rets) == 1
-        assert len(rets[0]) == 1
-        res = [[
-            img_metas[0]['box_type_3d'](rets[0][0]['bboxes'], box_dim=rets[0][0]['bboxes'].shape[-1]),
-            rets[0][0]['scores'],
-            rets[0][0]['labels'].int()
-        ]]
+        res = []
+        for i, ret in enumerate(rets[0]):
+            res.append([
+                img_metas[i]['box_type_3d'](
+                    ret['bboxes'], box_dim=ret['bboxes'].shape[-1]),
+                ret['scores'],
+                ret['labels'].int()
+            ])
         return res
