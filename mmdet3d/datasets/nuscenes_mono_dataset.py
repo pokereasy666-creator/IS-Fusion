@@ -320,9 +320,9 @@ class NuScenesMonoDataset(CocoDataset):
             # Remove redundant predictions caused by overlap of images
             if (sample_id + 1) % CAM_NUM != 0:
                 continue
-            boxes = global_nusc_box_to_cam(
+            boxes, attrs_per_frame = global_nusc_box_to_cam(
                 self.data_infos[sample_id + 1 - CAM_NUM], boxes_per_frame,
-                mapped_class_names, self.eval_detection_configs,
+                attrs_per_frame, mapped_class_names, self.eval_detection_configs,
                 self.eval_version)
             cam_boxes3d, scores, labels = nusc_box_to_cam_box3d(boxes)
             # box nms 3d over 6 images in a frame
@@ -727,6 +727,7 @@ def cam_nusc_box_to_global(info,
 
 def global_nusc_box_to_cam(info,
                            boxes,
+                           attrs,
                            classes,
                            eval_configs,
                            eval_version='detection_cvpr_2019'):
@@ -736,17 +737,19 @@ def global_nusc_box_to_cam(info,
         info (dict): Info for a specific sample data, including the
             calibration information.
         boxes (list[:obj:`NuScenesBox`]): List of predicted NuScenesBoxes.
+        attrs (list[int]): List of attributes corresponding to ``boxes``.
         classes (list[str]): Mapped classes in the evaluation.
         eval_configs (object): Evaluation configuration object.
         eval_version (str): Evaluation version.
             Default: 'detection_cvpr_2019'
 
     Returns:
-        list: List of standard NuScenesBoxes in the global
-            coordinate.
+        tuple[list, list]: Filtered boxes in camera coordinates and their
+        corresponding attributes.
     """
     box_list = []
-    for box in boxes:
+    attr_list = []
+    for box, attr in zip(boxes, attrs):
         # Move box to ego vehicle coord system
         box.translate(-np.array(info['ego2global_translation']))
         box.rotate(
@@ -761,7 +764,8 @@ def global_nusc_box_to_cam(info,
         box.translate(-np.array(info['cam2ego_translation']))
         box.rotate(pyquaternion.Quaternion(info['cam2ego_rotation']).inverse)
         box_list.append(box)
-    return box_list
+        attr_list.append(attr)
+    return box_list, attr_list
 
 
 def nusc_box_to_cam_box3d(boxes):

@@ -7,6 +7,7 @@ from mmengine.registry import METRICS
 
 _LEGACY_DATASET_METRICS = {
     'KittiDataset': 'KittiMetric',
+    'KittiMonoDataset': 'KittiMetric',
     'LyftDataset': 'LyftMetric',
     'NuScenesDataset': 'NuScenesMetric',
     'NuScenesMonoDataset': 'NuScenesMetric',
