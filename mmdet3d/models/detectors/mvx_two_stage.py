@@ -403,7 +403,7 @@ class MVXTwoStageDetector(Base3DDetector):
     def simple_test_pts(self, x, img_metas, rescale=False):
         """Test function of point cloud branch."""
         outs = self.pts_bbox_head(x)
-        if img_metas[0]is None:
+        if img_metas[0] is None:
             return outs
         bbox_list = self.pts_bbox_head.get_bboxes(
             *outs, img_metas, rescale=rescale)
@@ -422,7 +422,7 @@ class MVXTwoStageDetector(Base3DDetector):
         if pts_feats and self.with_pts_bbox:
             bbox_pts = self.simple_test_pts(
                 pts_feats, img_metas, rescale=rescale)
-            if img_metas[0]is None:
+            if img_metas[0] is None:
                 return bbox_pts
             for result_dict, pts_bbox in zip(bbox_list, bbox_pts):
                 result_dict['pts_bbox'] = pts_bbox

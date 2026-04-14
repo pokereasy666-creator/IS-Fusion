@@ -171,7 +171,6 @@ class ISFusionDetector(MVXTwoStageDetector):
             # Original path: DynamicVFE + SparseEncoder
             voxels, coors = self.dynamic_voxelize(pts)
             voxel_features, feature_coors = self.pts_voxel_encoder(voxels, coors, pts, img_feats, img_metas)
-            batch_size = coors[-1, 0].item() + 1
             batch_size = int(feature_coors[-1, 0].item()) + 1
             feature_coors = feature_coors.to(torch.int32)
             if feature_coors.shape[1] == 4:

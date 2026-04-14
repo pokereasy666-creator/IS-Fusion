@@ -75,7 +75,7 @@ def build_data_cfg(config_path, skip_type, cfg_options):
         cfg.merge_from_dict(cfg_options)
     # import modules from string list.
     if cfg.get('custom_imports', None):
-        from mmcv.utils import import_modules_from_strings
+        from mmengine.utils import import_modules_from_strings
         import_modules_from_strings(**cfg['custom_imports'])
 
     # resolve train dataset config: v2 layout (train_dataloader.dataset) or

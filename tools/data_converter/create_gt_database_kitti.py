@@ -45,6 +45,7 @@ def _parse_coco_ann_info(ann_info):
             gt_bboxes_ignore.append(bbox)
         else:
             gt_bboxes.append(bbox)
+            gt_labels.append(ann.get('category_id', 0))
             gt_masks_ann.append(ann['segmentation'])
 
     if gt_bboxes:
@@ -60,7 +61,8 @@ def _parse_coco_ann_info(ann_info):
         gt_bboxes_ignore = np.zeros((0, 4), dtype=np.float32)
 
     ann = dict(
-        bboxes=gt_bboxes, bboxes_ignore=gt_bboxes_ignore, masks=gt_masks_ann)
+        bboxes=gt_bboxes, labels=gt_labels,
+        bboxes_ignore=gt_bboxes_ignore, masks=gt_masks_ann)
 
     return ann
 
@@ -333,7 +335,7 @@ def create_groundtruth_database(dataset_class_name,
                 mmcv.imwrite(object_img_patches[i], img_patch_path)
                 mmcv.imwrite(object_masks[i], mask_patch_path)
 
-            with open(abs_filepath, 'w') as f:
+            with open(abs_filepath, 'wb') as f:
                 gt_points.tofile(f)
 
             if (used_classes is None) or names[i] in used_classes:

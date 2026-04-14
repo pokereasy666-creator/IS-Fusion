@@ -352,7 +352,7 @@ class DefaultFormatBundle3D(DefaultFormatBundle):
         if 'img' in results:
             if len(results['img']) == 1:
                 results['img'] = results['img'][0]
-                results.pop('img_aug_matrix')
+                results.pop('img_aug_matrix', None)
 
         results = super(DefaultFormatBundle3D, self).__call__(results)
         return results
