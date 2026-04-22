@@ -962,7 +962,7 @@ class ISFusionEncoder(BaseModule):
 
         import torch
 
-        # --- Unwrap img_metas from DataContainer ---
+        # --- Unwrap img_metas from DataContainer / v2 data samples ---
         _metas = kwargs.get("img_metas", [])
         if isinstance(_metas, list):
             _metas = [m.data[0] if hasattr(m, "data") and isinstance(m.data, list) else (m.data if hasattr(m, "data") else m) for m in _metas]
@@ -970,6 +970,26 @@ class ISFusionEncoder(BaseModule):
             _metas = _metas.data
         if isinstance(_metas, list) and len(_metas) > 0 and isinstance(_metas[0], list):
             _metas = _metas[0]
+        # Convert outer tuple to list for mutation
+        if isinstance(_metas, tuple):
+            _metas = list(_metas)
+        # Per-sample entries may be wrapped in a tuple/list; unwrap to dict.
+        # Also handles Det3DDataSample objects that expose metainfo.
+        def _to_dict(m):
+            if isinstance(m, dict):
+                return m
+            if isinstance(m, (tuple, list)):
+                for elem in m:
+                    if isinstance(elem, dict):
+                        return elem
+                    if hasattr(elem, "metainfo"):
+                        return dict(elem.metainfo)
+                return m
+            if hasattr(m, "metainfo"):
+                return dict(m.metainfo)
+            return m
+        if isinstance(_metas, list):
+            _metas = [_to_dict(m) for m in _metas]
 
         # _metas is now a list of dicts, one per sample in the batch
         def _get_val(key):
