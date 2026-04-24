@@ -38,7 +38,7 @@ model_wrapper_cfg = dict(
     static_graph=True,
 )
 
-# batch_size=1 per GPU (A30 24GB)
+# batch_size=1 per GPU (A30 24GB), effective bs=2 with 2 GPUs
 train_dataloader = dict(batch_size=1)
 
 # Ensure hooks are registered for this config variant
@@ -47,7 +47,7 @@ custom_hooks = [
     dict(type='DatasetInjectionHook'),
 ]
 
-# Base learning rate for bs=1
+# lr scaled linearly: 6.25e-6 * 2 GPUs = 1.25e-5
 optim_wrapper = dict(
-    optimizer=dict(lr=6.25e-6),
+    optimizer=dict(lr=1.25e-5),
 )
