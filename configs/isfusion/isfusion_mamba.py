@@ -41,7 +41,7 @@ model_wrapper_cfg = dict(
 # Increase batch size to use more GPU memory
 train_dataloader = dict(batch_size=4)
 
-# Scale learning rate linearly with batch size (base: 6.25e-6 for bs=1, effective bs=5*1GPU=5)
+# Scale learning rate linearly: base 6.25e-6 per sample, effective bs = 2 GPUs * 4 = 8
 optim_wrapper = dict(
-    optimizer=dict(lr=6.25e-6 * 4),
+    optimizer=dict(lr=6.25e-6 * 8),
 )
