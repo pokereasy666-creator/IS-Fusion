@@ -412,8 +412,8 @@ optim_wrapper = dict(
     type='AmpOptimWrapper',
     dtype='float16',
     loss_scale='dynamic',
-    optimizer=dict(type='AdamW', lr=0.00000625, weight_decay=0.01),
-    clip_grad=dict(max_norm=0.01, norm_type=2))  # scaled for 1gpu * 1sample_per_gpu (original: 0.0001 for 8gpu * 2sample_per_gpu)
+    optimizer=dict(type='AdamW', lr=0.0000125, weight_decay=0.01),
+    clip_grad=dict(max_norm=0.01, norm_type=2))  # scaled for 2gpu * 1sample_per_gpu (original: 0.0001 for 8gpu * 2sample_per_gpu)
 
 param_scheduler = [dict(type='CosineAnnealingLR', by_epoch=True)]
 
